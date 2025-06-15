@@ -10,12 +10,8 @@
 
 ### 基本的な知見参照パターン - 記載例
 
-```markdown
-## .cursor/rules活用パターン
-
-### 基本的な知見参照パターン
+#### .cursor/rules形式での知見参照（自動適用）
 ```
-# .cursor/rules形式での知見参照（自動適用）
 @.cursor/knowledge.md @.cursor/patterns.md
 「認証機能を実装してください」
 → 過去の類似実装パターンが自動的に参照される
@@ -23,7 +19,7 @@
 → 実装品質が向上する
 ```
 
-### 条件付き適用パターン
+#### 条件付き適用パターン
 ```
 # 特定のファイルタイプに対する自動適用
 @.cursor/patterns.md[React コンポーネント実装テンプレート]
@@ -32,14 +28,13 @@
 効果: 統一されたコンポーネント構造
 ```
 
-### 複合参照パターン
+#### 複合参照パターン
 ```
 # 複数ファイルの組み合わせ参照
 @.cursor/context.md @.cursor/knowledge.md @.cursor/patterns.md
 「新機能を実装してください」
 → プロジェクト背景 + 過去の知見 + 実装パターン
 → 包括的で一貫性のある提案
-```
 ```
 
 ### .cursor/rules設定例
@@ -72,10 +67,7 @@ alwaysApply: false
 
 ### Windows (PowerShell) - 記載例
 
-```markdown
-## 環境別コマンド集
-
-### Windows (PowerShell) - プロジェクト固有
+#### プロジェクト固有コマンド
 ```powershell
 # 開発環境セットアップ
 npm install
@@ -106,7 +98,7 @@ Get-Content logs/app.log -Tail 50
 Get-Content logs/error.log -Tail 20
 ```
 
-### macOS/Linux (Bash) - プロジェクト固有
+#### macOS/Linux (Bash) - プロジェクト固有
 ```bash
 # 開発環境セットアップ
 npm install
@@ -149,16 +141,54 @@ docker-compose exec app bash
 docker-compose exec db psql -U postgres -d myapp
 docker-compose exec db pg_dump -U postgres myapp > backup.sql
 ```
+
+#### macOS/Linux (Bash) - プロジェクト固有
+```bash
+# 開発環境セットアップ
+npm install
+cp .env.example .env.local
+npm run db:migrate
+npm run db:seed
+
+# 開発サーバー起動
+npm run dev
+
+# テスト実行
+npm test
+npm run test:e2e
+npm run test:coverage
+
+# ビルド・デプロイ
+npm run build
+npm run deploy:staging
+npm run deploy:production
+
+# データベース操作
+npm run db:reset
+npm run db:backup
+npm run db:restore backup-file.sql
+
+# ログ確認
+tail -f logs/app.log
+tail -f logs/error.log
+```
+
+#### Docker環境
+```bash
+# コンテナ操作
+docker-compose up -d
+docker-compose down
+docker-compose logs -f app
+docker-compose exec app bash
+
+# データベース操作
+docker-compose exec db psql -U postgres -d myapp
+docker-compose exec db pg_dump -U postgres myapp > backup.sql
 ```
 
 ## 🏗️ 実装テンプレート
 
 ### React コンポーネント実装テンプレート - 記載例
-
-```markdown
-## 実装テンプレート
-
-### React コンポーネント実装テンプレート
 
 #### ファイル構成
 ```
@@ -273,7 +303,6 @@ describe('UserProfile', () => {
     expect(onEdit).toHaveBeenCalledWith(mockUser);
   });
 });
-```
 ```
 
 ### API実装テンプレート - 記載例
