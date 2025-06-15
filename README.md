@@ -109,7 +109,7 @@ cursor .
 
 ## 📖 詳細ドキュメント
 
-- **[クイックスタート & セットアップ](docs/quick-start.md)**: 6分で導入・即座に活用開始
+- **[クイックスタート & セットアップ](docs/quick-start.md)**: 5分で導入・即座に活用開始
 - **[チーム導入ガイド](docs/team-implementation-guide.md)**: 3段階の導入プロセス
 - **[包括的ガイド](docs/cursor-knowledge-management-system.md)**: 完全な導入・運用ガイド
 

@@ -60,7 +60,7 @@
 #### 実施内容
 1. **包括的ドキュメント作成**
    - `cursor-knowledge-management-system.md` (470行): 完全導入ガイド
-   - `quick-setup-guide.md` (172行): 6分セットアップ手順
+   - `quick-setup-guide.md` (172行): 5分セットアップ手順
    - `quick-start.md` (182行): 基本的な使用方法
    - `team-implementation-guide.md` (322行): チーム導入プロセス
 
@@ -120,7 +120,7 @@ cursor-knowledge-management-system/
 ├── .gitignore                   # 包括的除外設定
 ├── docs/
 │   ├── cursor-knowledge-management-system.md  # 完全ガイド（470行）
-│   ├── quick-setup-guide.md                  # 6分セットアップ（172行）
+│   ├── quick-setup-guide.md                  # 5分セットアップ（172行）
 │   ├── quick-start.md                        # 基本使用方法（182行）
 │   ├── team-implementation-guide.md          # チーム導入（322行）
 │   └── development-log.md                    # 本開発記録
