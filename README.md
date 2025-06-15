@@ -41,13 +41,13 @@ your-project/
 
 ```bash
 # このリポジトリをクローン
-git clone https://github.com/yourusername/cursor-knowledge-management-system.git
+git clone https://github.com/shioki/Cursor-Knowledge-Management-System.git
 
 # プロジェクトディレクトリに移動
 cd your-project
 
 # テンプレートをコピー
-cp -r cursor-knowledge-management-system/templates/* .
+cp -r Cursor-Knowledge-Management-System/templates/* .
 ```
 
 ### 2. カスタマイズ
