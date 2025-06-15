@@ -1,188 +1,315 @@
-# Cursor AI 知識管理システム - 公式MDC形式対応版
+# Cursor AI 知識管理システム 完全ガイド
 
-## 🎯 概要
+## 概要
 
-**Cursor AI公式の`.cursor/rules`形式**を活用した最新の知識管理システムです。従来の`CURSOR.md`形式から、より強力で柔軟な**MDC（Markdown with Configuration）形式**に完全移行し、Cursor AIの最新機能を最大限に活用します。
+このドキュメントは、Cursor AIのMDC（Model Context Protocol）形式に完全対応した知識管理システムの包括的なガイドです。従来のCURSOR.md形式から進化し、より効率的で持続可能な開発支援を実現します。
 
-### 🚀 主要な改善点
-- ✅ **公式サポート**: Cursor AI公式の`.cursor/rules`形式を採用
-- ✅ **自動適用**: ファイルパターンに基づく条件付き自動適用
-- ✅ **高度な制御**: description、globs、alwaysApplyによる柔軟な制御
-- ✅ **複数ルール管理**: 機能別に分離された複数のルールファイル
-- ✅ **将来性**: 継続的な機能拡張とサポート保証
+## ⚠️ **重要: GitHubクローン後の必須更新作業**
 
-## 📁 新しいファイル構造
+**このシステムを効果的に活用するには、GitHubからクローンした後、以下のファイルを実際のプロジェクト情報で更新することが必須です：**
 
-```
-your-project/
-├── .cursor/
-│   ├── rules/                           # 🆕 公式ルールディレクトリ
-│   │   ├── knowledge-management.mdc     # メイン知識管理ルール
-│   │   ├── debug-workflow.mdc           # デバッグワークフロー
-│   │   ├── patterns-library.mdc         # パターンライブラリ
-│   │   └── team-standards.mdc           # チーム標準（常時適用）
-│   ├── context.md                       # プロジェクト背景・制約
-│   ├── patterns.md                      # 実装パターン・テンプレート
-│   ├── knowledge.md                     # 技術知識・設計決定
-│   ├── improvements.md                  # 改善履歴・学習記録
-│   └── debug/                           # デバッグ専用ディレクトリ
-│       ├── sessions/                    # セッション記録
-│       ├── temp-logs/                   # 一時ログ
-│       └── archive/                     # アーカイブ
-├── .cursorignore                        # Cursor無視ファイル
-└── README.md                            # プロジェクト概要
-```
+### 📝 **必ず更新が必要なファイル**
 
-## 🚀 5分クイックセットアップ
+#### プロジェクト基本情報
+- [ ] `README.md` - プロジェクト名・概要・使用方法
+- [ ] `package.json` - メタデータ（Node.jsの場合）
 
-### ステップ1: ディレクトリ作成
+#### 🔥 **知識管理ファイル（最重要！）**
+- [ ] `templates/.cursor/knowledge.md` - **実際の技術判断を記録**
+- [ ] `templates/.cursor/patterns.md` - **プロジェクト固有のパターンを記録**
+- [ ] `templates/.cursor/context.md` - **プロジェクト背景・制約を記録**
+- [ ] `templates/.cursor/debug-log.md` - **実際のデバッグ履歴を記録**
+- [ ] `templates/.cursor/improvements.md` - **実際の改善履歴を記録**
 
-**PowerShell (Windows):**
-```powershell
-# 公式ディレクトリ構造を作成
-New-Item -ItemType Directory -Force -Path ".cursor"
-New-Item -ItemType Directory -Force -Path ".cursor\rules"
-New-Item -ItemType Directory -Force -Path ".cursor\debug"
-New-Item -ItemType Directory -Force -Path ".cursor\debug\sessions"
-New-Item -ItemType Directory -Force -Path ".cursor\debug\temp-logs"
-New-Item -ItemType Directory -Force -Path ".cursor\debug\archive"
-```
+#### 個人・チーム設定
+- [ ] `.cursor/rules/my-rules/` 配下 - 個人の開発スタイル
+- [ ] `.cursor/rules/team-rules/` 配下 - チーム開発ルール（チーム導入時）
 
-**Mac/Linux:**
+### 🔒 **基本的に変更不要なファイル**
+- `.cursor/rules/core-rules/rule-generating-agent.mdc` - ルール生成ロジック
+- `.cursor/rules/global-rules/` - グローバルルール
+- `.cursor/rules/ts-rules/`, `.cursor/rules/py-rules/` など（必要に応じて調整）
+
+**⚠️ テンプレートのままでは自動参照の効果が得られません！**
+
+## 🚀 クイックスタート
+
+### 1. リポジトリのクローン
 ```bash
-# 公式ディレクトリ構造を作成
-mkdir -p .cursor/{rules,debug/{sessions,temp-logs,archive}}
+git clone https://github.com/your-username/cursor-knowledge-management-system.git
+cd cursor-knowledge-management-system
 ```
 
-### ステップ2: 基本ルールファイルをコピー
+### 2. 必須ファイルの更新（10-30分）
 
-このリポジトリの`templates/.cursor/`以下のファイルをプロジェクトにコピー：
-
+#### 最小限の更新（10分）
 ```bash
-# テンプレートからコピー
-cp -r templates/.cursor/* .cursor/
-cp templates/.cursorignore .cursorignore
+# 1. README.md のプロジェクト名を変更
+# 2. templates/.cursor/knowledge.md をプロジェクト用に書き換え
 ```
 
-### ステップ3: プロジェクト固有の設定
+#### 推奨更新（20分）
+```bash
+# 上記 + templates/.cursor/context.md 更新
+# 使用言語に応じたルール調整
+```
 
-**`.cursor/context.md`** を編集してプロジェクト情報を設定：
+#### フル活用（30分）
+```bash
+# 上記すべて + チーム開発ルール策定
+# 全templatesファイルの実プロジェクト情報での更新
+```
 
+### 3. 実際の更新例
+
+#### templates/.cursor/knowledge.md の更新
 ```markdown
-# プロジェクト背景
+# 技術的知見・設計パターン（あなたのプロジェクト名）
 
-## プロジェクト概要
-- **目的**: [あなたのプロジェクトの目的]
-- **技術スタック**: [使用技術を記載]
-- **開発期間**: [予定期間]
+## 設計判断の記録
 
-## 制約・要件
-- **技術制約**: [技術的制約]
-- **ビジネス要件**: [ビジネス要件]
-- **パフォーマンス要件**: [性能要件]
+### 2025-06-XX - フレームワーク選択
+#### 判断内容
+React vs Vue.js の選択
+
+#### 検討した選択肢
+1. **React**
+   - メリット: チームの習熟度が高い、エコシステムが豊富
+   - デメリット: 学習コストが高い
+   - 結果: 採用
+
+2. **Vue.js**
+   - メリット: 学習コストが低い
+   - デメリット: チームの経験が少ない
+   - 結果: 不採用
+
+#### 理由
+チームの既存スキルを活かし、開発速度を優先
 ```
 
-## 🎯 MDC形式の利点
+## 🎯 MDC形式の特徴
 
-### 1. 高度なルール制御
+### 4つのルールタイプ
+
+| ルールタイプ | 設定 | 動作 | 使用例 |
+|-------------|------|------|--------|
+| **Always Rules** | `alwaysApply: true` | 常に適用 | チーム標準・コーディング規約 |
+| **Auto Rules** | `globs: "pattern"` | ファイルマッチで自動適用 | TypeScript専用ルール |
+| **Agent Rules** | `description: "詳細"` | AI判断で適用 | 複雑な条件判断 |
+| **Manual Rules** | 全て空白 | 手動参照のみ | 特殊な状況用 |
+
+### MDC設定例
 ```yaml
 ---
-description: "ルールの詳細説明（AI判断用）"
-globs: "**/*.{js,ts,jsx,tsx}"  # 適用ファイルパターン
-alwaysApply: false             # 常時適用フラグ
+description: "TypeScript開発時の品質管理ルール"
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
 ---
+
+# TypeScript開発ルール
+...
 ```
 
-### 2. 4つのルールタイプ
+## 📁 プロジェクト構造
 
-| ルールタイプ | 設定 | 動作 |
-|-------------|------|------|
-| **Always Rules** | `alwaysApply: true` | 常に適用 |
-| **Auto Rules** | `globs: "pattern"` | ファイルパターンマッチで自動適用 |
-| **Agent Rules** | `description: "詳細"` | AI判断で適用 |
-| **Manual Rules** | 全て空白 | 手動参照のみ |
-
-### 3. 実際の使用例
-
-**新機能開発時:**
 ```
-@.cursor/context.md @.cursor/patterns.md
-"ユーザー認証機能を実装してください"
-```
-
-**バグ修正時:**
-```
-@.cursor/debug/sessions/ @.cursor/knowledge.md
-"ログイン時のエラーを修正してください"
-```
-
-**設計レビュー時:**
-```
-@.cursor/knowledge.md @.cursor/improvements.md
-"アーキテクチャの改善点を検討してください"
+cursor-knowledge-management-system/
+├── .cursor/
+│   └── rules/                    # MDC形式ルール（基本的に変更不要）
+│       ├── core-rules/          # システムルール
+│       ├── global-rules/        # グローバルルール
+│       ├── ts-rules/           # TypeScript固有ルール
+│       ├── py-rules/           # Python固有ルール
+│       ├── team-rules/         # チーム開発ルール（要更新）
+│       └── my-rules/           # 個人設定（要更新）
+├── templates/
+│   └── .cursor/                 # 🔥 要更新: 実プロジェクト情報で埋める
+│       ├── knowledge.md         # 技術判断記録
+│       ├── patterns.md          # 設計パターン
+│       ├── context.md           # プロジェクト背景
+│       ├── debug-log.md         # デバッグ履歴
+│       └── improvements.md      # 改善履歴
+├── docs/                        # ドキュメント
+│   ├── quick-start.md          # クイックスタートガイド
+│   ├── team-implementation-guide.md # チーム導入ガイド
+│   └── development-log.md      # 開発ログ
+└── README.md                    # 要更新: プロジェクト情報
 ```
 
-## 🔄 旧システムからの移行
+## 🔧 基本的な使用方法
 
-### 移行手順
-1. **バックアップ作成**: 既存の`CURSOR.md`をバックアップ
-2. **新構造作成**: 上記のセットアップ手順を実行
-3. **内容移行**: 既存の内容を適切なファイルに分散
-4. **テスト**: 新しいシステムでの動作確認
-5. **旧ファイル削除**: 確認後に`CURSOR.md`を削除
+### 1. 知識の記録
+```markdown
+# templates/.cursor/knowledge.md に記録
+### 2025-06-XX - API設計
+#### 判断内容
+REST vs GraphQL の選択
 
-### 移行マッピング
-- `CURSOR.md` → `.cursor/rules/knowledge-management.mdc`
-- 既存の知識 → `.cursor/knowledge.md`
-- デバッグ記録 → `.cursor/debug/sessions/`
-- パターン → `.cursor/patterns.md`
+#### 結果
+REST API を採用（シンプルさを重視）
+
+#### 理由
+- チームの習熟度
+- プロジェクトの複雑さ
+- 開発期間の制約
+```
+
+### 2. パターンの蓄積
+```markdown
+# templates/.cursor/patterns.md に記録
+## コンポーネント設計パターン
+### Atomic Design適用
+- Atoms: Button, Input, Label
+- Molecules: SearchBox, FormField
+- Organisms: Header, ProductList
+```
+
+### 3. 自動参照の活用
+AIとの対話で以下のように参照：
+```
+@.cursor/knowledge.md @.cursor/patterns.md
+「ユーザー認証機能を実装してください」
+```
 
 ## 📊 効果測定指標
 
-### 開発効率
-- **コンテキスト切り替え時間**: 90%削減
-- **重複作業**: 80%削減
-- **問題解決時間**: 40%短縮
-- **新人オンボーディング**: 50%高速化
+### 定量的効果
+- **開発効率**: 成功率の向上
+- **知識定着**: 自動参照による一貫性確保
+- **投資回収**: 短期間での効果実感
+- **バグ削減**: バグ発生率の削減
+- **オンボーディング**: 新人教育時間の短縮
 
-### 品質向上
-- **バグ発生率**: 50%削減
-- **コードレビュー時間**: 30%短縮
-- **ドキュメント更新率**: 95%以上
-- **知識共有効率**: 70%向上
+### 定性的効果
+- 技術判断の一貫性向上
+- チーム内知識共有の促進
+- 開発品質の標準化
+- 継続的改善文化の醸成
 
-## 🛠️ カスタマイズガイド
+*注: 具体的な効果は各プロジェクト・チームの状況により異なります*
 
-### プロジェクト種別別設定
+## 🎯 プロジェクト種別別カスタマイズ
 
-**Webアプリケーション:**
+### Web開発プロジェクト
 ```yaml
+# .cursor/rules/web-rules.mdc
+---
+description: "Web開発専用ルール"
 globs: "**/*.{js,ts,jsx,tsx,css,scss,html}"
+alwaysApply: false
+---
+
+# Web開発ルール
+- React/Vue.jsコンポーネント設計
+- CSS-in-JS vs CSS Modules
+- バンドル最適化
+- SEO対応
 ```
 
-**データサイエンス:**
+### Python/データサイエンス
 ```yaml
+# .cursor/rules/python-rules.mdc
+---
+description: "Python/データサイエンス専用ルール"
 globs: "**/*.{py,ipynb,sql,r}"
+alwaysApply: false
+---
+
+# Python開発ルール
+- Jupyter Notebook管理
+- データ前処理パターン
+- モデル評価手法
+- 可視化ベストプラクティス
 ```
 
-**モバイルアプリ:**
+### モバイル開発
 ```yaml
+# .cursor/rules/mobile-rules.mdc
+---
+description: "モバイル開発専用ルール"
 globs: "**/*.{swift,kt,dart,java}"
+alwaysApply: false
+---
+
+# モバイル開発ルール
+- プラットフォーム固有設計
+- パフォーマンス最適化
+- ユーザビリティ考慮事項
+- ストア申請要件
 ```
 
-### チーム規模別調整
+## 🤝 チーム導入戦略
 
-**小規模チーム（1-5人）:**
-- シンプルな構造を維持
-- `team-standards.mdc`を`alwaysApply: true`に設定
+### 段階的導入アプローチ
 
-**大規模チーム（10人以上）:**
-- より詳細なルール分割
-- 役割別ルールファイルを追加
+#### フェーズ1: 個人導入（1週間）
+- [ ] 基本ファイルの更新
+- [ ] 個人的な知識記録開始
+- [ ] 効果の実感・検証
+
+#### フェーズ2: チーム展開（2-3週間）
+- [ ] チームメンバーへの説明・研修
+- [ ] チーム共通ルールの策定
+- [ ] 定期的な知識共有プロセス確立
+
+#### フェーズ3: 組織展開（1-2ヶ月）
+- [ ] 他チームへの横展開
+- [ ] 組織標準としての確立
+- [ ] 継続的改善プロセスの構築
+
+### 成功のための重要ポイント
+
+1. **継続的な更新**: テンプレートを実際の情報で更新し続ける
+2. **チーム文化**: 知識共有を評価する文化の醸成
+3. **効果測定**: 定量的・定性的効果の継続的測定
+4. **改善サイクル**: PDCAサイクルによる継続的改善
+
+## 🔄 継続的改善のプロセス
+
+### 月次レビュー
+```markdown
+## 月次効果測定項目
+
+### システム活用状況
+- [ ] 各ファイルの更新頻度
+- [ ] MDCルールの適用状況
+- [ ] チームメンバーの活用度
+
+### 効果測定
+- [ ] 開発効率の変化
+- [ ] バグ発生率の変化
+- [ ] 知識共有の効果
+
+### 改善計画
+- [ ] 課題の特定と優先順位付け
+- [ ] 具体的な改善アクション
+- [ ] 次月の目標設定
+```
+
+### 品質管理
+```markdown
+## 知識品質管理チェックリスト
+
+### 記録時の品質確認
+- [ ] 5W1Hが明確に記載されている
+- [ ] 他のメンバーが理解できる内容
+- [ ] 再現可能な手順が記載されている
+- [ ] 関連する他の記録との整合性
+
+### 定期的な品質レビュー
+
+月次でのシステム全体の品質確認を実施します。
+
+#### レビュー項目
+- 知識の正確性・最新性
+- パターンの有効性
+- ルールの適用状況
+- チーム全体での活用状況
+```
 
 ## 🔧 トラブルシューティング
 
-### よくある問題
+### よくある問題と解決策
 
 **Q: ルールが適用されない**
 A: `.cursor/rules/`ディレクトリの場所とファイル拡張子（`.mdc`）を確認
@@ -193,39 +320,38 @@ A: `globs`パターンとファイルパスが一致しているか確認
 **Q: パフォーマンスが悪い**
 A: `alwaysApply: true`のルールを最小限に抑制
 
-### デバッグ方法
-1. Cursor設定で`.mdc`ファイルの表示を確認
-2. ルールの`description`フィールドでAI判断を調整
-3. `globs`パターンをより具体的に設定
+**Q: テンプレートファイルが更新されない**
+A: `templates/.cursor/`内のファイルを実際のプロジェクト情報で更新
 
-## 🎉 成功事例
+## 📚 関連ドキュメント
 
-### 導入効果（実測値）
-- **開発速度**: 平均60%向上
-- **バグ率**: 45%削減
-- **オンボーディング時間**: 3日→1.5日
-- **ドキュメント品質**: 大幅改善
+- [クイックスタートガイド](docs/quick-start.md) - 5分で始める導入手順
+- [チーム実装ガイド](docs/team-implementation-guide.md) - チーム導入の詳細プロセス
+- [開発ログ](docs/development-log.md) - システム開発の記録
 
-### ユーザーの声
-> "MDC形式により、プロジェクトの複雑さに関係なく一貫した開発体験を実現できました" - 開発チームリーダー
+## 🤝 コミュニティ・リソース
 
-> "自動適用機能により、手動でのコンテキスト設定が不要になり、開発に集中できます" - シニアエンジニア
+### 学習リソース
+- [Cursor AI公式ドキュメント](https://cursor.sh/docs)
+- [MDC形式ガイド](https://modelcontextprotocol.io/)
+- オープンソースコミュニティでの知見共有
 
-## 🚀 今すぐ始める
+### 貢献方法
+- **GitHub Issues**: バグ報告・機能要望
+- **GitHub Discussions**: 使用方法・ベストプラクティス共有
+- **プルリクエスト**: 改善提案・ドキュメント更新
 
-1. **リポジトリをクローン**
-2. **テンプレートをコピー**
-3. **プロジェクト情報を設定**
-4. **Cursor AIで開発開始**
+プルリクエスト、イシュー、機能提案を歓迎します！
 
-**Cursor AI公式の最新機能を活用して、より効率的で質の高い開発を実現しましょう！**
+1. リポジトリをフォーク
+2. 機能ブランチを作成
+3. 変更をコミット
+4. プルリクエストを作成
+
+## 📄 ライセンス
+
+MIT License - 詳細は [LICENSE](LICENSE) ファイルを参照
 
 ---
 
-## 📞 サポート・コミュニティ
-
-- **GitHub Issues**: バグ報告・機能要望
-- **Discussions**: 使用方法・ベストプラクティス共有
-- **Wiki**: 詳細ドキュメント・FAQ
-
-**⭐ このプロジェクトが役立った場合は、GitHubでスターをお願いします！**
+**⚠️ 重要な注意事項**: このシステムを効果的に活用するには、`templates/.cursor/`内のファイルを実際のプロジェクト情報で更新することが必須です。テンプレートのままでは自動参照の効果が得られず、知識管理システムとしての価値を発揮できません。
