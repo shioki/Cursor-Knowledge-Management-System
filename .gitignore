@@ -1,4 +1,6 @@
 # Cursor AI MDC知識管理システム用 .gitignore
+# 注意: このファイルは実際のプロジェクトで使用する際の参考例です
+# templates/.cursor/ を .cursor/ にコピーした後の構成を想定しています
 
 # 一時的なデバッグファイル
 .cursor/debug/temp-logs/
@@ -55,6 +57,7 @@ temp/
 .tmp/
 
 # MDC知識管理システムで保持すべきファイル（除外しない）
+# 以下のファイルは実際のプロジェクトで重要なため、除外しないでください：
 # .cursor/rules/*.mdc
 # .cursor/knowledge.md
 # .cursor/patterns.md
