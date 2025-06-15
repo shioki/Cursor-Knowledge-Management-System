@@ -2,7 +2,7 @@
 
 ## 概要
 
-このドキュメントは、Cursor AIのMDC（Model Context Protocol）形式に完全対応した知識管理システムの包括的なガイドです。従来のCURSOR.md形式から進化し、より効率的で持続可能な開発支援を実現します。
+Cursor AI 知識管理システムは、AI支援開発における知識の蓄積・活用・共有を効率化するためのフレームワークです。`.cursor/rules`形式を活用し、プロジェクト固有の知見を体系的に管理します。
 
 ## 🎯 システムの目的と価値
 
@@ -20,7 +20,7 @@
 
 ## 🏗️ システム設計思想
 
-### MDC形式採用の理由
+### .cursor/rules形式採用の理由
 - **公式サポート**: Cursor AI公式の`.cursor/rules`形式
 - **柔軟な制御**: 条件付き自動適用による効率化
 - **拡張性**: 将来の機能追加への対応力
@@ -35,7 +35,7 @@
 | **Agent Rules** | `description: "詳細"` | AI判断で適用 | 複雑な条件判断 |
 | **Manual Rules** | 全て空白 | 手動参照のみ | 特殊な状況用 |
 
-### MDC設定例
+### .cursor/rules設定例
 ```yaml
 ---
 description: "TypeScript開発時の品質管理ルール"
@@ -51,15 +51,15 @@ alwaysApply: false
 
 ## 📁 システム構成
 
-### テンプレート構造
+### 基本構造
 ```
-templates/.cursor/
-├── knowledge.md         # 技術判断記録テンプレート
-├── patterns.md          # 設計パターンテンプレート
-├── context.md           # プロジェクト背景テンプレート
-├── debug-log.md         # デバッグ履歴テンプレート
-├── improvements.md      # 改善履歴テンプレート
-└── rules/               # MDCルールテンプレート
+.cursor/
+├── knowledge.md              # 技術判断・設計決定の記録
+├── patterns.md               # 共通パターン・テンプレート
+├── context.md                # プロジェクト背景・制約
+├── debug-log.md              # デバッグ履歴・問題解決記録
+├── improvements.md           # 改善履歴・最適化記録
+└── rules/                    # .cursor/rules設定
     ├── knowledge-management.mdc
     ├── debug-workflow.mdc
     ├── patterns-library.mdc
@@ -73,7 +73,7 @@ your-project/
 │   ├── knowledge.md    # 実際のプロジェクト情報で更新
 │   ├── patterns.md     # 実際のプロジェクト情報で更新
 │   ├── context.md      # 実際のプロジェクト情報で更新
-│   └── rules/          # MDCルール（Cursorが認識）
+│   └── rules/          # .cursor/rules（Cursorが認識）
 ├── .cursorignore       # ← templates/.cursorignore をコピー
 └── src/                # プロジェクトファイル
 ```
@@ -170,6 +170,7 @@ your-project/
 ## 📚 関連リソース
 
 - [クイックスタートガイド](quick-start.md) - 実際の導入手順
+- [テンプレート使用ガイド](template-usage-guide.md) - 詳細な記載例とベストプラクティス
 - [チーム導入ガイド](team-implementation-guide.md) - チーム全体での活用
 - [開発ログ](development-log.md) - システム開発の記録
 

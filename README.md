@@ -1,10 +1,10 @@
 # Cursor Knowledge Management System
 
-Cursor AIのMDC（Model Context Protocol）形式に対応した知識管理システムです。AI支援開発における一貫性、品質向上、そして効率的な知識蓄積を実現します。
+Cursor AIの`.cursor/rules`形式に対応した知識管理システムです。AI支援開発における一貫性、品質向上、そして効率的な知識蓄積を実現します。
 
 ## ✨ 主な特徴
 
-- **🎯 MDC完全対応**: Cursor AI公式の`.cursor/rules`形式を採用
+- **🎯 .cursor/rules対応**: Cursor AI公式の`.cursor/rules`形式を採用
 - **🔄 自動適用**: 手動設定不要の自動化されたルール適用
 - **📚 体系的管理**: プロジェクト知識の構造化された管理
 - **🚀 セットアップ**: 導入後の活用開始
@@ -29,7 +29,7 @@ cursor-knowledge-management-system/
 │   ├── knowledge.md            # 技術判断記録テンプレート
 │   ├── patterns.md             # 設計パターンテンプレート
 │   ├── context.md              # プロジェクト背景テンプレート
-│   └── rules/                  # MDCルールテンプレート
+│   └── rules/                  # .cursor/rulesテンプレート
 ├── templates/.cursorignore      # Cursor無視ファイル設定テンプレート
 ├── docs/                       # ドキュメント
 └── README.md                   # プロジェクト説明
@@ -40,7 +40,7 @@ your-project/
 │   ├── knowledge.md           # 実際のプロジェクト情報で更新
 │   ├── patterns.md            # 実際のプロジェクト情報で更新
 │   ├── context.md             # 実際のプロジェクト情報で更新
-│   └── rules/                 # MDCルール（Cursorが認識）
+│   └── rules/                 # .cursor/rules（Cursorが認識）
 ├── .cursorignore              # ← templates/.cursorignore をここにコピー
 ├── src/                       # あなたのプロジェクトファイル
 └── README.md                  # あなたのプロジェクト説明
@@ -50,6 +50,7 @@ your-project/
 
 - [完全ガイド](docs/cursor-knowledge-management-system.md) - システムの詳細説明
 - [クイックスタートガイド](docs/quick-start.md) - 詳細な導入手順
+- [テンプレート使用ガイド](docs/template-usage-guide.md) - 詳細な記載例とベストプラクティス
 - [チーム導入ガイド](docs/team-implementation-guide.md) - チーム全体での活用
 - [開発ログ](docs/development-log.md) - システム開発の記録
 
