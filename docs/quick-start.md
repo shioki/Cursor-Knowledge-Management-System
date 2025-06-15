@@ -4,7 +4,7 @@
 
 ### 1. リポジトリのクローン
 ```bash
-git clone https://github.com/your-username/cursor-knowledge-management-system.git
+git clone https://github.com/shioki/Cursor-Knowledge-Management-System.git
 cd cursor-knowledge-management-system
 ```
 
