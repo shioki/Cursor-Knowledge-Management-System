@@ -48,6 +48,7 @@ your-project/
 
 ## 📚 関連ドキュメント
 
+- [完全ガイド](docs/cursor-knowledge-management-system.md) - システムの詳細説明
 - [クイックスタートガイド](docs/quick-start.md) - 詳細な導入手順
 - [チーム導入ガイド](docs/team-implementation-guide.md) - チーム全体での活用
 - [開発ログ](docs/development-log.md) - システム開発の記録

@@ -192,10 +192,10 @@
 ```
 cursor-knowledge-management-system/
 ├── README.md                           # プロジェクト概要（テンプレート構成版）
-├── cursor-knowledge-management-system.md  # 完全ガイド（テンプレート構成版）
 ├── LICENSE                             # MIT License
 ├── .gitignore                          # 包括的除外設定（実プロジェクト用参考）
 ├── docs/
+│   ├── cursor-knowledge-management-system.md  # 完全ガイド（テンプレート構成版）
 │   ├── quick-start.md                  # クイックスタート（テンプレート構成版）
 │   ├── team-implementation-guide.md    # チーム導入ガイド（テンプレート構成版）
 │   └── development-log.md              # 本開発記録（最新版）
