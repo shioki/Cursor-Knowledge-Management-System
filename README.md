@@ -48,10 +48,20 @@ your-project/
 
 ## 📚 関連ドキュメント
 
+### 基本ガイド
 - [完全ガイド](docs/cursor-knowledge-management-system.md) - システムの詳細説明
 - [クイックスタートガイド](docs/quick-start.md) - 詳細な導入手順
-- [テンプレート使用ガイド](docs/template-usage-guide.md) - 詳細な記載例とベストプラクティス
 - [チーム導入ガイド](docs/team-implementation-guide.md) - チーム全体での活用
+
+### テンプレート使用ガイド
+- [テンプレート使用ガイド](docs/template-usage-guide.md) - 概要とナビゲーション
+- [context.md ガイド](docs/template-context-guide.md) - プロジェクト情報の記載方法
+- [patterns.md ガイド](docs/template-patterns-guide.md) - 共通パターンの記録方法
+- [knowledge.md ガイド](docs/template-knowledge-guide.md) - 技術的知見の蓄積方法
+- [debug-log.md ガイド](docs/template-debug-log-guide.md) - 問題解決の記録方法
+- [improvements.md ガイド](docs/template-improvements-guide.md) - 改善活動の記録方法
+
+### 開発情報
 - [開発ログ](docs/development-log.md) - システム開発の記録
 
 ## 📄 ライセンス
