@@ -1,0 +1,67 @@
+# Cursor AI 知識管理システム - 無視ファイル設定
+
+# 一時ファイル・ログ
+.cursor/debug/temp-logs/*.log
+.cursor/debug/temp-logs/*.tmp
+*.temp
+*.tmp
+
+# 個人用ファイル（チーム共有しない）
+.cursor/debug/sessions/personal-*
+.cursor/personal-notes.md
+
+# システム生成ファイル
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# 大容量ファイル
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# 機密情報
+.env.local
+.env.secret
+secrets/
+credentials/
+
+# ビルド成果物
+dist/
+build/
+out/
+target/
+
+# 依存関係
+node_modules/
+vendor/
+.pnp/
+.pnp.js
+
+# IDE設定（プロジェクト固有でない）
+.vscode/settings.json
+.idea/workspace.xml
+*.suo
+*.user
+
+# ログファイル
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# テスト関連
+coverage/
+.nyc_output/
+test-results/
+.pytest_cache/
+
+# キャッシュ
+.cache/
+.parcel-cache/
+.next/cache/
+.nuxt/cache/ 

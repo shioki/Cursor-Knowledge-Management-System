@@ -1,0 +1,52 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Cursor AI 知識管理システム
+
+## 🎯 基本方針
+- **コンテキスト優先**: @.cursor/context.md でプロジェクト背景を常に参照
+- **パターン活用**: @.cursor/patterns.md で実装パターンを確認・再利用
+- **知識蓄積**: @.cursor/knowledge.md で技術決定と学習を記録
+- **継続改善**: @.cursor/improvements.md で改善を追跡・共有
+
+## 📁 ファイル参照ルール
+
+### 開発フェーズ別参照
+- **新機能開発時**: @.cursor/patterns.md → 既存パターンの確認・活用
+- **問題発生時**: @.cursor/debug/ → 過去の解決策を検索
+- **設計判断時**: @.cursor/knowledge.md → 技術決定の記録・参照
+- **振り返り時**: @.cursor/improvements.md → 学習内容の整理
+
+### 緊急時対応
+- **重大バグ**: @.cursor/debug/sessions/ で類似問題を検索
+- **パフォーマンス問題**: @.cursor/knowledge.md の最適化記録を参照
+- **デプロイ問題**: @.cursor/patterns.md のデプロイパターンを確認
+
+## 🔄 品質管理プロセス
+1. **重要な解決策**: 必ず .cursor/improvements.md に記録
+2. **デバッグセッション**: .cursor/debug/sessions/ に詳細保存
+3. **パターン更新**: 即座に .cursor/patterns.md に反映
+4. **知識共有**: チーム向け情報は .cursor/knowledge.md に整理
+
+## 🚀 効率化指標
+- **コンテキスト切り替え時間**: 90%削減目標
+- **重複作業**: 80%削減目標  
+- **問題解決時間**: 40%短縮目標
+- **新人オンボーディング**: 50%高速化目標
+
+## 📊 使用例
+```
+# 新機能開発時
+@.cursor/context.md @.cursor/patterns.md
+"ユーザー認証機能を実装してください"
+
+# バグ修正時  
+@.cursor/debug/sessions/ @.cursor/knowledge.md
+"ログイン時のエラーを修正してください"
+
+# 設計レビュー時
+@.cursor/knowledge.md @.cursor/improvements.md
+"アーキテクチャの改善点を検討してください"
+
