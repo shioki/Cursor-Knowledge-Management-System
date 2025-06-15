@@ -98,13 +98,15 @@ React vs Vue.js の選択
 1. `.cursor/knowledge.md` の基本情報を更新
 2. `.cursor/context.md` のプロジェクト概要を記入
 
-**推奨更新（20分）**
+**推奨更新（20分）**  
 上記に加えて：
+
 3. `.cursor/patterns.md` の初期パターンを記録
 4. プロジェクト固有の制約を追加
 
-**フル活用（30分）**
+**フル活用（30分）**  
 上記すべてに加えて：
+
 5. `.cursor/debug-log.md` の初期設定
 6. `.cursor/improvements.md` の目標設定
 
