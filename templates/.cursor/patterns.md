@@ -91,7 +91,7 @@ find .cursor -name "*.mdc"              # MDCファイル検索
 ```bash
 # 例：Node.js プロジェクト + MDC
 npm install                             # 依存関係インストール
-cp -r templates/.cursor .               # MDCテンプレート適用
+cp -r /path/to/cursor-knowledge-management-system/templates/.cursor .cursor  # MDCテンプレート適用
 npm run dev                             # 開発サーバー起動（MDC自動適用）
 npm run test                            # テスト実行（test-patterns.mdc適用）
 npm run build                           # ビルド実行（build-patterns.mdc適用）

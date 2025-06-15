@@ -39,7 +39,7 @@ git checkout -b team-setup
 
 #### 1.2 チーム基本情報の設定
 
-**templates/.cursor/context.md の更新例**
+**.cursor/context.md の更新例**
 ```markdown
 # プロジェクト背景・制約（チーム名: プロジェクト名）
 
@@ -69,7 +69,7 @@ git checkout -b team-setup
 
 #### 1.3 チーム開発ルールの策定
 
-**templates/.cursor/patterns.md の更新例**
+**.cursor/patterns.md の更新例**
 ```markdown
 # 設計パターン・実装テンプレート（チーム名: プロジェクト名）
 
@@ -367,4 +367,33 @@ alwaysApply: true
 
 ---
 
-**⚠️ 重要**: チーム導入を成功させるには、`templates/.cursor/`内のファイルを実際のチーム・プロジェクト情報で更新することが必須です。テンプレートのままでは自動参照の効果が得られず、チーム全体での知識共有が実現できません。 
+**⚠️ 重要**: チーム導入を成功させるには、`.cursor/`内のファイルを実際のチーム・プロジェクト情報で更新することが必須です。テンプレートのままでは自動参照の効果が得られず、チーム全体での知識共有が実現できません。 
+
+## ⚠️ **重要: 導入前の必須更新作業**
+
+**GitHubからクローンした後、チーム導入前に以下の手順が必要です：**
+
+### 🔧 **テンプレートのコピー**
+```bash
+# あなたの実際のプロジェクトディレクトリに移動
+cd /path/to/your-actual-project
+
+# テンプレートをコピー（プロジェクトルート直下に配置）
+cp -r /path/to/cursor-knowledge-management-system/templates/.cursor .cursor
+
+# .cursorignoreファイルもコピー（推奨）
+cp /path/to/cursor-knowledge-management-system/templates/.cursorignore .cursorignore
+```
+
+### 📝 **チーム導入で必須更新が必要なファイル**
+
+#### プロジェクト基本情報
+- [ ] `README.md` - チーム・プロジェクト名・概要・使用方法
+- [ ] `package.json` - チームメタデータ（Node.jsの場合）
+
+#### 🔥 **知識管理ファイル（最重要！）**
+- [ ] `.cursor/knowledge.md` - **チームの技術判断を記録**
+- [ ] `.cursor/patterns.md` - **チーム固有のパターンを記録**
+- [ ] `.cursor/context.md` - **プロジェクト背景・制約を記録**
+- [ ] `.cursor/debug-log.md` - **チームのデバッグ履歴を記録**
+- [ ] `.cursor/improvements.md` - **チームの改善履歴を記録** 

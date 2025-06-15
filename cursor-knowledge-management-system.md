@@ -4,22 +4,30 @@
 
 このドキュメントは、Cursor AIのMDC（Model Context Protocol）形式に完全対応した知識管理システムの包括的なガイドです。従来のCURSOR.md形式から進化し、より効率的で持続可能な開発支援を実現します。
 
-## ⚠️ **重要: GitHubクローン後の必須更新作業**
+## ⚠️ **重要: 導入前の必須更新作業**
 
-**このシステムを効果的に活用するには、GitHubからクローンした後、以下のファイルを実際のプロジェクト情報で更新することが必須です：**
+**GitHubからクローンした後、以下の手順が必要です：**
 
-### 📝 **必ず更新が必要なファイル**
+### 🔧 **テンプレートのコピー**
+```bash
+# あなたの実際のプロジェクトディレクトリに移動
+cd /path/to/your-actual-project
 
-#### プロジェクト基本情報
-- [ ] `README.md` - プロジェクト名・概要・使用方法
-- [ ] `package.json` - メタデータ（Node.jsの場合）
+# テンプレートをコピー（プロジェクトルート直下に配置）
+cp -r /path/to/cursor-knowledge-management-system/templates/.cursor .cursor
+
+# .cursorignoreファイルもコピー（推奨）
+cp /path/to/cursor-knowledge-management-system/templates/.cursorignore .cursorignore
+```
+
+### 📝 **必須更新が必要なファイル**
 
 #### 🔥 **知識管理ファイル（最重要！）**
-- [ ] `templates/.cursor/knowledge.md` - **実際の技術判断を記録**
-- [ ] `templates/.cursor/patterns.md` - **プロジェクト固有のパターンを記録**
-- [ ] `templates/.cursor/context.md` - **プロジェクト背景・制約を記録**
-- [ ] `templates/.cursor/debug-log.md` - **実際のデバッグ履歴を記録**
-- [ ] `templates/.cursor/improvements.md` - **実際の改善履歴を記録**
+- [ ] `.cursor/knowledge.md` - **実際の技術判断を記録**
+- [ ] `.cursor/patterns.md` - **プロジェクト固有のパターンを記録**
+- [ ] `.cursor/context.md` - **プロジェクト背景・制約を記録**
+- [ ] `.cursor/debug-log.md` - **実際のデバッグ履歴を記録**
+- [ ] `.cursor/improvements.md` - **実際の改善履歴を記録**
 
 #### 個人・チーム設定
 - [ ] `.cursor/rules/my-rules/` 配下 - 個人の開発スタイル
@@ -45,12 +53,12 @@ cd cursor-knowledge-management-system
 #### 最小限の更新（10分）
 ```bash
 # 1. README.md のプロジェクト名を変更
-# 2. templates/.cursor/knowledge.md をプロジェクト用に書き換え
+# 2. .cursor/knowledge.md をプロジェクト用に書き換え
 ```
 
 #### 推奨更新（20分）
 ```bash
-# 上記 + templates/.cursor/context.md 更新
+# 上記 + .cursor/context.md 更新
 # 使用言語に応じたルール調整
 ```
 
@@ -62,7 +70,7 @@ cd cursor-knowledge-management-system
 
 ### 3. 実際の更新例
 
-#### templates/.cursor/knowledge.md の更新
+#### .cursor/knowledge.md の更新
 ```markdown
 # 技術的知見・設計パターン（あなたのプロジェクト名）
 
@@ -140,7 +148,7 @@ cursor-knowledge-management-system/
 
 ### 1. 知識の記録
 ```markdown
-# templates/.cursor/knowledge.md に記録
+# .cursor/knowledge.md に記録
 ### 2025-06-XX - API設計
 #### 判断内容
 REST vs GraphQL の選択
@@ -156,7 +164,7 @@ REST API を採用（シンプルさを重視）
 
 ### 2. パターンの蓄積
 ```markdown
-# templates/.cursor/patterns.md に記録
+# .cursor/patterns.md に記録
 ## コンポーネント設計パターン
 ### Atomic Design適用
 - Atoms: Button, Input, Label
@@ -321,7 +329,7 @@ A: `globs`パターンとファイルパスが一致しているか確認
 A: `alwaysApply: true`のルールを最小限に抑制
 
 **Q: テンプレートファイルが更新されない**
-A: `templates/.cursor/`内のファイルを実際のプロジェクト情報で更新
+A: `.cursor/`内のファイルを実際のプロジェクト情報で更新
 
 ## 📚 関連ドキュメント
 
@@ -354,4 +362,4 @@ MIT License - 詳細は [LICENSE](LICENSE) ファイルを参照
 
 ---
 
-**⚠️ 重要な注意事項**: このシステムを効果的に活用するには、`templates/.cursor/`内のファイルを実際のプロジェクト情報で更新することが必須です。テンプレートのままでは自動参照の効果が得られず、知識管理システムとしての価値を発揮できません。
+**⚠️ 重要な注意事項**: このシステムを効果的に活用するには、`.cursor/`内のファイルを実際のプロジェクト情報で更新することが必須です。テンプレートのままでは自動参照の効果が得られず、知識管理システムとしての価値を発揮できません。

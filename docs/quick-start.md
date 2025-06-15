@@ -1,14 +1,44 @@
 # クイックスタートガイド
 
-## 🚀 Cursor知識管理システムの導入手順
+## 🚀 5分で始める導入手順
 
-このガイドでは、Cursor AI知識管理システムの詳細な導入手順を説明します。
-
-### ステップ1: リポジトリのクローン
+### 1. リポジトリのクローン
 ```bash
 git clone https://github.com/your-username/cursor-knowledge-management-system.git
 cd cursor-knowledge-management-system
 ```
+
+### 2. テンプレートを実際のプロジェクトにコピー
+
+**Windows（PowerShell）:**
+```powershell
+# あなたの実際のプロジェクトディレクトリに移動
+cd C:\path\to\your-actual-project
+
+# テンプレートをコピー（プロジェクトルート直下に配置）
+Copy-Item -Path "C:\path\to\cursor-knowledge-management-system\templates\.cursor" -Destination ".cursor" -Recurse
+
+# .cursorignoreファイルもコピー（推奨）
+Copy-Item -Path "C:\path\to\cursor-knowledge-management-system\templates\.cursorignore" -Destination ".cursorignore"
+```
+
+**Mac/Linux（bash）:**
+```bash
+# あなたの実際のプロジェクトディレクトリに移動
+cd /path/to/your-actual-project
+
+# テンプレートをコピー（プロジェクトルート直下に配置）
+cp -r /path/to/cursor-knowledge-management-system/templates/.cursor .cursor
+
+# .cursorignoreファイルもコピー（推奨）
+cp /path/to/cursor-knowledge-management-system/templates/.cursorignore .cursorignore
+```
+
+### 3. **⚠️ 重要: 必須更新ファイル**
+
+**コピー後、以下のファイルは必ず実際のプロジェクト情報で更新が必要です：**
+
+#### .cursor/knowledge.md
 
 ## 📋 必須更新ファイルの詳細
 
@@ -41,7 +71,7 @@ React vs Vue.js の選択
 チームの既存スキルを活かし、開発速度を優先
 ```
 
-#### templates/.cursor/patterns.md
+#### .cursor/patterns.md
 **目的**: 設計パターン・実装テンプレートの記録
 **更新例**:
 ```markdown
@@ -65,7 +95,7 @@ interface ApiResponse<T> {
 ```
 ```
 
-#### templates/.cursor/context.md
+#### .cursor/context.md
 **目的**: プロジェクト背景・制約の記録
 **更新例**:
 ```markdown
@@ -108,16 +138,16 @@ interface ApiResponse<T> {
 
 ### 最小限の更新（10分）
 1. README.md のプロジェクト名を変更
-2. templates/.cursor/knowledge.md をプロジェクト用に書き換え
+2. .cursor/knowledge.md をプロジェクト用に書き換え
 
 ### 推奨更新（20分）
 上記に加えて：
-3. templates/.cursor/context.md 更新
+3. .cursor/context.md 更新
 4. 使用言語に応じたルール調整
 
 ### フル活用（30分）
 上記すべてに加えて：
-5. templates/.cursor/patterns.md の詳細記録
+5. .cursor/patterns.md の詳細記録
 6. チーム開発ルールの策定
 7. 全templatesファイルの実プロジェクト情報での更新
 
@@ -125,7 +155,7 @@ interface ApiResponse<T> {
 
 ### 1. 基本的な知識記録
 ```markdown
-# templates/.cursor/knowledge.md に記録
+# .cursor/knowledge.md に記録
 ### 2025-06-XX - API設計
 #### 判断内容
 REST vs GraphQL の選択
@@ -211,8 +241,8 @@ A: `.cursor/rules/`ディレクトリの場所とファイル拡張子（`.mdc`�
 A: `globs`パターンとファイルパスが一致しているか確認
 
 **Q: テンプレートファイルが更新されない**
-A: `templates/.cursor/`内のファイルを実際のプロジェクト情報で更新
+A: `.cursor/`内のファイルを実際のプロジェクト情報で更新
 
 ---
 
-**⚠️ 重要**: このシステムを効果的に活用するには、`templates/.cursor/`内のファイルを実際のプロジェクト情報で更新することが必須です。テンプレートのままでは自動参照の効果が得られません。 
+**⚠️ 重要**: このシステムを効果的に活用するには、`.cursor/`内のファイルを実際のプロジェクト情報で更新することが必須です。テンプレートのままでは自動参照の効果が得られません。 

@@ -1,4 +1,11 @@
 # Cursor AI 知識管理システム - 無視ファイル設定
+# 
+# 🔥 重要: これはテンプレートファイルです
+# 実際のプロジェクトでは、templates/.cursor/ を .cursor/ にコピーした後、
+# このファイルも .cursorignore として配置してください
+#
+# 使用方法:
+# cp templates/.cursorignore .cursorignore
 
 # 一時ファイル・ログ
 .cursor/debug/temp-logs/*.log
