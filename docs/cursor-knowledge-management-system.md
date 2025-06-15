@@ -24,12 +24,12 @@ Cursor AIを活用した効率的な開発知見管理システムです。プ�
 
 #### Windows (PowerShell)
 ```powershell
-# プロジェクトルートで実行
-md .cursor
-md .cursor\debug
-md .cursor\debug\sessions
-md .cursor\debug\temp-logs
-md .cursor\debug\archive
+# プロジェクトルートで実行（より確実な方法）
+New-Item -ItemType Directory -Path ".cursor" -Force
+New-Item -ItemType Directory -Path ".cursor\debug" -Force
+New-Item -ItemType Directory -Path ".cursor\debug\sessions" -Force
+New-Item -ItemType Directory -Path ".cursor\debug\temp-logs" -Force
+New-Item -ItemType Directory -Path ".cursor\debug\archive" -Force
 ```
 
 #### macOS/Linux (Bash)

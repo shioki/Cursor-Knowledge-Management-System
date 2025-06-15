@@ -15,7 +15,19 @@
 
 **Windows (PowerShell)**:
 ```powershell
-md .cursor, .cursor\debug, .cursor\debug\sessions, .cursor\debug\temp-logs, .cursor\debug\archive
+# より確実な段階的作成
+New-Item -ItemType Directory -Path ".cursor" -Force
+New-Item -ItemType Directory -Path ".cursor\debug" -Force  
+New-Item -ItemType Directory -Path ".cursor\debug\sessions" -Force
+New-Item -ItemType Directory -Path ".cursor\debug\temp-logs" -Force
+New-Item -ItemType Directory -Path ".cursor\debug\archive" -Force
+
+# または、手動で一つずつ
+mkdir .cursor
+mkdir .cursor\debug
+mkdir .cursor\debug\sessions
+mkdir .cursor\debug\temp-logs  
+mkdir .cursor\debug\archive
 ```
 
 **macOS/Linux (Bash)**:
