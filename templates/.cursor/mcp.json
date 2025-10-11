@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "time": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-time"]
+    },
+    "date-time-tools": {
+      "command": "npx",
+      "args": ["-y", "@abhi12299/date-time-tools"]
+    }
+  }
+}
