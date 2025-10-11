@@ -56,6 +56,35 @@ cp templates/.cursorignore .cursorignore
 - **[開発ログ](docs/reference/development-log.md)** - システム開発の記録
 - **[MCP日時設定ガイド](docs/reference/mcp-datetime-setup.md)** - MCPサーバの設定方法
 
+## 🏗️ システム構成
+
+```mermaid
+graph TB
+    A[ユーザー] --> B[Cursor AI]
+    B --> C[.cursor/rules]
+    C --> D[knowledge.md]
+    C --> E[patterns.md]
+    C --> F[context.md]
+    C --> G[debug-log.md]
+    C --> H[improvements.md]
+    
+    D --> I[技術判断記録]
+    E --> J[実装パターン]
+    F --> K[プロジェクト背景]
+    G --> L[問題解決履歴]
+    H --> M[改善活動記録]
+    
+    I --> N[AI支援開発]
+    J --> N
+    K --> N
+    L --> N
+    M --> N
+    
+    N --> O[品質向上]
+    N --> P[効率化]
+    N --> Q[知識蓄積]
+```
+
 ## 📁 プロジェクト構造
 
 ```

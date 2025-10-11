@@ -8,6 +8,23 @@
 
 ## 📚 テンプレートガイド
 
+```mermaid
+graph LR
+    A[context.md] --> E[プロジェクト理解]
+    B[patterns.md] --> F[実装支援]
+    C[knowledge.md] --> G[技術判断]
+    D[debug-log.md] --> H[問題解決]
+    I[improvements.md] --> J[継続改善]
+    
+    E --> K[Cursor AI]
+    F --> K
+    G --> K
+    H --> K
+    J --> K
+    
+    K --> L[効率的な開発]
+```
+
 ### 1. [テンプレート概要](overview.md)
 **テンプレートシステムの全体像**
 - テンプレートファイル一覧
