@@ -175,6 +175,14 @@ your-project/
 - **リンクチェック**: `npx markdown-link-check README.md CHANGELOG.md docs/**/*.md`
 - **.mdc frontmatter検証**: `description/globs/alwaysApply` の有無をスクリプトで確認
 - **実行タイミング**: 週次レビューやリリース前に実施
+- **PowerShell例**:  
+  `Get-ChildItem -Recurse -Filter *.md docs | ForEach-Object { npx markdown-link-check $_.FullName }`  
+  ルートファイルは `README.md`, `CHANGELOG.md` を個別指定
+- **CI例 (GitHub Actions)**:  
+  ```yaml
+  - name: Link check
+    run: npx markdown-link-check README.md CHANGELOG.md docs/**/*.md --quiet
+  ```
 
 ## 📚 関連リソース
 
