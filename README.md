@@ -97,7 +97,10 @@ cursor-knowledge-management-system/
 │   ├── improvements.md         # 改善記録テンプレート
 │   └── rules/                  # .cursor/rulesテンプレート
 │       ├── knowledge-management.mdc
+│       ├── project-context.mdc
 │       ├── debug-workflow.mdc
+│       ├── debug-support.mdc
+│       ├── improvement-tracking.mdc
 │       ├── patterns-library.mdc
 │       └── team-standards.mdc
 ├── templates/.cursorignore      # Cursor無視ファイル設定テンプレート
@@ -154,6 +157,12 @@ AIとの対話で以下のように参照されることを確認：
 - **Node.js**: 18.x以上（MCPサーバ使用時）
 - **Git**: 2.0以上
 
+## ✅ 品質チェック（推奨）
+
+- **リンクチェック**: `npx markdown-link-check docs/**/*.md`（CIでは `--quiet` 併用推奨）
+- **.mdc frontmatter検証**: `description/globs/alwaysApply` の必須キー有無をスクリプトで確認（例: `scripts/check-mdc-frontmatter.mjs`）
+- **実行タイミング**: 週次ドキュメント更新時・リリース前に実施
+
 ## 📄 ライセンス
 
 MIT License - 詳細は [LICENSE](LICENSE) ファイルを参照
@@ -168,6 +177,6 @@ MIT License - 詳細は [LICENSE](LICENSE) ファイルを参照
 
 ---
 
-**📅 最終更新**: 2025-10-11  
-**📋 バージョン**: 2.0.0  
+**📅 最終更新**: 2025-12-07  
+**📋 バージョン**: 2.0.1  
 **📝 変更履歴**: [CHANGELOG.md](CHANGELOG.md) を参照

@@ -61,7 +61,10 @@ alwaysApply: false
 ├── improvements.md           # 改善履歴・最適化記録
 └── rules/                    # .cursor/rules設定
     ├── knowledge-management.mdc
+    ├── project-context.mdc
     ├── debug-workflow.mdc
+    ├── debug-support.mdc
+    ├── improvement-tracking.mdc
     ├── patterns-library.mdc
     └── team-standards.mdc
 ```
@@ -166,6 +169,12 @@ your-project/
 2. **分析**: 定期的な振り返りと効果測定
 3. **改善**: システム・プロセスの最適化
 4. **共有**: チーム全体での知見の展開
+
+## ✅ 品質チェック（推奨）
+
+- **リンクチェック**: `npx markdown-link-check docs/**/*.md`
+- **.mdc frontmatter検証**: `description/globs/alwaysApply` の有無をスクリプトで確認
+- **実行タイミング**: 週次レビューやリリース前に実施
 
 ## 📚 関連リソース
 

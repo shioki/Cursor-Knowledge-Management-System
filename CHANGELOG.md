@@ -35,6 +35,18 @@
 - **保守性**: ドキュメント管理の効率化
 - **拡張性**: 将来の機能追加への対応力向上
 
+## [2.0.1] - 2025-12-07
+
+### 🔧 Changed
+- READMEに品質チェック手順（リンクチェック、.mdc frontmatter確認）を追加
+- `.cursor/rules` テンプレート構成を最新版に更新（project-context/debug-support/improvement-tracking追加）
+
+### 🐛 Fixed
+- Getting Started 内の死リンクを修正
+
+### 📚 Documentation
+- ルール構成とメンテナンス手順の記述を最新化
+
 ## [1.0.0] - 2025-06-15
 
 ### 🎉 Initial Release
