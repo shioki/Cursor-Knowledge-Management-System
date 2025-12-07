@@ -1,6 +1,6 @@
 ---
-description: 
-globs: 
+description: "知識・決定記録を自動参照し、判断の再利用を促す"
+globs: "**/*.{md,mdx}"
 alwaysApply: false
 ---
 # Cursor AI 知識管理システム

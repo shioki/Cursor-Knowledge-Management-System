@@ -1,0 +1,19 @@
+---
+description: "改善提案と実装済み改善を提示し継続改善を促進する"
+globs: "**/*"
+alwaysApply: false
+---
+# 改善トラッキングルール
+
+## 🎯 目的
+- 類似の改善機会が見つかった際に過去事例を提示
+- 改善提案の重複を避け、効果測定を共有
+
+## 🔗 推奨参照
+- @.cursor/improvements.md
+- @.cursor/knowledge.md
+- @.cursor/patterns.md
+
+## ✅ 運用ヒント
+- 改善完了後は効果と指標を `.cursor/improvements.md` に追記
+- 定期レビューで陳腐化した改善案をクローズする

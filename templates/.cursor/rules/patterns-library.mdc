@@ -1,6 +1,6 @@
 ---
-description: 
-globs: 
+description: "実装・設計パターンを提示し再利用を促進する"
+globs: "**/*.{ts,tsx,js,jsx,py,rb,go,rs,java,cs}"
 alwaysApply: false
 ---
 # パターンライブラリ管理

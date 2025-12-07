@@ -1,0 +1,19 @@
+---
+description: "プロジェクト全体のコンテキストを提供し提案精度を上げる"
+globs: "**/*"
+alwaysApply: true
+---
+# プロジェクトコンテキスト参照ルール
+
+## 📌 目的
+- プロジェクト背景・制約を常時参照して誤った提案を防ぐ
+- 技術スタックや非機能要件を編集時に即座に確認できるようにする
+
+## 🔗 推奨参照
+- @.cursor/context.md
+- @.cursor/patterns.md
+- @.cursor/knowledge.md
+
+## ✅ 運用ヒント
+- 新しい制約や前提が増えたら `.cursor/context.md` を最優先で更新
+- 大きな方針転換時は Changelog にも反映して履歴を残す

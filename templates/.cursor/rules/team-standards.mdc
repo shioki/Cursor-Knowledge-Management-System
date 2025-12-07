@@ -1,7 +1,7 @@
 ---
-description: 
-globs: 
-alwaysApply: false
+description: "チーム標準・コーディング規約を常時提示する"
+globs: "**/*"
+alwaysApply: true
 ---
 # チーム開発標準
 

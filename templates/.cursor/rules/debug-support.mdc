@@ -1,0 +1,20 @@
+---
+description: "デバッグ時に過去のセッションと解決策を提示する"
+globs: ".cursor/debug/**"
+alwaysApply: false
+---
+# デバッグ支援ルール
+
+## 🎯 目的
+- 類似問題発生時に過去のセッション・ログを自動提示
+- 再発防止策や恒久対応を素早く参照
+
+## 🔗 推奨参照
+- @.cursor/debug-log.md
+- @.cursor/debug/sessions/
+- @.cursor/debug/temp-logs/
+- @.cursor/improvements.md
+
+## ✅ 運用ヒント
+- 重大インシデントは `.cursor/debug/sessions/` に必ず記録
+- 解決後に `.cursor/improvements.md` へ予防策を追記

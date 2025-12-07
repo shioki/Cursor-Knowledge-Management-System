@@ -1,6 +1,6 @@
 ---
-description: 
-globs: 
+description: "デバッグ時に過去ログ・手順を自動提示する"
+globs: ".cursor/debug/**"
 alwaysApply: false
 ---
 # デバッグワークフロー管理

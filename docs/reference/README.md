@@ -94,6 +94,14 @@
    - 最小限の設定でテスト
    - 段階的に機能を追加
 
+## ✅ リンク・ルールの自動チェック（推奨）
+
+- **Markdownリンクチェック**: `npx markdown-link-check docs/**/*.md`  
+  - CI では `--quiet --config .mlc.json` などでノイズ削減を推奨
+- **.mdc frontmatter検証**: 必須キー `description`, `globs`, `alwaysApply` の有無を簡易スクリプトで確認  
+  - 例（Node）: `node scripts/check-mdc-frontmatter.mjs` を用意し、`.cursor/rules/*.mdc` を走査
+- **定期実行**: 週次のドキュメント更新時・リリース前に実行して参照切れを防止
+
 ## 📊 パフォーマンス
 
 ### 推奨設定

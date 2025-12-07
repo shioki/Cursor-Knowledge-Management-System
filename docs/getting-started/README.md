@@ -52,7 +52,7 @@ flowchart TD
 
 問題が発生した場合は、以下を確認してください：
 
-1. [トラブルシューティング](../reference/troubleshooting.md)
+1. [リファレンス](../reference/README.md)
 2. [開発ログ](../reference/development-log.md)
 3. [GitHub Issues](https://github.com/shioki/Cursor-Knowledge-Management-System/issues)
 
