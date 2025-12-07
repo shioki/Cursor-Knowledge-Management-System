@@ -172,7 +172,7 @@ your-project/
 
 ## ✅ 品質チェック（推奨）
 
-- **リンクチェック**: `npx markdown-link-check docs/**/*.md`
+- **リンクチェック**: `npx markdown-link-check README.md CHANGELOG.md docs/**/*.md`
 - **.mdc frontmatter検証**: `description/globs/alwaysApply` の有無をスクリプトで確認
 - **実行タイミング**: 週次レビューやリリース前に実施
 
