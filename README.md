@@ -164,8 +164,8 @@ AIとの対話で以下のように参照されることを確認：
 - **.mdc frontmatter検証**: `description/globs/alwaysApply` の必須キー有無をスクリプトで確認（例: `scripts/check-mdc-frontmatter.mjs`）
 - **実行タイミング**: 週次ドキュメント更新時・リリース前に実施
 - **PowerShell例**:  
-  `Get-ChildItem -Recurse -Filter *.md docs | ForEach-Object { npx markdown-link-check $_.FullName }`  
-  ルートファイルは `README.md`, `CHANGELOG.md` を個別指定して同様に実行
+  `Get-ChildItem -Path docs -Recurse -Filter *.md | ForEach-Object { npx markdown-link-check $_.FullName }`  
+  ルートは `npx markdown-link-check README.md CHANGELOG.md` を個別に実行
 - **CI例 (GitHub Actions)**:  
   ```yaml
   - name: Link check
