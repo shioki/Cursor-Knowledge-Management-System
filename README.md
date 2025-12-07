@@ -160,6 +160,7 @@ AIとの対話で以下のように参照されることを確認：
 ## ✅ 品質チェック（推奨）
 
 - **リンクチェック**: `npx markdown-link-check README.md CHANGELOG.md docs/**/*.md`（CIでは `--quiet` 併用推奨）
+  - ルートの `README.md` / `CHANGELOG.md` も検証対象に含める
 - **.mdc frontmatter検証**: `description/globs/alwaysApply` の必須キー有無をスクリプトで確認（例: `scripts/check-mdc-frontmatter.mjs`）
 - **実行タイミング**: 週次ドキュメント更新時・リリース前に実施
 
