@@ -159,10 +159,15 @@ AIとの対話で以下のように参照されることを確認：
 
 ## ✅ 品質チェック（推奨）
 
-- **リンクチェック**: `npx markdown-link-check README.md CHANGELOG.md docs/**/*.md`（CIでは `--quiet` 併用推奨）
-  - ルートの `README.md` / `CHANGELOG.md` も検証対象に含める
-- **.mdc frontmatter検証**: `description/globs/alwaysApply` の必須キー有無をスクリプトで確認（例: `scripts/check-mdc-frontmatter.mjs`）
-- **実行タイミング**: 週次ドキュメント更新時・リリース前に実施
+- **.mdc frontmatter検証**: `templates/.cursor/rules/*.mdc` の `description/globs/alwaysApply` を検証
+  - 実行: `node scripts/check-mdc-frontmatter.mjs`
+- **リンクチェック**: Markdown内リンクの死活チェック
+  - **macOS/Linux/Git Bash**: `npx -y markdown-link-check README.md CHANGELOG.md docs/**/*.md --quiet --config .mlc.config.json`
+  - **Windows（PowerShell）**:
+    - ルート: `npx -y markdown-link-check README.md CHANGELOG.md --quiet --config .mlc.config.json`
+    - docs配下: `Get-ChildItem -Path docs -Recurse -Filter *.md | ForEach-Object { npx -y markdown-link-check $_.FullName --quiet --config .mlc.config.json }`
+- **CI**: GitHub Actions の `Docs checks` が同等の検証を実行
+- **実行タイミング**: 週次ドキュメント更新時・リリース前・大きなリファクタ後に実施
 
 ## 📄 ライセンス
 
