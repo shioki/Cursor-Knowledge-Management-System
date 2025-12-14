@@ -1,0 +1,27 @@
+name: Docs checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  docs-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate .mdc frontmatter
+        run: node scripts/check-mdc-frontmatter.mjs
+
+      - name: Link check (markdown-link-check)
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s globstar nullglob
+          npx -y markdown-link-check README.md CHANGELOG.md docs/**/*.md --quiet --config .mlc.config.json
