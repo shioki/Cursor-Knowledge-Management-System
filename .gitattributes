@@ -1,0 +1,11 @@
+# Normalize text files and keep diffs clean
+* text=auto
+
+# Prefer LF in this repo (docs/scripts/config)
+*.md   text eol=lf
+*.mdc  text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.mjs  text eol=lf
+*.js   text eol=lf
