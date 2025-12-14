@@ -131,7 +131,6 @@
 - [GitHub Documentation](https://docs.github.com)
 
 ### コミュニティ
-- [GitHub Discussions](https://github.com/shioki/Cursor-Knowledge-Management-System/discussions)
 - [Issues](https://github.com/shioki/Cursor-Knowledge-Management-System/issues)
 
 ## 🔄 関連セクション

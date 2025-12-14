@@ -34,7 +34,7 @@ npm ERR! node_modules/react
 npm ERR!   react@"^18.2.0" from the root project
 npm ERR! 
 npm ERR! Could not resolve dependency:
-npm ERR! peer react@"^17.0.0" from @testing-library/react@12.1.5
+npm ERR! peer react@"^17.0.0" from @testing-library/react\@12.1.5
 npm ERR! node_modules/@testing-library/react
 npm ERR!   @testing-library/react@"^12.1.5" from the root project
 ```
@@ -106,7 +106,7 @@ npm install --legacy-peer-deps
    - トラブルシューティングガイドの作成
 
 #### 参考リンク
-- [npm dependency resolution](https://docs.npmjs.com/cli/v8/using-npm/dependency-resolution)
+- [npm dependency resolution (changelog)](https://docs.npmjs.com/cli/v7/using-npm/changelog/)
 - [React Testing Library compatibility](https://github.com/testing-library/react-testing-library/issues/1232)
 - [npm ERESOLVE errors](https://github.com/npm/cli/issues/4232)
 

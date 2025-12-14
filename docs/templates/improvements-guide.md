@@ -390,7 +390,7 @@ jobs:
 #### 参考情報
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
 - [AWS CLI Reference](https://docs.aws.amazon.com/cli/)
-- [CI/CD Best Practices](https://example.com/cicd-best-practices)
+- [CI/CD Best Practices (GitHub)](https://docs.github.com/en/actions/deployment/about-deployments/about-continuous-deployment)
 
 #### メタ情報
 - **実施者**: DevOpsエンジニア（渡辺真一）
