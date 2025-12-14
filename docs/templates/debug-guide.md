@@ -48,7 +48,7 @@ npm ERR!   @testing-library/react@"^12.1.5" from the root project
 #### 調査手順
 1. **エラーメッセージの分析**
    - ERESOLVE エラーは依存関係の競合を示す
-   - React 18 と @testing-library/react@12.1.5 の peer dependency 競合
+   - React 18 と @testing-library/react\@12.1.5 の peer dependency 競合
 
 2. **依存関係の確認**
    ```bash
