@@ -2,6 +2,7 @@
 import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const markdownLinkCheck = require('markdown-link-check');
@@ -12,39 +13,33 @@ async function runOne(filePath, configPath) {
   const config = JSON.parse(configRaw);
 
   const fileName = path.relative(process.cwd(), filePath);
-  const baseDir = path.dirname(filePath).replace(/\\/g, '/');
-  const baseUrl = `file:///${baseDir}/`;
+
+  // IMPORTANT:
+  // Use Node's URL utilities to avoid malformed file URLs like "file:////...".
+  // pathToFileURL handles both Unix (/a/b) and Windows (C:\a\b) correctly.
+  const baseUrl = pathToFileURL(path.resolve(path.dirname(filePath)) + path.sep).href;
 
   await new Promise((resolve, reject) => {
-    markdownLinkCheck(
-      markdown,
-      { ...config, baseUrl },
-      (err, results) => {
-        if (err) {
-          const e = new Error(`error while checking ${fileName}: ${err.message ?? String(err)}`);
-          // Preserve original error for debugging
-          e.cause = err;
-          return reject(e);
-        }
-
-        const dead = results.filter((r) => r.status !== 'alive');
-        if (dead.length === 0) return resolve();
-
-        const lines = dead.map((r) => `  [✖] ${r.link} → Status: ${r.status}`);
-        const e = new Error(`dead links found in ${fileName}\n${lines.join('\n')}`);
+    markdownLinkCheck(markdown, { ...config, baseUrl }, (err, results) => {
+      if (err) {
+        const e = new Error(`error while checking ${fileName}: ${err.message ?? String(err)}`);
+        e.cause = err;
         return reject(e);
       }
-    );
+
+      const dead = results.filter((r) => r.status !== 'alive');
+      if (dead.length === 0) return resolve();
+
+      const lines = dead.map((r) => `  [✖] ${r.link} → Status: ${r.status}`);
+      return reject(new Error(`dead links found in ${fileName}\n${lines.join('\n')}`));
+    });
   });
 }
 
 async function main() {
   const configPath = path.join(process.cwd(), '.mlc.config.json');
 
-  const targets = [
-    path.join(process.cwd(), 'README.md'),
-    path.join(process.cwd(), 'CHANGELOG.md')
-  ];
+  const targets = [path.join(process.cwd(), 'README.md'), path.join(process.cwd(), 'CHANGELOG.md')];
 
   // Collect docs/**/*.md without relying on shell globs.
   const walk = async (dir) => {
@@ -62,7 +57,6 @@ async function main() {
 
   await walk(path.join(process.cwd(), 'docs'));
 
-  // De-dup (README/CHANGELOG won't be in docs but keep safe)
   const uniq = Array.from(new Set(targets));
 
   const failures = [];
@@ -76,9 +70,7 @@ async function main() {
 
   if (failures.length > 0) {
     console.error('[link-check] FAILED');
-    for (const msg of failures) {
-      console.error(`\n${msg}`);
-    }
+    for (const msg of failures) console.error(`\n${msg}`);
     process.exit(1);
   }
 
