@@ -16,12 +16,8 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Validate .mdc frontmatter
-        run: node scripts/check-mdc-frontmatter.mjs
+      - name: Install deps
+        run: npm ci
 
-      - name: Link check (markdown-link-check)
-        shell: bash
-        run: |
-          set -euo pipefail
-          shopt -s globstar nullglob
-          npx -y markdown-link-check README.md CHANGELOG.md docs/**/*.md --quiet --config .mlc.config.json
+      - name: Docs check
+        run: npm run docs:check

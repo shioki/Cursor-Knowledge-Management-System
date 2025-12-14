@@ -1,0 +1,13 @@
+{
+  "name": "cursor-knowledge-management-system",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "markdown-link-check": "^3.12.2"
+  },
+  "scripts": {
+    "mdc:check": "node scripts/check-mdc-frontmatter.mjs",
+    "links:check": "node scripts/check-links.mjs",
+    "docs:check": "npm run mdc:check && npm run links:check"
+  }
+}

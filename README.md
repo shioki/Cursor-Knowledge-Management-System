@@ -159,6 +159,8 @@ AIとの対話で以下のように参照されることを確認：
 
 ## ✅ 品質チェック（推奨）
 
+- **ワンコマンド（推奨）**: CIと同等の検証をまとめて実行
+  - `npm run docs:check`
 - **.mdc frontmatter検証**: `templates/.cursor/rules/*.mdc` の `description/globs/alwaysApply` を検証
   - 実行: `node scripts/check-mdc-frontmatter.mjs`
 - **リンクチェック**: Markdown内リンクの死活チェック
