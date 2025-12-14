@@ -2,6 +2,7 @@
 * text=auto
 
 # Prefer LF in this repo (docs/scripts/config)
+.gitattributes text eol=lf
 *.md   text eol=lf
 *.mdc  text eol=lf
 *.yml  text eol=lf
