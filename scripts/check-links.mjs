@@ -14,9 +14,10 @@ async function runOne(filePath, configPath) {
 
   const fileName = path.relative(process.cwd(), filePath);
 
-  // IMPORTANT:
-  // Use Node's URL utilities to avoid malformed file URLs like "file:////...".
-  // pathToFileURL handles both Unix (/a/b) and Windows (C:\a\b) correctly.
+  // Bug 1 fix:
+  // Do NOT construct baseUrl by string concatenation like:
+  //   "file:///" + "/path" => "file:////path"  (Unix absolute paths already start with '/')
+  // Use Node's URL utilities instead; this is correct on both Unix and Windows.
   const baseUrl = pathToFileURL(path.resolve(path.dirname(filePath)) + path.sep).href;
 
   await new Promise((resolve, reject) => {
@@ -39,7 +40,10 @@ async function runOne(filePath, configPath) {
 async function main() {
   const configPath = path.join(process.cwd(), '.mlc.config.json');
 
-  const targets = [path.join(process.cwd(), 'README.md'), path.join(process.cwd(), 'CHANGELOG.md')];
+  const targets = [
+    path.join(process.cwd(), 'README.md'),
+    path.join(process.cwd(), 'CHANGELOG.md'),
+  ];
 
   // Collect docs/**/*.md without relying on shell globs.
   const walk = async (dir) => {
