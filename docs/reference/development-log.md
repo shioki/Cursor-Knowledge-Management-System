@@ -214,7 +214,7 @@
    - 安全性を最優先とした設計
 
 3. **包括的な使用ガイド作成**
-   - `docs/template-usage-guide.md` の新規作成
+   - `docs/template-usage-guide.md` の新規作成（旧。現行は `docs/templates/overview.md` が入口）
    - 各テンプレートファイルの詳細な記載例
    - 具体的なコード例とベストプラクティス
    - 段階的な記入方法の説明
@@ -232,7 +232,7 @@
    # ファイルタイトル
    
    > 💡 .cursor/rules形式での活用説明
-   > ⚠️ 重要: 使用方法は docs/template-usage-guide.md を参照
+   > ⚠️ 重要: 使用方法は docs/templates/overview.md を参照（旧: docs/template-usage-guide.md）
    
    ## セクション1
    ## セクション2
@@ -243,7 +243,7 @@
    ```
 
 2. **記載例の一元管理**
-   - 全ての記載例を `docs/template-usage-guide.md` に集約
+   - 全ての記載例を（旧）`docs/template-usage-guide.md` に集約 →（現行）`docs/templates/` 配下に分割
    - 各テンプレートファイルからの明確な参照
    - 保守性とユーザビリティの両立
 
@@ -347,7 +347,7 @@ cursor-knowledge-management-system/
 
 #### 背景・問題発見
 1. **テンプレートガイドの肥大化問題**
-   - `docs/template-usage-guide.md` が710行を超える大容量ファイルに
+   - `docs/template-usage-guide.md` が710行を超える大容量ファイルに（旧。現行の入口は `docs/templates/overview.md`）
    - 重複セクションとコードブロックの不適切な終了による表示崩れ
    - 単一ファイルでの全テンプレート説明による可読性の低下
    - 保守性の問題（特定テンプレートの更新時に巨大ファイル全体を編集）
@@ -359,16 +359,16 @@ cursor-knowledge-management-system/
 
 #### 実施内容
 1. **テンプレートガイドの分割設計**
-   - メインガイド: `docs/template-usage-guide.md`（概要とナビゲーション）
+   - メインガイド: `docs/templates/overview.md`（現行。旧: `docs/template-usage-guide.md`）
    - 個別ガイド: 各テンプレート専用の詳細ガイドファイル
-   - ファイル命名規則: `template-[テンプレート名]-guide.md`
+   - ファイル命名規則（旧）: `template-[テンプレート名]-guide.md` →（現行）: `[テンプレート名]-guide.md`
 
 2. **5つの個別ガイドファイル作成**
-   - `docs/template-context-guide.md`: context.md の詳細使用ガイド
-   - `docs/template-patterns-guide.md`: patterns.md の詳細使用ガイド
-   - `docs/template-knowledge-guide.md`: knowledge.md の詳細使用ガイド
-   - `docs/template-debug-log-guide.md`: debug-log.md の詳細使用ガイド
-   - `docs/template-improvements-guide.md`: improvements.md の詳細使用ガイド
+   - `docs/templates/context-guide.md`: context.md の詳細使用ガイド（旧: `docs/template-context-guide.md`）
+   - `docs/templates/patterns-guide.md`: patterns.md の詳細使用ガイド（旧: `docs/template-patterns-guide.md`）
+   - `docs/templates/knowledge-guide.md`: knowledge.md の詳細使用ガイド（旧: `docs/template-knowledge-guide.md`）
+   - `docs/templates/debug-guide.md`: debug-log.md の詳細使用ガイド（旧: `docs/template-debug-log-guide.md`）
+   - `docs/templates/improvements-guide.md`: improvements.md の詳細使用ガイド（旧: `docs/template-improvements-guide.md`）
 
 3. **各ガイドファイルの充実した内容**
    - **context.md ガイド**: プロジェクト基本情報、技術スタック、アーキテクチャ、チーム構成の記載方法
@@ -380,7 +380,7 @@ cursor-knowledge-management-system/
 4. **関連ドキュメントの一括更新**
    - `README.md`: テンプレート使用ガイドセクションの構造化
    - `docs/cursor-knowledge-management-system.md`: 関連リソースの分割構成対応
-   - `docs/team-implementation-guide.md`: 関連リソースとオンボーディングの更新
+   - `docs/advanced/team-implementation.md`: 関連リソースとオンボーディングの更新（旧: `docs/team-implementation-guide.md`）
 
 5. **メインテンプレートガイドの最適化**
    - 概要とナビゲーション中心の構成に変更
@@ -390,12 +390,19 @@ cursor-knowledge-management-system/
 #### 技術的解決策
 1. **ファイル命名の統一**
    ```
-   template-[テンプレート名]-guide.md
+   （旧）template-[テンプレート名]-guide.md
    ├── template-context-guide.md
    ├── template-patterns-guide.md
    ├── template-knowledge-guide.md
    ├── template-debug-log-guide.md
    └── template-improvements-guide.md
+
+   （現行）docs/templates/[テンプレート名]-guide.md
+   ├── context-guide.md
+   ├── patterns-guide.md
+   ├── knowledge-guide.md
+   ├── debug-guide.md
+   └── improvements-guide.md
    ```
 
 2. **ナビゲーション構造の最適化**

@@ -56,7 +56,7 @@ cp /path/to/cursor-knowledge-management-system/templates/.cursorignore .cursorig
 - **保守性**: テンプレートファイルの簡潔性
 
 #### 📖 詳細な使用方法
-**完全な記載例とベストプラクティス**: `docs/template-usage-guide.md` を参照してください。
+**完全な記載例とベストプラクティス**: `docs/templates/overview.md` を参照してください。
 
 このガイドには以下が含まれています：
 - 各テンプレートファイルの詳細な記載例
@@ -78,7 +78,7 @@ cp /path/to/cursor-knowledge-management-system/templates/.cursorignore .cursorig
 **Step 2: ガイドを参照しながら記入**
 ```bash
 # ガイドを開きながら作業
-code docs/template-usage-guide.md
+code docs/templates/overview.md
 code .cursor/knowledge.md
 ```
 
@@ -113,7 +113,7 @@ React vs Vue.js の選択
 ## 🔧 使用開始の確認
 
 ### 1. 基本的な知識記録
-詳細な記載例は `docs/template-usage-guide.md` を参照してください。
+詳細な記載例は `docs/templates/overview.md` を参照してください。
 
 **簡単な例**:
 ```markdown

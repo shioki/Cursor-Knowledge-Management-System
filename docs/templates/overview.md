@@ -22,31 +22,31 @@
 
 各テンプレートファイルの詳細な使用方法と記載例は、以下の専用ガイドをご参照ください：
 
-### [📚 knowledge.md 使用ガイド](./template-knowledge-guide.md)
+### [📚 knowledge.md 使用ガイド](./knowledge-guide.md)
 - 設計判断の記録方法
 - 技術パターン集の作成
 - ADR (Architecture Decision Record) の書き方
 - .cursor/rules との連携方法
 
-### [🔧 patterns.md 使用ガイド](./template-patterns-guide.md)
+### [🔧 patterns.md 使用ガイド](./patterns-guide.md)
 - .cursor/rules活用パターン
 - 環境別コマンド集
 - 実装テンプレートの作成
 - チーム標準の定義
 
-### [🌐 context.md 使用ガイド](./template-context-guide.md)
+### [🌐 context.md 使用ガイド](./context-guide.md)
 - プロジェクト基本情報の記載
 - 技術スタックの整理
 - アーキテクチャ概要の作成
 - チーム構成の記録
 
-### [🐛 debug-log.md 使用ガイド](./template-debug-log-guide.md)
+### [🐛 debug-log.md 使用ガイド](./debug-guide.md)
 - 問題・エラーログの記録
 - パフォーマンス問題の分析
 - 解決手順の文書化
 - 予防策の記録
 
-### [📈 improvements.md 使用ガイド](./template-improvements-guide.md)
+### [📈 improvements.md 使用ガイド](./improvements-guide.md)
 - 改善提案の記録
 - 実装済み改善の文書化
 - 効果測定の方法
@@ -82,11 +82,11 @@
 
 初めて使用する場合は、以下の順序で進めることをお勧めします：
 
-1. **[context.md ガイド](./template-context-guide.md)** でプロジェクト基本情報を整理
-2. **[patterns.md ガイド](./template-patterns-guide.md)** で開発パターンを定義
-3. **[knowledge.md ガイド](./template-knowledge-guide.md)** で技術的知見を蓄積
-4. **[debug-log.md ガイド](./template-debug-log-guide.md)** で問題解決を記録
-5. **[improvements.md ガイド](./template-improvements-guide.md)** で継続的改善を実施
+1. **[context.md ガイド](./context-guide.md)** でプロジェクト基本情報を整理
+2. **[patterns.md ガイド](./patterns-guide.md)** で開発パターンを定義
+3. **[knowledge.md ガイド](./knowledge-guide.md)** で技術的知見を蓄積
+4. **[debug-log.md ガイド](./debug-guide.md)** で問題解決を記録
+5. **[improvements.md ガイド](./improvements-guide.md)** で継続的改善を実施
 
 ---
 

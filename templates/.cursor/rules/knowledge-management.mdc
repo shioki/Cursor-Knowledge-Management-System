@@ -37,4 +37,9 @@ alwaysApply: false
 - **新人オンボーディング**: 高速化を目標
 
 ## 📊 使用例
+例: AIに依頼するとき、必要に応じて以下を一緒に渡します。
+
+```text
+@.cursor/context.md @.cursor/patterns.md @.cursor/knowledge.md
+「ユーザー認証機能を実装してください。既存パターンと過去の判断を踏まえて提案して。」
 ```

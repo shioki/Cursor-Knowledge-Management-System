@@ -198,7 +198,7 @@ interface ApiResponse<T> {
 ### 初日
 - [ ] システム概要の説明（30分）
 - [ ] 基本ファイルの構造理解
-- [ ] テンプレート使用ガイドの確認（`docs/template-usage-guide.md`）
+- [ ] テンプレート使用ガイドの確認（`docs/templates/overview.md`）
 
 ### 1週間以内
 - [ ] チーム固有のパターンを理解
