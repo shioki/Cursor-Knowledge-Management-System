@@ -192,6 +192,14 @@ npm run docs:check
 - **コマンド構造検証**: `npm run commands:check` - コマンドファイルの存在・内容を検証
 - **リンクチェック**: `npm run links:check` - Markdown 内リンクの死活チェック
 
+### リリース（GitHub Release）
+
+`gh` の認証が必要です。未設定の場合は [GitHub リリース手順](docs/reference/github-release.md) を参照してください。
+
+```bash
+npm run release -- v3.0.0
+```
+
 ## ライセンス
 
 MIT License - 詳細は [LICENSE](LICENSE) ファイルを参照
