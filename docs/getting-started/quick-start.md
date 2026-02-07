@@ -1,183 +1,133 @@
 # クイックスタートガイド
 
-## 🚀 5分で始める導入手順
+## 5 分で始める導入手順
 
 ### 1. リポジトリのクローン
 ```bash
 git clone https://github.com/shioki/Cursor-Knowledge-Management-System.git
-cd cursor-knowledge-management-system
+cd Cursor-Knowledge-Management-System
 ```
 
 ### 2. テンプレートを実際のプロジェクトにコピー
 
-**Windows（PowerShell）:**
-```powershell
-# あなたの実際のプロジェクトディレクトリに移動
-cd C:\path\to\your-actual-project
-
-# テンプレートをコピー（プロジェクトルート直下に配置）
-Copy-Item -Path "C:\path\to\cursor-knowledge-management-system\templates\.cursor" -Destination ".cursor" -Recurse
-
-# .cursorignoreファイルもコピー（推奨）
-Copy-Item -Path "C:\path\to\cursor-knowledge-management-system\templates\.cursorignore" -Destination ".cursorignore"
-```
-
-**Mac/Linux（bash）:**
+**Mac/Linux (bash):**
 ```bash
 # あなたの実際のプロジェクトディレクトリに移動
 cd /path/to/your-actual-project
 
-# テンプレートをコピー（プロジェクトルート直下に配置）
-cp -r /path/to/cursor-knowledge-management-system/templates/.cursor .cursor
+# スキルをコピー
+cp -r /path/to/Cursor-Knowledge-Management-System/templates/.cursor/skills .cursor/skills
 
-# .cursorignoreファイルもコピー（推奨）
-cp /path/to/cursor-knowledge-management-system/templates/.cursorignore .cursorignore
+# コマンドをコピー
+cp -r /path/to/Cursor-Knowledge-Management-System/templates/.cursor/commands .cursor/commands
+
+# .cursorignore をコピー（推奨）
+cp /path/to/Cursor-Knowledge-Management-System/templates/.cursorignore .cursorignore
+
+# スクリプトに実行権限を付与
+find .cursor/skills -name "*.sh" -exec chmod +x {} \;
 ```
 
-### 3. **⚠️ 重要: 必須更新ファイル**
+**Windows (PowerShell):**
+```powershell
+# あなたの実際のプロジェクトディレクトリに移動
+cd C:\path\to\your-actual-project
 
-**コピー後、以下のファイルは必ず実際のプロジェクト情報で更新が必要です：**
+# スキルをコピー
+Copy-Item -Path "C:\path\to\Cursor-Knowledge-Management-System\templates\.cursor\skills" -Destination ".cursor\skills" -Recurse
 
-#### 🔥 **知識管理ファイル（最重要）**
-- [ ] `.cursor/knowledge.md` - 実際の技術判断を記録
-- [ ] `.cursor/patterns.md` - プロジェクト固有のパターンを記録
-- [ ] `.cursor/context.md` - プロジェクト背景・制約を記録
+# コマンドをコピー
+Copy-Item -Path "C:\path\to\Cursor-Knowledge-Management-System\templates\.cursor\commands" -Destination ".cursor\commands" -Recurse
 
-**⚠️ テンプレートのままでは自動参照の効果が得られません**
-
-### 4. **📝 テンプレートファイルの使用方法**
-
-各テンプレートファイルは構造のみを提供し、詳細な記載例は別ドキュメントで提供しています。
-
-#### ✅ 新しいテンプレート構造の利点
-- **安全性**: HTMLコメント問題を完全回避
-- **明確性**: テンプレート構造が一目瞭然
-- **使いやすさ**: 詳細な使用方法を別ドキュメントで提供
-- **保守性**: テンプレートファイルの簡潔性
-
-#### 📖 詳細な使用方法
-**完全な記載例とベストプラクティス**: `docs/templates/overview.md` を参照してください。
-
-このガイドには以下が含まれています：
-- 各テンプレートファイルの詳細な記載例
-- 具体的なコード例
-- 段階的な記入方法
-- ベストプラクティス
-- 継続的活用の方法
-
-#### 🎯 推奨する使用手順
-
-**Step 1: テンプレート構造の理解**
-```markdown
-# 各テンプレートファイルの基本構造を確認
-## セクション1
-## セクション2
-## セクション3
+# .cursorignore をコピー（推奨）
+Copy-Item -Path "C:\path\to\Cursor-Knowledge-Management-System\templates\.cursorignore" -Destination ".cursorignore"
 ```
 
-**Step 2: ガイドを参照しながら記入**
+**セットアップスクリプトを使う場合（Mac/Linux）:**
 ```bash
-# ガイドを開きながら作業
-code docs/templates/overview.md
-code .cursor/knowledge.md
+bash /path/to/Cursor-Knowledge-Management-System/templates/.cursor/skills/project-setup/scripts/init.sh /path/to/your-project
 ```
 
-**Step 3: プロジェクト固有情報の記入**
-```markdown
-# 実際のプロジェクト情報に置き換え
-## 設計判断の記録
-### 2024-01-15 - フレームワーク選択
-#### 判断内容
-React vs Vue.js の選択
-...
+### 3. 動作確認
+
+#### スキルの確認
+1. Cursor Settings を開く（Mac: Cmd+Shift+J / Windows: Ctrl+Shift+J）
+2. Rules に移動
+3. Agent Decides セクションにスキルが表示されることを確認
+
+#### コマンドの確認
+1. Cursor のチャットを開く
+2. `/` を入力
+3. `record-decision`, `add-pattern` 等のコマンドが表示されることを確認
+
+### 4. 初期カスタマイズ
+
+#### 最小限の更新（10 分）
+1. チャットで `/update-context` と入力し、プロジェクトの基本情報を記入
+2. チャットで `/record-decision` と入力し、最初の技術判断を記録
+
+#### 推奨更新（20 分）
+上記に加えて:
+3. チャットで `/add-pattern` と入力し、初期パターンを登録
+4. `.cursor/skills/team-standards/SKILL.md` をプロジェクトの規約に更新
+
+#### フル活用（30 分）
+上記すべてに加えて:
+5. デバッグテンプレートの確認
+6. 改善目標の設定
+
+### 5. 構造の検証（任意）
+
+セットアップが正しいことを確認:
+```bash
+bash .cursor/skills/project-setup/scripts/validate.sh
 ```
 
-#### 💡 効率的な記入方法
-
-**最小限の更新（10分）**
-1. `.cursor/knowledge.md` の基本情報を更新
-2. `.cursor/context.md` のプロジェクト概要を記入
-
-**推奨更新（20分）**  
-上記に加えて：
-
-3. `.cursor/patterns.md` の初期パターンを記録
-4. プロジェクト固有の制約を追加
-
-**フル活用（30分）**  
-上記すべてに加えて：
-
-5. `.cursor/debug-log.md` の初期設定
-6. `.cursor/improvements.md` の目標設定
-
-## 🔧 使用開始の確認
-
-### 1. 基本的な知識記録
-詳細な記載例は `docs/templates/overview.md` を参照してください。
-
-**簡単な例**:
-```markdown
-# .cursor/knowledge.md に記録
-## 設計判断の記録
-
-### 2024-01-15 - API設計方針
-#### 判断内容
-REST vs GraphQL の選択
-
-#### 決定内容と理由
-**決定**: REST API を採用
-**理由**: 
-- チームの習熟度が高い
-- プロジェクトの複雑さに適している
-- 開発期間の制約を考慮
-```
-
-### 2. 自動参照の確認
-AIとの対話で以下のように参照されることを確認：
-```
-@.cursor/knowledge.md @.cursor/patterns.md
-「ユーザー認証機能を実装してください」
-```
-
-### 3. .cursor/rules連携の動作確認
-関連ファイル編集時に、適切な知見が自動参照されることを確認
-
-## 📊 導入完了チェックリスト
+## 導入完了チェックリスト
 
 ### 初期設定
-- [ ] テンプレートファイルのコピー完了
-- [ ] 基本ファイルの更新完了
-- [ ] 最初の技術判断を記録
+- [ ] skills/ ディレクトリのコピー完了
+- [ ] commands/ ディレクトリのコピー完了
+- [ ] .cursorignore のコピー完了
+- [ ] スクリプトの実行権限付与完了（Mac/Linux）
 
 ### 動作確認
-- [ ] AIとの対話で自動参照が動作
-- [ ] MDCルールが適切に適用
-- [ ] ファイル構造が正しく配置
+- [ ] Cursor Settings でスキルが検出される
+- [ ] チャットで `/` コマンドが表示される
+- [ ] エージェントとの対話でスキルが自動適用される
 
-### 継続運用準備
-- [ ] 定期的な更新スケジュール設定
-- [ ] チームメンバーへの共有（チーム導入の場合）
-- [ ] 効果測定方法の決定
+### 初期カスタマイズ
+- [ ] `/update-context` でプロジェクト情報を記入
+- [ ] `/record-decision` で最初の技術判断を記録
+- [ ] team-standards のカスタマイズ
 
-## 🆘 トラブルシューティング
+## トラブルシューティング
 
-### よくある問題
-**Q: ルールが適用されない**
-A: `.cursor/rules/`ディレクトリの場所とファイル拡張子（`.mdc`）を確認
+**Q: スキルが Cursor Settings に表示されない**
+A: `.cursor/skills/` ディレクトリがプロジェクトルート直下に配置されているか確認してください。各スキルフォルダに `SKILL.md` が存在することを確認してください。
 
-**Q: 自動参照が働かない**
-A: ファイルが実際のプロジェクト情報で更新されているか確認
+**Q: コマンドが `/` 入力で表示されない**
+A: `.cursor/commands/` ディレクトリがプロジェクトルート直下に配置されているか確認してください。Cursor 2.4 以上が必要です。
+
+**Q: スクリプトが実行できない**
+A: `chmod +x` で実行権限を付与してください。Windows の場合は Git Bash を使用してください。
 
 **Q: コピーコマンドが失敗する**
-A: パスが正しいか、権限があるかを確認
+A: パスが正しいか、書き込み権限があるかを確認してください。
 
-## 📚 次のステップ
+## v2.x からの移行
 
-- [テンプレート使用ガイド](../templates/overview.md) - 詳細な記載例とベストプラクティス
+v2.x（`.cursor/rules` 形式）を使用していた場合は、[v2.x からの移行ガイド](migration-from-rules.md) を参照してください。自動スクリプト、対話型コマンド、手動手順の 3 つの移行方法を提供しています。
+
+## 次のステップ
+
+- [スキルとコマンドの概要](skills-and-commands.md) - 基本概念を理解
+- [v2.x からの移行ガイド](migration-from-rules.md) - .cursor/rules からの移行
+- [スキルガイド](../templates/skills-guide.md) - 各スキルの詳細な使い方
+- [コマンドガイド](../templates/commands-guide.md) - 各コマンドの詳細な使い方
 - [完全ガイド](../cursor-knowledge-management-system.md) - システムの詳細理解
 - [チーム導入ガイド](../advanced/team-implementation.md) - チーム全体での活用
-- [開発ログ](../reference/development-log.md) - システム開発の背景
 
 ---
 
-**🎯 重要**: 導入後は継続的な更新が成功の鍵です。日々の技術判断を記録し続けることで、真の効果を実感できます。 
+**重要**: 導入後は継続的な更新が成功の鍵です。日々の技術判断を `/record-decision` で記録し続けることで、真の効果を実感できます。

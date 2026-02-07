@@ -1,190 +1,207 @@
 # Cursor Knowledge Management System
 
-Cursor AIの`.cursor/rules`形式に対応した知識管理システムです。AI支援開発における一貫性、品質向上、そして効率的な知識蓄積を実現します。
+Cursor AI のエージェントスキル（Agent Skills）とカスタムコマンド（Commands）を活用した知識管理システムです。AI 支援開発における一貫性、品質向上、そして効率的な知識蓄積を実現します。
 
-## ✨ 主な特徴
+<p align="center">
+  <img src="assets/overview-infographic.png" alt="Cursor Knowledge Management System v3.0 概要" width="800">
+</p>
 
-- **🎯 .cursor/rules対応**: Cursor AI公式の`.cursor/rules`形式を採用
-- **🔄 自動適用**: 手動設定不要の自動化されたルール適用
-- **📚 体系的管理**: プロジェクト知識の構造化された管理
-- **🚀 セットアップ**: 導入後の活用開始
-- **👥 チーム対応**: 個人からチーム開発まで対応
+## なぜ Skills + Commands なのか
 
-## 🚀 クイックスタート
+従来の `.cursor/rules` では `alwaysApply: true` のルールが毎回すべてのリクエストに含まれ、globs マッチしたルールも関連性に関わらず読み込まれていました。知識ファイルも一括で渡されるため、**実際には不要なトークンが大量に消費**されていました。
+
+Agent Skills では、エージェントが会話の文脈から必要なスキルだけを自動選択し、詳細情報は **references/ からオンデマンドで段階的に読み込み**ます。SKILL.md 本体は軽量に保たれるため、**トークン消費とコストを大幅に削減**できます。さらに scripts/ によるタスク自動化、`/` コマンドによるワークフロー即時起動により、知識を蓄積する習慣のハードルも下がります。
+
+### トークン消費の目安
+
+| 項目 | 旧（rules） | 新（skills） |
+|------|-------------|-------------|
+| **リクエストごとのベースライン** | ~2,000-4,000 tokens | ~300-800 tokens |
+| 内訳: 常時読み込み | alwaysApply ルール全文（毎回） | スキルの description 一覧のみ |
+| 内訳: 条件読み込み | globs マッチしたルール全文 | 文脈に合うスキルだけ選択的に |
+| 内訳: 知識データ | @参照で対象ファイル全文 | references/ を必要時にオンデマンド |
+| **削減率の目安** | - | **約 60-80% 削減** |
+
+> **注**: 実際の削減率はプロジェクトの知識量、ルールの数、利用頻度により異なります。
+> 知識ファイルが大きいプロジェクトほど削減効果が高くなります。
+
+詳しい背景は [v2.x からの移行ガイド](docs/getting-started/migration-from-rules.md) を参照してください。
+
+## 主な特徴
+
+- **エージェントスキル対応**: Cursor AI 公式の Agent Skills 標準仕様を採用
+- **カスタムコマンド搭載**: `/` コマンドで即座に知識管理ワークフローを起動
+- **自動化スクリプト**: シェルスクリプトによる記録作成・検索の自動化
+- **段階的読み込み**: references/ による効率的なコンテキスト管理
+- **チーム対応**: 個人からチーム開発まで対応
+
+## クイックスタート
 
 ### 1. リポジトリのクローン
 ```bash
 git clone https://github.com/shioki/Cursor-Knowledge-Management-System.git
-cd cursor-knowledge-management-system
+cd Cursor-Knowledge-Management-System
 ```
 
 ### 2. テンプレートをプロジェクトにコピー
 ```bash
-# Windows (PowerShell)
-Copy-Item -Path "templates\.cursor" -Destination ".cursor" -Recurse
-Copy-Item -Path "templates\.cursorignore" -Destination ".cursorignore"
-
 # Mac/Linux
-cp -r templates/.cursor .cursor
-cp templates/.cursorignore .cursorignore
+cp -r templates/.cursor/skills /path/to/your-project/.cursor/skills
+cp -r templates/.cursor/commands /path/to/your-project/.cursor/commands
+cp templates/.cursorignore /path/to/your-project/.cursorignore
+
+# スクリプトに実行権限を付与
+find /path/to/your-project/.cursor/skills -name "*.sh" -exec chmod +x {} \;
 ```
 
-### 3. 必須ファイルの更新
-**⚠️ 重要**: 以下のファイルを実際のプロジェクト情報で更新してください：
-- `.cursor/knowledge.md` - 技術判断の記録
-- `.cursor/patterns.md` - プロジェクト固有のパターン
-- `.cursor/context.md` - プロジェクト背景・制約
+```powershell
+# Windows (PowerShell)
+Copy-Item -Path "templates\.cursor\skills" -Destination "/path/to/your-project\.cursor\skills" -Recurse
+Copy-Item -Path "templates\.cursor\commands" -Destination "/path/to/your-project\.cursor\commands" -Recurse
+Copy-Item -Path "templates\.cursorignore" -Destination "/path/to/your-project\.cursorignore"
+```
 
-## 📚 ドキュメント
+### 3. 初期カスタマイズ
 
-### 🚀 Getting Started
-- **[クイックスタート](docs/getting-started/quick-start.md)** - 5分で始める導入手順
+コピー後、以下のコマンドでプロジェクト情報を設定してください:
 
-### 📋 Templates
-- **[テンプレート概要](docs/templates/overview.md)** - テンプレートの概要とナビゲーション
-- **[Context ガイド](docs/templates/context-guide.md)** - プロジェクト情報の記載方法
-- **[Patterns ガイド](docs/templates/patterns-guide.md)** - 共通パターンの記録方法
-- **[Knowledge ガイド](docs/templates/knowledge-guide.md)** - 技術的知見の蓄積方法
-- **[Debug ガイド](docs/templates/debug-guide.md)** - 問題解決の記録方法
-- **[Improvements ガイド](docs/templates/improvements-guide.md)** - 改善活動の記録方法
+1. `/update-context` - プロジェクト基本情報を記入
+2. `/record-decision` - 最初の技術判断を記録
+3. team-standards スキルの `SKILL.md` をプロジェクトの規約に更新
 
-### 🏢 Advanced
-- **[チーム導入ガイド](docs/advanced/team-implementation.md)** - チーム全体での活用方法
-
-### 📖 Reference
-- **[完全ガイド](docs/cursor-knowledge-management-system.md)** - システムの詳細説明
-- **[開発ログ](docs/reference/development-log.md)** - システム開発の記録
-- **[MCP日時設定ガイド](docs/reference/mcp-datetime-setup.md)** - MCPサーバの設定方法
-
-## 🏗️ システム構成
+## システム構成
 
 ```mermaid
 graph TB
-    A[ユーザー] --> B[Cursor AI]
-    B --> C[.cursor/rules]
-    C --> D[knowledge.md]
-    C --> E[patterns.md]
-    C --> F[context.md]
-    C --> G[debug-log.md]
-    C --> H[improvements.md]
-    
-    D --> I[技術判断記録]
-    E --> J[実装パターン]
-    F --> K[プロジェクト背景]
-    G --> L[問題解決履歴]
-    H --> M[改善活動記録]
-    
-    I --> N[AI支援開発]
-    J --> N
-    K --> N
-    L --> N
-    M --> N
-    
-    N --> O[品質向上]
-    N --> P[効率化]
-    N --> Q[知識蓄積]
+    User[ユーザー] --> Agent[Cursor Agent]
+
+    Agent --> Skills[".cursor/skills/"]
+    User -->|"/ コマンド入力"| Commands[".cursor/commands/"]
+
+    subgraph skillsArea ["Skills = ドメイン知識 + 自動化"]
+        S1["エージェントが自動判断で適用"]
+        S2["scripts/ で処理を自動化"]
+        S3["references/ で段階的に知識読込"]
+    end
+
+    subgraph commandsArea ["Commands = ユーザー起点のアクション"]
+        C1["/record-decision で即座に実行"]
+        C2["定型ワークフローを標準化"]
+        C3["チーム全体で共有可能"]
+    end
+
+    Skills --> skillsArea
+    Commands --> commandsArea
 ```
 
-## 📁 プロジェクト構造
+### スキルとコマンドの役割分担
+
+| 観点 | Skills | Commands |
+|------|--------|----------|
+| **起動方法** | エージェントが自動判断 or `/skill-name` | ユーザーが `/command-name` で明示起動 |
+| **複雑さ** | 高（scripts, references） | 低（Markdown ファイル 1 つ） |
+| **用途** | ドメイン知識の提供、自動化処理 | 定型アクション、ワークフロー手順 |
+
+## プロジェクト構造
 
 ```
 cursor-knowledge-management-system/
-├── templates/.cursor/           # 🔥 テンプレートファイル（コピー用）
-│   ├── knowledge.md            # 技術判断記録テンプレート
-│   ├── patterns.md             # 設計パターンテンプレート
-│   ├── context.md              # プロジェクト背景テンプレート
-│   ├── debug-log.md            # デバッグログテンプレート
-│   ├── improvements.md         # 改善記録テンプレート
-│   └── rules/                  # .cursor/rulesテンプレート
-│       ├── knowledge-management.mdc
-│       ├── project-context.mdc
-│       ├── debug-workflow.mdc
-│       ├── debug-support.mdc
-│       ├── improvement-tracking.mdc
-│       ├── patterns-library.mdc
-│       └── team-standards.mdc
-├── templates/.cursorignore      # Cursor無視ファイル設定テンプレート
-├── docs/                       # ドキュメント
-│   ├── getting-started/        # 導入ガイド
-│   ├── templates/              # テンプレート使用ガイド
-│   ├── advanced/               # 高度な使用方法
-│   └── reference/              # 技術リファレンス
-└── README.md                   # プロジェクト説明
-
-# 導入後の実際のプロジェクト構造:
-your-project/
-├── .cursor/                    # ← templates/.cursor/ をここにコピー
-│   ├── knowledge.md           # 実際のプロジェクト情報で更新
-│   ├── patterns.md            # 実際のプロジェクト情報で更新
-│   ├── context.md             # 実際のプロジェクト情報で更新
-│   ├── debug-log.md           # 実際のプロジェクト情報で更新
-│   ├── improvements.md        # 実際のプロジェクト情報で更新
-│   └── rules/                 # .cursor/rules（Cursorが認識）
-├── .cursorignore              # ← templates/.cursorignore をここにコピー
-├── src/                       # あなたのプロジェクトファイル
-└── README.md                  # あなたのプロジェクト説明
+├── templates/.cursor/              # テンプレートファイル（コピー用）
+│   ├── skills/                     # エージェントスキル
+│   │   ├── project-context/        # プロジェクト背景・制約
+│   │   ├── team-standards/         # チーム開発標準
+│   │   ├── knowledge-management/   # 技術判断記録
+│   │   ├── pattern-library/        # 実装パターン管理
+│   │   ├── debug-workflow/         # デバッグワークフロー
+│   │   ├── improvement-tracking/   # 改善活動追跡
+│   │   └── project-setup/          # セットアップ支援
+│   └── commands/                   # カスタムコマンド
+│       ├── record-decision.md      # /record-decision
+│       ├── add-pattern.md          # /add-pattern
+│       ├── start-debug.md          # /start-debug
+│       ├── log-improvement.md      # /log-improvement
+│       ├── review-knowledge.md     # /review-knowledge
+│       ├── update-context.md       # /update-context
+│       └── migrate-from-rules.md   # /migrate-from-rules
+├── templates/.cursorignore         # Cursor 無視ファイル設定
+├── docs/                           # ドキュメント
+│   ├── getting-started/            # 導入ガイド
+│   ├── templates/                  # スキル・コマンド使用ガイド
+│   ├── advanced/                   # 高度な使用方法
+│   └── reference/                  # 技術リファレンス
+└── README.md
 ```
 
-## 🎯 使用例
+## 7 つのスキル
 
-### 基本的な知識記録
-```markdown
-# .cursor/knowledge.md に記録
-## 設計判断の記録
+| スキル | 概要 |
+|--------|------|
+| **project-context** | プロジェクトの背景・制約・技術スタックに基づいた提案 |
+| **team-standards** | コーディング規約、命名規則、開発フローの標準 |
+| **knowledge-management** | 技術判断の記録・参照・検索 |
+| **pattern-library** | 実装パターンの検索・適用・登録 |
+| **debug-workflow** | デバッグプロセスの支援と過去事例の検索 |
+| **improvement-tracking** | 改善提案の記録・効果測定・追跡 |
+| **project-setup** | 新規プロジェクトへの導入・構造検証 |
 
-### 2024-01-15 - API設計方針
-#### 判断内容
-REST vs GraphQL の選択
+## 6 つのコマンド
 
-#### 決定内容と理由
-**決定**: REST API を採用
-**理由**: 
-- チームの習熟度が高い
-- プロジェクトの複雑さに適している
-- 開発期間の制約を考慮
+| コマンド | 概要 |
+|----------|------|
+| `/record-decision` | 技術判断を即座に記録 |
+| `/add-pattern` | 実装パターンを登録 |
+| `/start-debug` | デバッグセッションを開始 |
+| `/log-improvement` | 改善内容を記録 |
+| `/review-knowledge` | 知識ベースを定期レビュー |
+| `/update-context` | プロジェクトコンテキストを更新 |
+| `/migrate-from-rules` | v2.x（.cursor/rules）からの対話型移行 |
+
+## ドキュメント
+
+### Getting Started
+- **[クイックスタート](docs/getting-started/quick-start.md)** - 5 分で始める導入手順
+- **[スキルとコマンドの概要](docs/getting-started/skills-and-commands.md)** - 基本概念と使い方
+- **[v2.x からの移行ガイド](docs/getting-started/migration-from-rules.md)** - .cursor/rules からの移行方法
+
+### ガイド
+- **[スキルガイド](docs/templates/skills-guide.md)** - 7 つのスキルの詳細な使い方
+- **[コマンドガイド](docs/templates/commands-guide.md)** - 6 つのコマンドの詳細な使い方
+
+### Advanced
+- **[チーム導入ガイド](docs/advanced/team-implementation.md)** - チーム全体での活用方法
+- **[カスタムスキル・コマンド作成](docs/advanced/custom-skills.md)** - 独自のスキルとコマンドの作り方
+
+### Reference
+- **[完全ガイド](docs/cursor-knowledge-management-system.md)** - システムの詳細説明
+- **[開発ログ](docs/reference/development-log.md)** - システム開発の記録
+
+## システム要件
+
+- **Cursor AI**: 2.4 以上（Agent Skills 対応）
+- **Git**: 2.0 以上
+- **Bash**: スクリプト実行用（Mac/Linux 標準、Windows は Git Bash 等）
+
+## 品質チェック
+
+```bash
+# ワンコマンドで全検証を実行
+npm run docs:check
 ```
 
-### 自動参照の確認
-AIとの対話で以下のように参照されることを確認：
-```
-@.cursor/knowledge.md @.cursor/patterns.md
-「ユーザー認証機能を実装してください」
-```
+- **スキル構造検証**: `npm run skills:check` - SKILL.md の存在・フロントマター・フォルダ名一致を検証
+- **コマンド構造検証**: `npm run commands:check` - コマンドファイルの存在・内容を検証
+- **リンクチェック**: `npm run links:check` - Markdown 内リンクの死活チェック
 
-## 🔧 システム要件
-
-- **Cursor AI**: 最新版推奨
-- **Node.js**: 18.x以上（MCPサーバ使用時）
-- **Git**: 2.0以上
-
-## ✅ 品質チェック（推奨）
-
-- **ワンコマンド（推奨）**: CIと同等の検証をまとめて実行
-  - `npm run docs:check`
-- **.mdc frontmatter検証**: `templates/.cursor/rules/*.mdc` の `description/globs/alwaysApply` を検証
-  - 実行: `node scripts/check-mdc-frontmatter.mjs`
-- **リンクチェック**: Markdown内リンクの死活チェック
-  - **macOS/Linux/Git Bash**: `npx -y markdown-link-check README.md CHANGELOG.md docs/**/*.md --quiet --config .mlc.config.json`
-  - **Windows（PowerShell）**:
-    - ルート: `npx -y markdown-link-check README.md CHANGELOG.md --quiet --config .mlc.config.json`
-    - docs配下: `Get-ChildItem -Path docs -Recurse -Filter *.md | ForEach-Object { npx -y markdown-link-check $_.FullName --quiet --config .mlc.config.json }`
-- **CI**: GitHub Actions の `Docs checks` が同等の検証を実行
-- **実行タイミング**: 週次ドキュメント更新時・リリース前・大きなリファクタ後に実施
-
-## 📄 ライセンス
+## ライセンス
 
 MIT License - 詳細は [LICENSE](LICENSE) ファイルを参照
 
-## 🤝 貢献
+## 貢献
 
 このプロジェクトへの貢献を歓迎します。詳細は [開発ログ](docs/reference/development-log.md) を参照してください。
 
 ---
 
-**⚠️ 重要**: このシステムを効果的に活用するには、`.cursor/`内のファイルを実際のプロジェクト情報で更新することが必須です。
-
----
-
-**📅 最終更新**: 2025-12-07  
-**📋 バージョン**: 2.0.1  
-**📝 変更履歴**: [CHANGELOG.md](CHANGELOG.md) を参照
+**最終更新**: 2026-02-07
+**バージョン**: 3.0.0
+**変更履歴**: [CHANGELOG.md](CHANGELOG.md) を参照

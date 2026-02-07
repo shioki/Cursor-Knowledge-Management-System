@@ -6,8 +6,9 @@
     "markdown-link-check": "^3.12.2"
   },
   "scripts": {
-    "mdc:check": "node scripts/check-mdc-frontmatter.mjs",
+    "skills:check": "node scripts/check-skill-structure.mjs",
+    "commands:check": "node scripts/check-command-structure.mjs",
     "links:check": "node scripts/check-links.mjs",
-    "docs:check": "npm run mdc:check && npm run links:check"
+    "docs:check": "npm run skills:check && npm run commands:check && npm run links:check"
   }
 }

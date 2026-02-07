@@ -1,21 +1,19 @@
 # Cursor AI 知識管理システム - 無視ファイル設定
-# 
-# 🔥 重要: これはテンプレートファイルです
-# 実際のプロジェクトでは、templates/.cursor/ を .cursor/ にコピーした後、
-# このファイルも .cursorignore として配置してください
+#
+# このファイルをプロジェクトルートの .cursorignore として配置してください
 #
 # 使用方法:
 # cp templates/.cursorignore .cursorignore
 
+# デバッグセッション（個人用）
+.cursor/debug-sessions/personal-*
+
+# 個人メモ
+.cursor/personal-notes.md
+
 # 一時ファイル・ログ
-.cursor/debug/temp-logs/*.log
-.cursor/debug/temp-logs/*.tmp
 *.temp
 *.tmp
-
-# 個人用ファイル（チーム共有しない）
-.cursor/debug/sessions/personal-*
-.cursor/personal-notes.md
 
 # システム生成ファイル
 .DS_Store
@@ -71,4 +69,4 @@ test-results/
 .cache/
 .parcel-cache/
 .next/cache/
-.nuxt/cache/ 
+.nuxt/cache/
