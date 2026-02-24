@@ -79,6 +79,8 @@ gh auth status
    ```
    未認証の場合は日本語でエラー案内を表示して終了します。
 
+   **Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、**Git Bash** または **WSL** で `npm run release -- v3.0.0` を実行してください。
+
    **オプション 2: gh を直接使う**
    ```bash
    gh release create v3.0.0 \

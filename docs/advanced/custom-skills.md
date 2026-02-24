@@ -175,6 +175,8 @@ disable-model-invocation: true
 bash .cursor/skills/project-setup/scripts/validate.sh
 ```
 
+作成したスキルは Cursor のスキルとしてそのまま利用できます。将来的に [Cursor Marketplace](https://cursor.com/ja/blog/marketplace) でプラグインとして共有する場合は、Skills に加えて MCP や Rules などをまとめたプラグインとして投稿する形が想定されています。詳細は [Cursor プラグイン・マーケットプレイス](../reference/cursor-plugins-and-marketplace.md) を参照してください。
+
 ## 参考リンク
 
 - [Agent Skills 標準仕様](https://agentskills.io)

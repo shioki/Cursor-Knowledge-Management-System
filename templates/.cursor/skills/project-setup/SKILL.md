@@ -17,7 +17,7 @@ description: 新しいプロジェクトにCursor Knowledge Management Systemを
 
 ### 1. 初期セットアップ
 
-以下のスクリプトでスキルとコマンドを一括コピーできます:
+以下のスクリプトでスキルとコマンドを一括コピーできます。**init.sh は Mac/Linux 用です。Windows では手動で Copy-Item を実行するか、Git Bash で init.sh を実行するか、init.ps1（同 scripts/ に用意されている場合）を使用してください。**
 
 ```bash
 bash path/to/cursor-knowledge-management-system/templates/.cursor/skills/project-setup/scripts/init.sh /path/to/target-project
@@ -41,7 +41,7 @@ Copy-Item -Path "templates\.cursorignore" -Destination ".cursorignore"
 
 ### 2. 構造の検証
 
-セットアップ後、以下のスクリプトで構造を検証できます:
+セットアップ後、以下のスクリプトで構造を検証できます。**Windows** の場合は **Git Bash** で `bash .cursor/skills/project-setup/scripts/validate.sh` を実行してください。
 
 ```bash
 bash .cursor/skills/project-setup/scripts/validate.sh
