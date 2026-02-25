@@ -3,7 +3,7 @@
 Cursor AI のエージェントスキル（Agent Skills）とカスタムコマンド（Commands）を活用した知識管理システムです。AI 支援開発における一貫性、品質向上、そして効率的な知識蓄積を実現します。
 
 <p align="center">
-  <img src="assets/overview-infographic.png" alt="Cursor Knowledge Management System v3.0 概要" width="800">
+  <img src="assets/overview-infographic.png" alt="Cursor Knowledge Management System v3.1 概要" width="800">
 </p>
 
 ## なぜ Skills + Commands なのか
@@ -205,10 +205,10 @@ npm run docs:check
 `gh` の認証が必要です。未設定の場合は [GitHub リリース手順](docs/reference/github-release.md) を参照してください。
 
 ```bash
-npm run release -- v3.0.0
+npm run release -- v3.1.0
 ```
 
-**Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、**Git Bash** または **WSL** で `npm run release -- v3.0.0` を実行してください。
+**Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、**Git Bash** または **WSL** で `npm run release -- v3.1.0` を実行してください。
 
 ## ライセンス
 
@@ -221,5 +221,5 @@ MIT License - 詳細は [LICENSE](LICENSE) ファイルを参照
 ---
 
 **最終更新**: 2026-02-25
-**バージョン**: 3.0.0
+**バージョン**: 3.1.0
 **変更履歴**: [CHANGELOG.md](CHANGELOG.md) を参照

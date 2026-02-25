@@ -62,7 +62,7 @@ gh auth status
    未ログインの場合は上記「抜本的解決策」の A または B を実施する。
 
 2. **リリースノートの準備**  
-   ルートに `RELEASE_NOTES_vX.Y.Z.md` を用意する（例: `RELEASE_NOTES_v3.0.0.md`）。  
+   ルートに `RELEASE_NOTES_vX.Y.Z.md` を用意する（例: `RELEASE_NOTES_v3.1.0.md`）。  
    既に同じ名前のファイルがある場合はそのまま利用してよい。
 
 3. **push（まだの場合）**
@@ -75,17 +75,17 @@ gh auth status
 
    **オプション 1: npm スクリプト（推奨）**
    ```bash
-   npm run release -- v3.0.0
+   npm run release -- v3.1.0
    ```
    未認証の場合は日本語でエラー案内を表示して終了します。
 
-   **Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、**Git Bash** または **WSL** で `npm run release -- v3.0.0` を実行してください。
+   **Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、**Git Bash** または **WSL** で `npm run release -- v3.1.0` を実行してください。
 
    **オプション 2: gh を直接使う**
    ```bash
-   gh release create v3.0.0 \
-     --title "v3.0.0 - タイトル" \
-     --notes-file RELEASE_NOTES_v3.0.0.md
+   gh release create v3.1.0 \
+     --title "v3.1.0 - タイトル" \
+     --notes-file RELEASE_NOTES_v3.1.0.md
    ```
 
 ## トラブルシューティング

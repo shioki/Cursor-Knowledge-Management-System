@@ -2,6 +2,21 @@
 
 このプロジェクトの重要な変更履歴を記録します。
 
+## [3.1.0] - 2026-02-25
+
+### ✨ Added
+- **Cursor Marketplace 対応**: プラグイン構成（Skills / Subagents / MCP / Hooks / Rules）と本システムの対応を解説する `docs/reference/cursor-plugins-and-marketplace.md` を新規追加
+- **Windows 用 init.ps1**: `templates/.cursor/skills/project-setup/scripts/init.ps1` を追加（PowerShell で skills / commands / .cursorignore を一括コピー）
+- README に Cursor プラグイン・マーケットプレイスへの言及を追加
+- custom-skills.md にマーケットプレイスでプラグインとして共有する場合の一文を追加
+
+### 🔄 Changed
+- **コマンド数表記の統一**: 「6 つのコマンド」を「7 つのコマンド」に統一（`/migrate-from-rules` を含む）
+- **Windows 対応の明文化**: システム要件・クイックスタート・品質チェック・リリース手順に Windows（PowerShell / Git Bash / WSL）の案内を追加
+- **quick-start.md**: セットアップを Mac/Linux と Windows で整理、チェックリスト・トラブルシューティングを更新、init.ps1 の使い方セクションを追加
+- **project-setup/SKILL.md**: init.sh / validate.sh の Windows での実行方法（Copy-Item、Git Bash、init.ps1）を追記
+- **github-release.md**: Windows でリリースする場合の Git Bash / WSL 案内を追加
+
 ## [3.0.0] - 2026-02-07
 
 ### 🎉 Major Release - Agent Skills + Commands への全面移行
