@@ -39,7 +39,7 @@
 4. 影響範囲
 
 ### 記録先
-`.cursor/skills/knowledge-management/references/KNOWLEDGE_TEMPLATE.md`
+`.claude/skills/knowledge-management/references/KNOWLEDGE_TEMPLATE.md`
 
 ### 使用例
 
@@ -78,7 +78,7 @@
 4. 使用上の注意点
 
 ### 記録先
-`.cursor/skills/pattern-library/references/PATTERNS_TEMPLATE.md`
+`.claude/skills/pattern-library/references/PATTERNS_TEMPLATE.md`
 
 ### 使用例
 
@@ -111,8 +111,8 @@
 4. 調査方針を提案
 
 ### 記録先
-- セッションファイル: `.cursor/debug-sessions/YYYY-MM-DD_問題名.md`
-- デバッグログ: `.cursor/skills/debug-workflow/references/DEBUG_TEMPLATE.md`
+- セッションファイル: `.claude/debug-sessions/YYYY-MM-DD_問題名.md`
+- デバッグログ: `.claude/skills/debug-workflow/references/DEBUG_TEMPLATE.md`
 
 ### 使用例
 
@@ -147,7 +147,7 @@
 5. ステータス
 
 ### 記録先
-`.cursor/skills/improvement-tracking/references/IMPROVEMENTS_TEMPLATE.md`
+`.claude/skills/improvement-tracking/references/IMPROVEMENTS_TEMPLATE.md`
 
 ### 使用例
 
@@ -216,7 +216,7 @@
 4. 確認後にファイルを更新
 
 ### 記録先
-`.cursor/skills/project-context/references/CONTEXT_TEMPLATE.md`
+`.claude/skills/project-context/references/CONTEXT_TEMPLATE.md`
 
 ### 使用例
 
@@ -229,7 +229,7 @@
 ## /migrate-from-rules
 
 ### 概要
-v2.x（`.cursor/rules` 形式）から v3.0.0（Agent Skills + Commands）への移行を対話形式で支援します。
+v2.x（`.cursor/rules` 形式）から v4.0.0（Agent Skills + Commands）への移行を対話形式で支援します。
 
 ### 使用場面
 - v2.x のルールとデータファイルを新しいスキル構造に移行したいとき

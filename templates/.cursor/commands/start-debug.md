@@ -12,11 +12,11 @@
    - **期待動作**: 本来どう動くべきか
    - **緊急度**: 高/中/低
 
-2. `.cursor/skills/debug-workflow/references/DEBUG_TEMPLATE.md` を読み込み、過去の類似問題を確認してください。
+2. `.claude/skills/debug-workflow/references/DEBUG_TEMPLATE.md`（または `.cursor/skills/...`）を読み込み、過去の類似問題を確認してください。
 
-3. `.cursor/debug-sessions/` ディレクトリがあれば、過去のセッションで類似問題がないか確認してください。
+3. `.claude/debug-sessions/`（または `.cursor/debug-sessions/`）ディレクトリがあれば、過去のセッションで類似問題がないか確認してください。
 
-4. デバッグセッションファイルを `.cursor/debug-sessions/YYYY-MM-DD_問題概要.md` として作成してください:
+4. デバッグセッションファイルを `.claude/debug-sessions/YYYY-MM-DD_問題概要.md`（または `.cursor/debug-sessions/...`）として作成してください:
 
 ```markdown
 # デバッグセッション: [問題の概要]

@@ -4,7 +4,7 @@
 
 ## 手順
 
-1. `.cursor/skills/project-context/references/CONTEXT_TEMPLATE.md` を読み込み、現在の記録内容を確認してください。
+1. `.claude/skills/project-context/references/CONTEXT_TEMPLATE.md`（または `.cursor/skills/...`）を読み込み、現在の記録内容を確認してください。
 
 2. ユーザーに変更点をヒアリングしてください:
    - **技術スタックの変更**: 新しいライブラリやフレームワークの採用、バージョンアップ

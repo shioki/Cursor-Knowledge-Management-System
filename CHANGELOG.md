@@ -2,6 +2,35 @@
 
 このプロジェクトの重要な変更履歴を記録します。
 
+## [4.0.0] - 2026-03-05
+
+### 🎉 Major Release - Cursor + Claude Code 共用化
+
+#### 💥 Breaking Changes
+- **テンプレート配置**: スキルのソースが `templates/.cursor/skills/` から `templates/.claude/skills/` に変更
+- **init デフォルト出力**: スキルのコピー先が `target/.cursor/skills` から `target/.claude/skills` に変更
+- **デバッグセッション**: 保存先が `.cursor/debug-sessions` から `.claude/debug-sessions` に変更（後方互換のためパス検出あり）
+
+#### ✨ Added
+- **Cursor + Claude Code 並行利用**: `.claude/skills` を共有配置とし、両ツールで同一スキルを参照可能
+- **`--cursor-only` オプション**: init 時に `.cursor/skills` に配置する Cursor 専用モード
+- **パス検出ロジック**: `_skill-base.sh` により `.claude/skills` と `.cursor/skills` を自動検出
+- **並行利用ガイド**: `docs/getting-started/parallel-use-cursor-claude.md` を新規追加
+- **v3→v4 移行ガイド**: `docs/getting-started/migration-from-v3.md` を新規追加
+- **compatibility フィールド**: 全 7 スキルに `compatibility: Cursor, Claude Code` を追加
+
+#### 🔄 Changed
+- **migrate-from-rules.sh**: 移行先を `.claude/skills` に変更、v4.0.0 対応
+- **validate.sh**: `.claude/skills` と `.cursor/skills` の両方を検証対象に
+- **scripts/check-skill-structure.mjs**: チェック対象を `templates/.claude/skills` に変更
+- **全スクリプト**: パス検出により `.claude` 優先、`.cursor` フォールバック
+- **.cursorignore**: `.claude/debug-sessions/personal-*` 等を追加
+- **ドキュメント**: README、quick-start、skills-guide、commands-guide 等を `.claude/` ベースに全面更新
+
+### 📋 v3.x からの移行
+- パス検出により `.cursor/skills` のままでも継続動作
+- `.claude/` への移行は任意。詳細は [migration-from-v3.md](docs/getting-started/migration-from-v3.md) を参照
+
 ## [3.1.0] - 2026-02-25
 
 ### ✨ Added

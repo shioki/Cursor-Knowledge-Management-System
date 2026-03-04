@@ -2,9 +2,9 @@
 
 Cursor AI のエージェントスキル（Agent Skills）とカスタムコマンド（Commands）を活用した知識管理システムです。AI 支援開発における一貫性、品質向上、そして効率的な知識蓄積を実現します。
 
-<p align="center">
-  <img src="assets/overview-infographic.png" alt="Cursor Knowledge Management System v3.1 概要" width="800">
-</p>
+> **v4.0.0**: **Cursor IDE と Claude Code（ターミナル CLI）の並行利用**に対応。同一プロジェクトで同じスキルを両ツールから利用できます。  
+> - 新規: [並行利用ガイド](docs/getting-started/parallel-use-cursor-claude.md)  
+> - v3.x 利用中: [v3→v4 移行ガイド](docs/getting-started/migration-from-v3.md)（移行は任意）
 
 ## なぜ Skills + Commands なのか
 
@@ -31,6 +31,7 @@ Cursor は [プラグイン](https://cursor.com/ja/blog/marketplace)（MCP・ス
 
 ## 主な特徴
 
+- **Cursor + Claude Code 共用**（v4.0.0）: `.claude/skills/` にスキルを置くだけで、Cursor IDE と Claude Code（CLI）の両方から同一の知識を利用可能。`--cursor-only` で従来どおり `.cursor/skills` にも配置可能
 - **エージェントスキル対応**: Cursor AI 公式の Agent Skills 標準仕様を採用
 - **カスタムコマンド搭載**: `/` コマンドで即座に知識管理ワークフローを起動
 - **自動化スクリプト**: シェルスクリプトによる記録作成・検索の自動化
@@ -46,24 +47,35 @@ cd Cursor-Knowledge-Management-System
 ```
 
 ### 2. テンプレートをプロジェクトにコピー
+
+**推奨: init スクリプトを使用**
+```bash
+# 共有モード（Cursor と Claude Code で利用）
+bash templates/.claude/skills/project-setup/scripts/init.sh /path/to/your-project
+
+# Cursor のみの場合は --cursor-only
+bash templates/.claude/skills/project-setup/scripts/init.sh /path/to/your-project --cursor-only
+```
+
+**手動コピー（共有モード）:**
 ```bash
 # Mac/Linux
-cp -r templates/.cursor/skills /path/to/your-project/.cursor/skills
+cp -r templates/.claude/skills /path/to/your-project/.claude/skills
 cp -r templates/.cursor/commands /path/to/your-project/.cursor/commands
 cp templates/.cursorignore /path/to/your-project/.cursorignore
-
-# スクリプトに実行権限を付与
-find /path/to/your-project/.cursor/skills -name "*.sh" -exec chmod +x {} \;
+mkdir -p /path/to/your-project/.claude/debug-sessions
+find /path/to/your-project/.claude/skills -name "*.sh" -exec chmod +x {} \;
 ```
 
 ```powershell
 # Windows (PowerShell)
-Copy-Item -Path "templates\.cursor\skills" -Destination "/path/to/your-project\.cursor\skills" -Recurse
+Copy-Item -Path "templates\.claude\skills" -Destination "/path/to/your-project\.claude\skills" -Recurse
 Copy-Item -Path "templates\.cursor\commands" -Destination "/path/to/your-project\.cursor\commands" -Recurse
 Copy-Item -Path "templates\.cursorignore" -Destination "/path/to/your-project\.cursorignore"
+New-Item -ItemType Directory -Path "/path/to/your-project\.claude\debug-sessions" -Force
 ```
 
-スクリプト（init.sh / validate.sh）を使う場合は、Windows では **Git Bash** で実行するか、上記の PowerShell 手動コピー＋動作確認で代替できます。Windows で一括コピーする場合は、**PowerShell** で `templates/.cursor/skills/project-setup/scripts/init.ps1` を実行することもできます（詳しくは [クイックスタート](docs/getting-started/quick-start.md) を参照）。
+詳しくは [クイックスタート](docs/getting-started/quick-start.md) を参照。
 
 ### 3. 初期カスタマイズ
 
@@ -75,11 +87,13 @@ Copy-Item -Path "templates\.cursorignore" -Destination "/path/to/your-project\.c
 
 ## システム構成
 
+v4.0.0 では `.claude/skills/` がデフォルトとなり、Cursor Agent と Claude Code の両方から参照されます。
+
 ```mermaid
 graph TB
-    User[ユーザー] --> Agent[Cursor Agent]
+    User[ユーザー] --> Agent[Cursor Agent / Claude Code]
 
-    Agent --> Skills[".cursor/skills/"]
+    Agent --> Skills[".claude/skills/"]
     User -->|"/ コマンド入力"| Commands[".cursor/commands/"]
 
     subgraph skillsArea ["Skills = ドメイン知識 + 自動化"]
@@ -110,8 +124,8 @@ graph TB
 
 ```
 cursor-knowledge-management-system/
-├── templates/.cursor/              # テンプレートファイル（コピー用）
-│   ├── skills/                     # エージェントスキル
+├── templates/.claude/              # スキルテンプレート（Cursor / Claude Code 共用）
+│   └── skills/                     # エージェントスキル
 │   │   ├── project-context/        # プロジェクト背景・制約
 │   │   ├── team-standards/         # チーム開発標準
 │   │   ├── knowledge-management/   # 技術判断記録
@@ -119,7 +133,8 @@ cursor-knowledge-management-system/
 │   │   ├── debug-workflow/         # デバッグワークフロー
 │   │   ├── improvement-tracking/   # 改善活動追跡
 │   │   └── project-setup/          # セットアップ支援
-│   └── commands/                   # カスタムコマンド
+├── templates/.cursor/              # Cursor 専用
+│   └── commands/                  # カスタムコマンド
 │       ├── record-decision.md      # /record-decision
 │       ├── add-pattern.md          # /add-pattern
 │       ├── start-debug.md          # /start-debug
@@ -164,6 +179,8 @@ cursor-knowledge-management-system/
 
 ### Getting Started
 - **[クイックスタート](docs/getting-started/quick-start.md)** - 5 分で始める導入手順
+- **[Cursor + Claude Code 並行利用ガイド](docs/getting-started/parallel-use-cursor-claude.md)**（v4） - 両ツールで同じスキルを使う方法
+- **[v3→v4 移行ガイド](docs/getting-started/migration-from-v3.md)** - .claude/skills への移行（任意）
 - **[スキルとコマンドの概要](docs/getting-started/skills-and-commands.md)** - 基本概念と使い方
 - **[v2.x からの移行ガイド](docs/getting-started/migration-from-rules.md)** - .cursor/rules からの移行方法
 
@@ -205,10 +222,10 @@ npm run docs:check
 `gh` の認証が必要です。未設定の場合は [GitHub リリース手順](docs/reference/github-release.md) を参照してください。
 
 ```bash
-npm run release -- v3.1.0
+npm run release -- v4.0.0
 ```
 
-**Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、**Git Bash** または **WSL** で `npm run release -- v3.1.0` を実行してください。
+**Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、**Git Bash** または **WSL** で `npm run release -- v4.0.0` を実行してください。
 
 ## ライセンス
 
@@ -220,6 +237,6 @@ MIT License - 詳細は [LICENSE](LICENSE) ファイルを参照
 
 ---
 
-**最終更新**: 2026-02-25
-**バージョン**: 3.1.0
+**最終更新**: 2026-03-05  
+**バージョン**: 4.0.0（[リリースノート](RELEASE_NOTES_v4.0.0.md)）  
 **変更履歴**: [CHANGELOG.md](CHANGELOG.md) を参照

@@ -4,12 +4,12 @@
 
 ## 手順
 
-1. 以下のファイルをすべて読み込んでください:
-   - `.cursor/skills/knowledge-management/references/KNOWLEDGE_TEMPLATE.md`
-   - `.cursor/skills/pattern-library/references/PATTERNS_TEMPLATE.md`
-   - `.cursor/skills/improvement-tracking/references/IMPROVEMENTS_TEMPLATE.md`
-   - `.cursor/skills/debug-workflow/references/DEBUG_TEMPLATE.md`
-   - `.cursor/skills/project-context/references/CONTEXT_TEMPLATE.md`
+1. 以下のファイルをすべて読み込んでください（`.claude/skills` または `.cursor/skills` のどちらか一方）:
+   - `.claude/skills/knowledge-management/references/KNOWLEDGE_TEMPLATE.md`
+   - `.claude/skills/pattern-library/references/PATTERNS_TEMPLATE.md`
+   - `.claude/skills/improvement-tracking/references/IMPROVEMENTS_TEMPLATE.md`
+   - `.claude/skills/debug-workflow/references/DEBUG_TEMPLATE.md`
+   - `.claude/skills/project-context/references/CONTEXT_TEMPLATE.md`
 
 2. 各ファイルについて以下の観点でレビューしてください:
    - **陳腐化**: 現在の技術スタックや方針と合わなくなった記録

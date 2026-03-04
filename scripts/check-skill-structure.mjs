@@ -3,7 +3,7 @@ import { readdir, readFile, access, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { constants } from 'node:fs';
 
-const SKILLS_DIR = path.join(process.cwd(), 'templates', '.cursor', 'skills');
+const SKILLS_DIR = path.join(process.cwd(), 'templates', '.claude', 'skills');
 
 function parseFrontmatter(text) {
   const lines = text.split(/\r?\n/);

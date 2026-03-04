@@ -10,7 +10,7 @@
    - **実装例**: 具体的なコード例
    - **注意事項**: 制約、パフォーマンス影響、メンテナンス性
 
-2. `.cursor/skills/pattern-library/references/PATTERNS_TEMPLATE.md` を読み込み、既存のパターンを確認してください。重複がないか確認します。
+2. `.claude/skills/pattern-library/references/PATTERNS_TEMPLATE.md`（または `.cursor/skills/...`）を読み込み、既存のパターンを確認してください。重複がないか確認します。
 
 3. 以下のテンプレートでエントリを作成し、適切なセクションに追記してください:
 

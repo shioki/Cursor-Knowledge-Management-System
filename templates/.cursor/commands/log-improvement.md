@@ -11,7 +11,7 @@
    - **効果**: Before/After の比較（可能であれば数値で）
    - **ステータス**: 提案/実装中/完了/保留
 
-2. `.cursor/skills/improvement-tracking/references/IMPROVEMENTS_TEMPLATE.md` を読み込み、既存の改善記録を確認してください。
+2. `.claude/skills/improvement-tracking/references/IMPROVEMENTS_TEMPLATE.md`（または `.cursor/skills/...`）を読み込み、既存の改善記録を確認してください。
 
 3. 以下のテンプレートでエントリを作成し、適切なセクションに追記してください:
 

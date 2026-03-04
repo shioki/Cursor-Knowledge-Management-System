@@ -10,7 +10,7 @@
    - **決定と理由**: 最終的な選択とその根拠
    - **影響範囲**: この決定が影響するコンポーネントや機能
 
-2. `.cursor/skills/knowledge-management/references/KNOWLEDGE_TEMPLATE.md` を読み込み、既存の記録を確認してください。
+2. `.claude/skills/knowledge-management/references/KNOWLEDGE_TEMPLATE.md`（または `.cursor/skills/...`）を読み込み、既存の記録を確認してください。
 
 3. 以下のテンプレートでエントリを作成し、「設計判断の記録」セクションに追記してください:
 

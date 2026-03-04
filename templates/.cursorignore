@@ -5,10 +5,14 @@
 # 使用方法:
 # cp templates/.cursorignore .cursorignore
 
-# デバッグセッション（個人用）
+# 共有データ（Cursor / Claude Code）
+.claude/debug-sessions/personal-*
+.claude/personal-notes.md
+
+# デバッグセッション（個人用・後方互換）
 .cursor/debug-sessions/personal-*
 
-# 個人メモ
+# 個人メモ（後方互換）
 .cursor/personal-notes.md
 
 # 一時ファイル・ログ

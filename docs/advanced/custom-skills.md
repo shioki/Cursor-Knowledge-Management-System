@@ -6,10 +6,10 @@
 
 ### 1. ディレクトリ作成
 
-`.cursor/skills/` 配下に新しいフォルダを作成します:
+`.claude/skills/`（または `.cursor/skills/`）配下に新しいフォルダを作成します:
 
 ```bash
-mkdir -p .cursor/skills/my-custom-skill/{scripts,references}
+mkdir -p .claude/skills/my-custom-skill/{scripts,references}
 ```
 
 ### 2. SKILL.md の作成
@@ -74,7 +74,7 @@ echo "スクリプト実行完了"
 `references/` ディレクトリに追加ドキュメントを配置します。エージェントは必要に応じてこれらを読み込みます。
 
 ```
-.cursor/skills/my-custom-skill/
+.claude/skills/my-custom-skill/
 ├── SKILL.md
 ├── scripts/
 │   └── process.sh
@@ -121,7 +121,7 @@ touch .cursor/commands/my-command.md
 ## 手順
 
 1. ユーザーに情報をヒアリング
-2. `.cursor/skills/knowledge-management/references/KNOWLEDGE_TEMPLATE.md` を読み込み
+2. `.claude/skills/knowledge-management/references/KNOWLEDGE_TEMPLATE.md` を読み込み
 3. `scripts/add-entry.sh` でエントリ作成
 4. 結果を提示
 ```
@@ -172,7 +172,7 @@ disable-model-invocation: true
 カスタムスキル・コマンドを追加した後は、以下で構造を検証できます:
 
 ```bash
-bash .cursor/skills/project-setup/scripts/validate.sh
+bash .claude/skills/project-setup/scripts/validate.sh
 ```
 
 作成したスキルは Cursor のスキルとしてそのまま利用できます。将来的に [Cursor Marketplace](https://cursor.com/ja/blog/marketplace) でプラグインとして共有する場合は、Skills に加えて MCP や Rules などをまとめたプラグインとして投稿する形が想定されています。詳細は [Cursor プラグイン・マーケットプレイス](../reference/cursor-plugins-and-marketplace.md) を参照してください。

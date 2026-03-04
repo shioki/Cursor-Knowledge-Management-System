@@ -2,14 +2,14 @@
 
 ## エージェントスキル（Agent Skills）とは
 
-エージェントスキルは、Cursor AI のエージェントにドメイン固有の能力を追加するための仕組みです。スキルは `.cursor/skills/` ディレクトリに配置し、エージェントが文脈に応じて自動的に適用します。
+エージェントスキルは、Cursor AI のエージェントにドメイン固有の能力を追加するための仕組みです。v4.0.0 では `.claude/skills/` に配置し（Cursor と Claude Code で共有）、エージェントが文脈に応じて自動的に適用します。`--cursor-only` の場合は `.cursor/skills/` に配置します。
 
 ### スキルの構造
 
 各スキルは `SKILL.md` ファイルを含むフォルダです:
 
 ```
-.cursor/skills/
+.claude/skills/  （または .cursor/skills/）
 └── skill-name/
     ├── SKILL.md          # スキル定義（必須）
     ├── scripts/          # 実行可能なスクリプト（任意）

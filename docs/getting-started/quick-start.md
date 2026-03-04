@@ -15,8 +15,8 @@ cd Cursor-Knowledge-Management-System
 # あなたの実際のプロジェクトディレクトリに移動
 cd /path/to/your-actual-project
 
-# スキルをコピー
-cp -r /path/to/Cursor-Knowledge-Management-System/templates/.cursor/skills .cursor/skills
+# スキルをコピー（v4: .claude/skills で Cursor と Claude Code で共有）
+cp -r /path/to/Cursor-Knowledge-Management-System/templates/.claude/skills .claude/skills
 
 # コマンドをコピー
 cp -r /path/to/Cursor-Knowledge-Management-System/templates/.cursor/commands .cursor/commands
@@ -24,8 +24,11 @@ cp -r /path/to/Cursor-Knowledge-Management-System/templates/.cursor/commands .cu
 # .cursorignore をコピー（推奨）
 cp /path/to/Cursor-Knowledge-Management-System/templates/.cursorignore .cursorignore
 
+# debug-sessions を作成
+mkdir -p .claude/debug-sessions
+
 # スクリプトに実行権限を付与
-find .cursor/skills -name "*.sh" -exec chmod +x {} \;
+find .claude/skills -name "*.sh" -exec chmod +x {} \;
 ```
 
 **Windows (PowerShell):**
@@ -34,10 +37,13 @@ find .cursor/skills -name "*.sh" -exec chmod +x {} \;
 cd C:\path\to\your-actual-project
 
 # スキルをコピー
-Copy-Item -Path "C:\path\to\Cursor-Knowledge-Management-System\templates\.cursor\skills" -Destination ".cursor\skills" -Recurse
+Copy-Item -Path "C:\path\to\Cursor-Knowledge-Management-System\templates\.claude\skills" -Destination ".claude\skills" -Recurse
 
 # コマンドをコピー
 Copy-Item -Path "C:\path\to\Cursor-Knowledge-Management-System\templates\.cursor\commands" -Destination ".cursor\commands" -Recurse
+
+# debug-sessions を作成
+New-Item -ItemType Directory -Path ".claude\debug-sessions" -Force
 
 # .cursorignore をコピー（推奨）
 Copy-Item -Path "C:\path\to\Cursor-Knowledge-Management-System\templates\.cursorignore" -Destination ".cursorignore"
@@ -45,12 +51,12 @@ Copy-Item -Path "C:\path\to\Cursor-Knowledge-Management-System\templates\.cursor
 
 **セットアップスクリプトを使う場合（Mac/Linux）:**
 ```bash
-bash /path/to/Cursor-Knowledge-Management-System/templates/.cursor/skills/project-setup/scripts/init.sh /path/to/your-project
+bash /path/to/Cursor-Knowledge-Management-System/templates/.claude/skills/project-setup/scripts/init.sh /path/to/your-project
 ```
 
 **Windows でセットアップする場合:**
 - **PowerShell のみ**でコピーする場合は、上記の Copy-Item を実行してください。
-- **validate.sh** で構造を検証する場合は、**Git Bash** で `bash .cursor/skills/project-setup/scripts/validate.sh` を実行してください。
+- **validate.sh** で構造を検証する場合は、**Git Bash** で `bash .claude/skills/project-setup/scripts/validate.sh` を実行してください。
 - Windows 用の一括コピースクリプト（init.ps1）を使う場合は、下記 [init.ps1 で一括コピーする場合（Windows）](#initps1-で一括コピーする場合windows) を参照してください。
 
 ### 3. 動作確認
@@ -74,7 +80,7 @@ bash /path/to/Cursor-Knowledge-Management-System/templates/.cursor/skills/projec
 #### 推奨更新（20 分）
 上記に加えて:
 3. チャットで `/add-pattern` と入力し、初期パターンを登録
-4. `.cursor/skills/team-standards/SKILL.md` をプロジェクトの規約に更新
+4. `.claude/skills/team-standards/SKILL.md` をプロジェクトの規約に更新
 
 #### フル活用（30 分）
 上記すべてに加えて:
@@ -86,7 +92,7 @@ bash /path/to/Cursor-Knowledge-Management-System/templates/.cursor/skills/projec
 セットアップが正しいことを確認:
 ```bash
 # Mac/Linux、または Windows の Git Bash
-bash .cursor/skills/project-setup/scripts/validate.sh
+bash .claude/skills/project-setup/scripts/validate.sh
 ```
 
 ## 導入完了チェックリスト
@@ -110,13 +116,13 @@ bash .cursor/skills/project-setup/scripts/validate.sh
 ## トラブルシューティング
 
 **Q: スキルが Cursor Settings に表示されない**
-A: `.cursor/skills/` ディレクトリがプロジェクトルート直下に配置されているか確認してください。各スキルフォルダに `SKILL.md` が存在することを確認してください。
+A: `.claude/skills/`（または `.cursor/skills/`）ディレクトリがプロジェクトルート直下に配置されているか確認してください。各スキルフォルダに `SKILL.md` が存在することを確認してください。
 
 **Q: コマンドが `/` 入力で表示されない**
 A: `.cursor/commands/` ディレクトリがプロジェクトルート直下に配置されているか確認してください。Cursor 2.4 以上が必要です。
 
 **Q: スクリプトが実行できない**
-A: Mac/Linux では `chmod +x` で実行権限を付与してください。**Windows** の場合は **Git Bash** または **WSL** で `bash` を指定して実行してください（例: `bash .cursor/skills/project-setup/scripts/validate.sh`）。
+A: Mac/Linux では `chmod +x` で実行権限を付与してください。**Windows** の場合は **Git Bash** または **WSL** で `bash` を指定して実行してください（例: `bash .claude/skills/project-setup/scripts/validate.sh`）。
 
 **Q: コピーコマンドが失敗する**
 A: パスが正しいか、書き込み権限があるかを確認してください。
