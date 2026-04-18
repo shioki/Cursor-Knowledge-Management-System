@@ -1,0 +1,32 @@
+{
+  "$schema": "https://cursor.com/schemas/plugin.json",
+  "name": "cursor-knowledge-management-system",
+  "description": "Cursor + Claude Code 共用のエージェントスキル 7 種とカスタムコマンド 7 種で、技術判断・パターン・デバッグセッション・改善活動を一貫して蓄積する知識管理プラグイン。",
+  "version": "5.0.0",
+  "author": {
+    "name": "shioki",
+    "url": "https://github.com/shioki/Cursor-Knowledge-Management-System"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/shioki/Cursor-Knowledge-Management-System",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shioki/Cursor-Knowledge-Management-System.git"
+  },
+  "keywords": [
+    "knowledge-management",
+    "skills",
+    "commands",
+    "adr",
+    "debug",
+    "patterns",
+    "team-standards"
+  ],
+  "paths": {
+    "skills": "templates/.agents/skills",
+    "commands": "templates/.cursor/commands"
+  },
+  "compatibility": {
+    "cursor": ">=3.0.0"
+  }
+}

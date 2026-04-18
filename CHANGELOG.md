@@ -2,6 +2,52 @@
 
 このプロジェクトの重要な変更履歴を記録します。
 
+## [5.0.0] - 2026-04-18
+
+### 🎉 Major Release - Cursor Plugin 化と配布経路の多様化
+
+#### 💥 Breaking Changes
+- **正規スキルディレクトリ変更**: `templates/.claude/skills/` → `templates/.agents/skills/` に移動（Cursor 3.x / Claude Code / Codex 公式互換の `.agents/skills/` 規約に準拠）
+- **init デフォルト出力**: スキルのコピー先が `target/.claude/skills` から `target/.agents/skills` に変更
+- **デバッグセッション既定パス**: `.claude/debug-sessions` → `.agents/debug-sessions` に変更（`.agents` > `.claude` > `.cursor` の順で自動検出）
+- **`templates/.cursor/skills/`**: 非推奨化し `DEPRECATED.md` を追加。`init.sh` の転送先は `.agents/skills/` に更新
+- **互換性**: `.claude/skills/` / `.cursor/skills/` は引き続きフォールバックとして動作。ただし新規プロジェクトでは `.agents/skills/` を推奨
+
+#### ✨ Added
+- **Cursor Plugin マニフェスト**: [.cursor-plugin/plugin.json](.cursor-plugin/plugin.json) を新規追加。Cursor Marketplace 配布に対応
+- **Microsoft APM 対応**: [apm.yml](apm.yml) を追加。`apm install shioki/Cursor-Knowledge-Management-System#v5.0.0` で取り込み可能
+- **gh skill 対応**: 全 SKILL.md に `license: MIT` と `metadata.tags` を追加し、`gh skill install` / `gh skill publish` に対応
+- **AGENTS.md テンプレート**: `templates/AGENTS.md.template`（ルート用）と `templates/AGENTS.md.nested-example.md`（サブディレクトリ用）を同梱
+- **init.sh `--legacy-claude` / `--with-agents-md`**: v4 互換配置と AGENTS.md 同梱オプションを新設
+- **自動移行提案**: init.sh デフォルト実行時、`.claude/skills` 検出で `.agents/skills` への移動を対話提案
+- **新規ドキュメント**:
+  - [docs/advanced/plugin-development.md](docs/advanced/plugin-development.md) - Cursor Plugin ローカルテスト手順
+  - [docs/reference/marketplace-submission.md](docs/reference/marketplace-submission.md) - Marketplace 提出手順
+  - [docs/reference/gh-skill-integration.md](docs/reference/gh-skill-integration.md) - gh skill 連携
+  - [docs/reference/apm-integration.md](docs/reference/apm-integration.md) - APM 連携
+  - [docs/getting-started/agents-md-guide.md](docs/getting-started/agents-md-guide.md) - AGENTS.md 運用ガイド
+- **プラグインマニフェスト検証**: `scripts/check-plugin-manifest.mjs` を新設。`.cursor-plugin/plugin.json` と `apm.yml` のスキーマを検証
+- **`npm run plugin:check`**: `docs:check` に組み込み
+- **`npm run skill:publish`**: `gh skill publish` を呼び出すラッパーを新設
+- **release.sh immutable release 対応**: バージョン整合性チェック、`gh skill publish` 連携、immutable release アナウンスを追加
+
+#### 🔄 Changed
+- **`_skill-base.sh`**: 検出順を `.agents` → `.claude` → `.cursor` に変更
+- **全 SKILL.md のパス表記**: `.claude/skills/...` → `.agents/skills/...` に更新（後方互換の注記付き）
+- **compatibility フィールド**: `Cursor, Claude Code` → `Cursor 3.x, Claude Code, Codex` に更新
+- **validate.sh**: `.agents/skills` を優先検出。`license` フィールドの存在を optional チェック
+- **migrate-from-rules.sh**: `--legacy-claude` / `--cursor-only` オプションを新設
+- **`/migrate-from-rules` コマンド**: Cursor 組み込み `/migrate-to-skills` との使い分けセクションを追記
+- **check-skill-structure.mjs**: 走査対象を `templates/.agents/skills/` に変更、`license` / `metadata` を optional warning でチェック
+- **README / CHANGELOG**: v5.0.0 の配布経路 4 種と新機能を反映
+
+### 📋 v4.x からの移行
+- **自動移行**: `init.sh /path/to/project` 実行時、`.claude/skills` 検出で `.agents/skills` への移動提案が表示されます
+- **手動移行**: `mv .claude/skills .agents/skills && [ -d .claude/debug-sessions ] && mv .claude/debug-sessions .agents/debug-sessions`
+- **v4 互換を維持したい場合**: `init.sh /path/to/project --legacy-claude` を使用
+
+詳細は [RELEASE_NOTES_v5.0.0.md](RELEASE_NOTES_v5.0.0.md) を参照してください。
+
 ## [4.0.0] - 2026-03-05
 
 ### 🎉 Major Release - Cursor + Claude Code 共用化

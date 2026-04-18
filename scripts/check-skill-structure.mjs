@@ -3,7 +3,7 @@ import { readdir, readFile, access, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { constants } from 'node:fs';
 
-const SKILLS_DIR = path.join(process.cwd(), 'templates', '.claude', 'skills');
+const SKILLS_DIR = path.join(process.cwd(), 'templates', '.agents', 'skills');
 
 function parseFrontmatter(text) {
   const lines = text.split(/\r?\n/);
@@ -104,6 +104,20 @@ async function main() {
           `${skillName}/SKILL.md: description is too short (should be at least 10 characters)`
         );
       }
+    }
+
+    // Optional but recommended fields for gh skill / Marketplace distribution
+    if (!fm.map.has('license')) {
+      console.warn(
+        `[skills-check] WARN: ${skillName}/SKILL.md: missing optional key "license" (recommended for gh skill publish)`
+      );
+    }
+
+    // metadata may be multi-line (parsed as empty value here). At minimum warn if missing entirely.
+    if (!fm.map.has('metadata')) {
+      console.warn(
+        `[skills-check] WARN: ${skillName}/SKILL.md: missing optional key "metadata" (metadata.tags recommended for discoverability)`
+      );
     }
 
     // Check scripts/ have execute permission (Unix only)

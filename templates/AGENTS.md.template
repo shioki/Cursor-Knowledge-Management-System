@@ -1,0 +1,68 @@
+# AGENTS.md
+
+> プロジェクトルート用テンプレート。Cursor 3.x / Claude Code / Codex など、AGENTS.md をサポートする全エージェントで共通して読み込まれます。
+> 本プロジェクトのスキル（`.agents/skills/`）とコマンド（`.cursor/commands/`）と併用してください。
+
+## プロジェクト概要
+
+<!-- プロジェクトの一文サマリ（50〜150 文字） -->
+
+- **プロジェクト名**:
+- **目的**:
+- **主要技術**:
+
+## エージェントへの基本指示
+
+### 回答スタイル
+
+- 出力は 日本語 で簡潔に記述する
+- コードスニペットには言語タグを付ける
+- 仕様が不確定な箇所は推測ではなく「不明」と明記する
+
+### コード品質
+
+- TypeScript / JavaScript: ESLint + Prettier 準拠
+- Python: ruff / black 準拠
+- テストがあるコンポーネントには回帰テストを必ず書く
+
+### ファイル操作ポリシー
+
+- `package.json`, `pyproject.toml` など設定ファイルは差分を最小限に
+- `.env`, `credentials*`, シークレット類は絶対に編集・コミットしない
+- 大量削除は理由を明示し、確認を求めてから実施する
+
+## 知識管理システムとの連携
+
+本プロジェクトは `.agents/skills/` 配下に以下のスキルを備えています:
+
+| スキル名 | 用途 |
+|---------|------|
+| `knowledge-management` | 技術判断の記録・参照 |
+| `pattern-library` | 実装パターンの検索・登録 |
+| `debug-workflow` | バグ調査・デバッグセッション |
+| `improvement-tracking` | 改善提案・効果測定 |
+| `project-context` | プロジェクト背景・制約 |
+| `team-standards` | チーム開発標準 |
+| `project-setup` | セットアップ支援 |
+
+エージェントはコンテキストに応じてこれらを自動選択します。ユーザー側から明示する場合は:
+
+- Cursor: チャットで `/skill-name` または `/record-decision` 等のコマンド
+- Claude Code: `/knowledge-management` など
+
+## ブランチ・コミット規約
+
+- ブランチ: `feature/*`, `fix/*`, `hotfix/*`
+- コミットメッセージ: Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`)
+- PR 作成時は関連 issue をリンク
+
+## セキュリティ
+
+- 秘匿情報はコミット禁止
+- 外部 API キーは環境変数または SecretManager 経由
+- 依存更新は SCA / SBOM で検証
+
+---
+
+> このファイルは `templates/AGENTS.md.template` を元にしています。
+> サブディレクトリ固有の指示は、該当ディレクトリに `AGENTS.md` を配置してネスト指定できます（[Cursor Rules ドキュメント](https://cursor.com/ja/docs/rules) を参照）。

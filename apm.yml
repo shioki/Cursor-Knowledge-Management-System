@@ -1,0 +1,43 @@
+# Microsoft APM (Agent Package Manager) manifest
+# https://github.com/microsoft/apm
+#
+# This repository itself is publishable as an APM package. Other projects can
+# install the entire skill + command set with:
+#
+#   apm install shioki/Cursor-Knowledge-Management-System#v5.0.0
+#
+# Or pick individual skills:
+#
+#   apm install shioki/Cursor-Knowledge-Management-System/templates/.agents/skills/knowledge-management
+#
+name: cursor-knowledge-management-system
+version: 5.0.0
+description: Cursor + Claude Code 共用の Skills + Commands で、技術判断・パターン・デバッグセッション・改善活動を蓄積する知識管理パッケージ
+author: shioki
+license: MIT
+homepage: https://github.com/shioki/Cursor-Knowledge-Management-System
+
+# このパッケージが提供するコンポーネントの配置
+# Cursor / Claude Code / Codex 公式ディレクトリ規約に準拠
+paths:
+  skills: templates/.agents/skills
+  commands: templates/.cursor/commands
+
+# このパッケージ自身は外部パッケージに依存しない（純粋なスキル/コマンド集）
+# 利用側は apm.yml から必要なスキルだけを個別に install することも可能
+dependencies:
+  apm: []
+
+# APM audit / security scan 向けメタデータ
+metadata:
+  tags:
+    - knowledge-management
+    - skills
+    - commands
+    - cursor
+    - claude-code
+    - codex
+  compatibility:
+    cursor: ">=3.0.0"
+    claude-code: ">=1.0.0"
+    codex: "*"
