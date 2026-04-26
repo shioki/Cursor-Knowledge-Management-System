@@ -9,7 +9,7 @@
 ```json
 {
   "name": "cursor-knowledge-management-system",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "paths": {
     "skills": "templates/.agents/skills",
     "commands": "templates/.cursor/commands"

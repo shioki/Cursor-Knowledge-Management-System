@@ -27,7 +27,7 @@ name: your-project
 version: 1.0.0
 dependencies:
   apm:
-    - shioki/Cursor-Knowledge-Management-System#v5.0.0
+    - shioki/Cursor-Knowledge-Management-System#v5.0.1
 ```
 
 ```bash
@@ -43,8 +43,8 @@ apm install
 ```yaml
 dependencies:
   apm:
-    - shioki/Cursor-Knowledge-Management-System/templates/.agents/skills/knowledge-management#v5.0.0
-    - shioki/Cursor-Knowledge-Management-System/templates/.agents/skills/debug-workflow#v5.0.0
+    - shioki/Cursor-Knowledge-Management-System/templates/.agents/skills/knowledge-management#v5.0.1
+    - shioki/Cursor-Knowledge-Management-System/templates/.agents/skills/debug-workflow#v5.0.1
 ```
 
 ### 3. タグ / コミット SHA での固定
@@ -55,7 +55,7 @@ dependencies:
 dependencies:
   apm:
     # タグ指定
-    - shioki/Cursor-Knowledge-Management-System#v5.0.0
+    - shioki/Cursor-Knowledge-Management-System#v5.0.1
     # SHA 指定（最も厳密）
     - shioki/Cursor-Knowledge-Management-System#abc123def
 ```
@@ -75,7 +75,7 @@ apm audit
 1. `apm.yml` の `version` を更新
 2. `[.cursor-plugin/plugin.json](../../.cursor-plugin/plugin.json)` の `version` を揃える
 3. `CHANGELOG.md` にエントリを追加
-4. `npm run release -- v5.0.0` でタグと GitHub Release を作成（immutable release 推奨）
+4. `npm run release -- v5.0.1` でタグと GitHub Release を作成（immutable release 推奨）
 
 ### immutable release の有効化
 
@@ -85,4 +85,4 @@ GitHub リポジトリの **Settings → Rules → Releases → Require immutabl
 
 - [APM – Agent Package Manager](https://github.com/microsoft/apm)
 - [APM Getting Started](https://microsoft.github.io/apm/)
-- [APM マニフェスト仕様](https://github.com/microsoft/apm/blob/main/docs/manifest.md)
+- [APM ドキュメント（Getting Started ・ apm.yml 例）](https://microsoft.github.io/apm/)

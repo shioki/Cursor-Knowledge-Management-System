@@ -1,6 +1,8 @@
 # Cursor Knowledge Management System
 
-Cursor AI のエージェントスキル（Agent Skills）とカスタムコマンド（Commands）を活用した知識管理システムです。AI 支援開発における一貫性、品質向上、そして効率的な知識蓄積を実現します。
+Cursor AI のエージェントスキル（Agent Skills）とカスタムコマンド（Commands）を活用した知識管理システムです。Cursor 3.x、Claude Code、Codex いずれでも `.agents/skills/` 上の同一スキルを共用できます。AI 支援開発における一貫性、品質向上、そして効率的な知識蓄積を実現します。
+
+英語の短い導入は [README.en.md](README.en.md) を参照してください。
 
 > **v5.0.0**: **Cursor Plugin として配布可能**な構成に刷新。`.agents/skills/` 正規ディレクトリへ移行し、**init / Cursor Marketplace / `gh skill` / Microsoft APM** の **4 つの配布経路**をサポートします。`AGENTS.md` テンプレートも同梱。
 > - 新規: [Cursor Plugin 開発ガイド](docs/advanced/plugin-development.md)
@@ -106,7 +108,7 @@ GitHub CLI でリポジトリ内の個別スキルを直接インストールで
 gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor
 
 # タグ固定版（サプライチェーン保全）
-gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v5.0.0
+gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v5.0.1
 ```
 
 詳細: [docs/reference/gh-skill-integration.md](docs/reference/gh-skill-integration.md)
@@ -118,7 +120,7 @@ gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management 
 ```yaml
 dependencies:
   apm:
-    - shioki/Cursor-Knowledge-Management-System#v5.0.0
+    - shioki/Cursor-Knowledge-Management-System#v5.0.1
 ```
 
 ```bash
@@ -317,10 +319,10 @@ npm run docs:check
 `gh` の認証が必要です。未設定の場合は [GitHub リリース手順](docs/reference/github-release.md) を参照してください。
 
 ```bash
-npm run release -- v5.0.0
+npm run release -- v5.0.1
 ```
 
-**Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、**Git Bash** または **WSL** で `npm run release -- v5.0.0` を実行してください。
+**Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、**Git Bash** または **WSL** で `npm run release -- v5.0.1` を実行してください。
 
 **immutable release の有効化（推奨）**: GitHub リポジトリの Settings → Rules → Releases → Require immutable を有効化してください。`gh skill install --pin` や `apm install <repo>#<tag>` の供給網保全に寄与します。詳しくは [Marketplace 提出手順](docs/reference/marketplace-submission.md) を参照。
 
@@ -330,10 +332,10 @@ MIT License - 詳細は [LICENSE](LICENSE) ファイルを参照
 
 ## 貢献
 
-このプロジェクトへの貢献を歓迎します。詳細は [開発ログ](docs/reference/development-log.md) を参照してください。
+このプロジェクトへの貢献を歓迎します。PR 前の検証手順と版数の揃え方は [CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。背景の年代別メモは [開発ログ](docs/reference/development-log.md) も併用できます。
 
 ---
 
-**最終更新**: 2026-04-18
-**バージョン**: 5.0.0（[リリースノート](RELEASE_NOTES_v5.0.0.md)）
+**最終更新**: 2026-04-26
+**バージョン**: 5.0.1（[リリースノート](RELEASE_NOTES_v5.0.0.md) — v5.0.0 機能、パッチは [CHANGELOG.md](CHANGELOG.md)）
 **変更履歴**: [CHANGELOG.md](CHANGELOG.md) を参照

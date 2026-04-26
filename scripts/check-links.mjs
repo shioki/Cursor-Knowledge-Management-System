@@ -42,7 +42,9 @@ async function main() {
 
   const targets = [
     path.join(process.cwd(), 'README.md'),
+    path.join(process.cwd(), 'README.en.md'),
     path.join(process.cwd(), 'CHANGELOG.md'),
+    path.join(process.cwd(), 'CONTRIBUTING.md'),
   ];
 
   // Collect docs/**/*.md without relying on shell globs.

@@ -1,8 +1,8 @@
 {
   "$schema": "https://cursor.com/schemas/plugin.json",
   "name": "cursor-knowledge-management-system",
-  "description": "Cursor + Claude Code 共用のエージェントスキル 7 種とカスタムコマンド 7 種で、技術判断・パターン・デバッグセッション・改善活動を一貫して蓄積する知識管理プラグイン。",
-  "version": "5.0.0",
+  "description": "Cursor 3.x / Claude Code / Codex で共用可能な `.agents/skills/` 準拠のエージェントスキル 7 種とカスタムコマンド 7 種。技術判断・パターン・デバッグ・改善活動を蓄積。init / Marketplace / gh skill / APM により配布可能。",
+  "version": "5.0.1",
   "author": {
     "name": "shioki",
     "url": "https://github.com/shioki/Cursor-Knowledge-Management-System"
@@ -20,7 +20,10 @@
     "adr",
     "debug",
     "patterns",
-    "team-standards"
+    "team-standards",
+    "codex",
+    "claude-code",
+    "agents-skills"
   ],
   "paths": {
     "skills": "templates/.agents/skills",

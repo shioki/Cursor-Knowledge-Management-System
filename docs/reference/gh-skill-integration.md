@@ -19,10 +19,10 @@ GitHub CLI に追加された [`gh skill`](https://github.blog/changelog/2026-04
 gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor
 
 # タグ指定
-gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management@v5.0.0 --agent cursor
+gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management@v5.0.1 --agent cursor
 
 # タグ固定（以降 gh skill update でも更新されない）
-gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v5.0.0
+gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v5.0.1
 ```
 
 インストール先は `--agent cursor` の場合、自動的に `.cursor/skills/` または `~/.cursor/skills/` になります。`--scope user` を付けるとユーザーグローバルにインストールされます。

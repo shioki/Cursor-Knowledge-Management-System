@@ -32,7 +32,7 @@ npm run docs:check
 ### 2. タグとリリースを作成
 
 ```bash
-npm run release -- v5.0.0
+npm run release -- v5.0.1
 ```
 
 ### 3. Marketplace へ提出

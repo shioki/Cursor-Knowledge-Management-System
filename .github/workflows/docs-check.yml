@@ -4,17 +4,24 @@ on:
   pull_request:
   push:
     branches: [main]
+  schedule:
+    # 月曜 06:00 UTC — 外部ドキュメント URL の変化を main の有無に依存せず検知
+    - cron: "0 6 * * 1"
 
 jobs:
   docs-check:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install deps
         run: npm ci

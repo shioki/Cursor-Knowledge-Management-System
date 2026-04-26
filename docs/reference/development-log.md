@@ -1,9 +1,20 @@
 # 📋 Cursor AI 知識管理システム 開発記録
 
 **作成日**: 2025年6月15日（初版） / 2026年2月7日（v3.0.0 全面改訂）  
-**最終更新**: 2026年2月7日（Agent Skills + Commands 移行完了 / v3.0.0）  
+**最終更新**: 2026-04-26（v4/v5 要約の追記・正典の明記）  
 **プロジェクト**: Cursor AI の Agent Skills と Custom Commands を活用した知識管理システム  
 **目的**: AI 支援開発における一貫性・品質向上・効率的な知識蓄積の実現
+
+**正典（バージョン履歴・破壊的変更）**: 以降の正式な改版履歴は [CHANGELOG.md](../../CHANGELOG.md) および [README.md](../../README.md)（冒頭のリリース注記）を参照してください。本書は当時点の背景・意思決定の記録を残すアーカイブです。
+
+---
+
+## v4.0.0 / v5.0.0 の要約（2026年）
+
+- **v4.0.0（2026-03）**: スキル配置を `templates/.claude/skills/` を中核にし、Cursor と Claude Code で同一スキルを共有可能化。`--cursor-only` やパス検出（`_skill-base.sh`）を整備。
+- **v5.0.0（2026-04）**: 正規パスを **`templates/.agents/skills/`**（Cursor 3.x / Claude Code / Codex 公式互換）に移行。Cursor Plugin（[`.cursor-plugin/plugin.json`](../../.cursor-plugin/plugin.json)）、Microsoft APM（[`apm.yml`](../../apm.yml)）、`gh skill`、AGENTS.md テンプレ、init の `--with-agents-md` / `--legacy-claude` 等を追加。配布は **init / Marketplace / gh skill / APM** の四経路。
+
+詳細は [CHANGELOG.md](../../CHANGELOG.md) と [RELEASE_NOTES_v5.0.0.md](../../RELEASE_NOTES_v5.0.0.md) を参照。
 
 ---
 
@@ -13,10 +24,11 @@
 - **参考記事**: [Claude Codeで効率的に開発するための知見管理（Zenn）](https://zenn.dev/driller/articles/2a23ef94f1d603)
 - **初期目的**: Claude Code向けの知識管理システムをCursor AI開発に適用
 - **v2.x**: Cursor AI公式の`.cursor/rules`形式（MDC）への移行
-- **v3.0.0**: Agent Skills + Custom Commands への全面移行（現行）
+- **v3.0.0**: Agent Skills + Custom Commands への全面移行
+- **v4.0.0 以降**: 上記「v4.0.0 / v5.0.0 の要約」を参照（現行のディレクトリと配布形態は v5 基準）
 - **スコープ**: 個人開発者からエンタープライズチームまで対応
 
-### 主な目標（v3.0.0 現行）
+### 主な目標（v3.0.0 時点の設計。現行の追加要件は CHANGELOG 参照）
 1. **Agent Skills 採用**: Cursor AI の SKILL.md + scripts/ + references/ 仕様を活用
 2. **Custom Commands 搭載**: `/` コマンドで即座にワークフローを起動
 3. **トークン最適化**: オンデマンド読込による 60-80% のトークン削減
@@ -78,7 +90,7 @@
 
 #### 実施内容
 1. **独立リポジトリ作成・GitHub公開**
-   - リポジトリURL: https://github.com/shioki/Cursor-Knowledge-Management-System
+   - リポジトリURL: https://github.com/shioki/Cursor-Knowledge-Management-System/
    - MIT License設定
    - 包括的なREADME作成
 
@@ -656,16 +668,17 @@ cursor-knowledge-management-system/
 │   └── release.sh                      # リリース作成
 └── templates/
     ├── .cursorignore                   # Cursor 無視ファイル設定
+    ├── .agents/
+    │   └── skills/                   # 7 つの Agent Skills（v5 正規。旧 .claude/.cursor 配置は互換用）
+    │       ├── project-context/
+    │       ├── team-standards/
+    │       ├── knowledge-management/
+    │       ├── pattern-library/
+    │       ├── debug-workflow/
+    │       ├── improvement-tracking/
+    │       └── project-setup/
     └── .cursor/
-        ├── skills/                     # 7 つの Agent Skills
-        │   ├── project-context/
-        │   ├── team-standards/
-        │   ├── knowledge-management/
-        │   ├── pattern-library/
-        │   ├── debug-workflow/
-        │   ├── improvement-tracking/
-        │   └── project-setup/
-        └── commands/                   # 7 つの Custom Commands
+        └── commands/                 # 7 つの Custom Commands
             ├── record-decision.md
             ├── add-pattern.md
             ├── start-debug.md

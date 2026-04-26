@@ -2,6 +2,17 @@
 
 このプロジェクトの重要な変更履歴を記録します。
 
+## [5.0.1] - 2026-04-26
+
+### Changed
+
+- **メタデータ**: [`.cursor-plugin/plugin.json`](.cursor-plugin/plugin.json) と [`apm.yml`](apm.yml) の説明文を、README 相当の内容（Cursor 3.x / Claude Code / Codex、`.agents/skills`、4 配布経路）に揃え、`plugin.json` の `keywords` を拡充
+- **README**: 冒頭に Codex 共用の一文と [README.en.md](README.en.md) への案内。貢献案内を [CONTRIBUTING.md](CONTRIBUTING.md) へ
+- **開発ログ**: [docs/reference/development-log.md](docs/reference/development-log.md) に v4/v5 要約、正典（CHANGELOG / README）の明記、ディレクトリ図を `.agents/skills` 基準に更新
+- **CI**: [`.github/dependabot.yml`](.github/dependabot.yml)（npm 週次）、[`.github/workflows/docs-check.yml`](.github/workflows/docs-check.yml) に `schedule`（週次）と `windows-latest` マトリクス
+- **リンク検証**: [scripts/check-links.mjs](scripts/check-links.mjs) の対象に `README.en.md` / `CONTRIBUTING.md` を追加
+- **ドキュメント**: [README.en.md](README.en.md)（英語クイックスタート）、[CONTRIBUTING.md](CONTRIBUTING.md)（PR 前 `docs:check` と版数同期手順）を新規追加
+
 ## [5.0.0] - 2026-04-18
 
 ### 🎉 Major Release - Cursor Plugin 化と配布経路の多様化
