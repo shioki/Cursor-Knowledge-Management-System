@@ -61,32 +61,58 @@ gh auth status
    ```
    未ログインの場合は上記「抜本的解決策」の A または B を実施する。
 
-2. **リリースノートの準備**  
-   ルートに `RELEASE_NOTES_vX.Y.Z.md` を用意する（例: `RELEASE_NOTES_v3.1.0.md`）。  
-   既に同じ名前のファイルがある場合はそのまま利用してよい。
+2. **バージョンを揃える**  
+   [`.cursor-plugin/plugin.json`](../../.cursor-plugin/plugin.json) と [`apm.yml`](../../apm.yml) の `version` を、これから付けるタグ（`v` を除いた値）に合わせる。  
+   揃っていない場合、`scripts/release.sh` は release を作成せずに終了します。README や `init.sh` などの表示文字列も併せて更新してください（一覧は [AGENTS.md](../../AGENTS.md) の「ドキュメントの版数」）。
 
-3. **push（まだの場合）**
+3. **リリースノートの準備**  
+   ルートに `RELEASE_NOTES_vX.Y.Z.md` を用意する（例: `RELEASE_NOTES_v6.0.0.md`）。  
+   既に同じ名前のファイルがある場合はそのまま利用してよい。ファイルが無い場合、スクリプトはその時点で停止します。
+
+4. **push（まだの場合）**
    ```bash
    git push origin main
    ```
 
-4. **リリース作成**  
+5. **リリース作成**  
    次のいずれかで実行する。
 
    **オプション 1: npm スクリプト（推奨）**
    ```bash
-   npm run release -- v3.1.0
+   npm run release -- v6.0.0
    ```
    未認証の場合は日本語でエラー案内を表示して終了します。
 
-   **Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、**Git Bash** または **WSL** で `npm run release -- v3.1.0` を実行してください。
+   本番実行前に、副作用なしで一連の検証だけを走らせることもできます。
+
+   ```bash
+   npm run release -- v6.0.0 --dry-run
+   ```
+
+   **Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、**Git Bash** または **WSL** で `npm run release -- v6.0.0` を実行してください。
 
    **オプション 2: gh を直接使う**
    ```bash
-   gh release create v3.1.0 \
-     --title "v3.1.0 - タイトル" \
-     --notes-file RELEASE_NOTES_v3.1.0.md
+   gh release create v6.0.0 \
+     --title "v6.0.0 - タイトル" \
+     --notes-file RELEASE_NOTES_v6.0.0.md
    ```
+
+   この場合は後述の事前検証が走りません。検証を省略したくない場合はオプション 1 を使ってください。
+
+## release.sh が行う事前検証
+
+`npm run release` は、タグを作る前に次の順で確認します。いずれかで問題が見つかると、release を作成せずに終了します。
+
+1. `gh` のインストールと認証
+2. `.cursor-plugin/plugin.json` / `apm.yml` の `version` がリリースタグと一致すること
+3. `npm run docs:check`（`skills:check` / `components:check` / `plugin:check` / `links:check`）
+4. `gh skill publish --dry-run`（`gh skill` が使える場合のみ）
+5. `RELEASE_NOTES_<タグ>.md` の存在
+
+3 について、v5 までは `npm` が見つからない環境では検証をスキップしてリリースを続行していました。検証を飛ばせてしまうと検証を組み込んだ意味がないため、v6 からは `npm` が無い場合にエラーで停止します。Node.js を用意してから再実行してください。
+
+release 作成後は、`--skip-skill-publish` を付けない限り `gh skill publish` も試行します。ここで失敗しても release 自体は成功しているため、警告を表示するだけで終了します。
 
 ## トラブルシューティング
 
@@ -95,8 +121,13 @@ gh auth status
 | `git push` で Username を聞かれる | Git の認証設定（SSH キーまたは credential helper）を確認する。[GitHub のドキュメント](https://docs.github.com/ja/authentication) を参照。 |
 | `gh auth status` で not logged in | 上記「方法 A」の `gh auth login` を実行する。 |
 | CI で `gh` が使えない | シークレットで `GH_TOKEN` を設定し、ジョブの `env` に渡しているか確認する。 |
+| `npm が見つかりません` で停止する | 事前検証に Node.js が必要です。インストールして再実行する。 |
+| `version ... が一致しません` で停止する | `plugin.json` と `apm.yml` の `version` をタグに合わせる。 |
+| `リリースノートが見つかりません` で停止する | ルートに `RELEASE_NOTES_<タグ>.md` を作成する。 |
 
 ## 関連リンク
 
+- [Marketplace 提出手順](marketplace-submission.md) - 提出前チェックリストと docs:check の内訳
+- [gh skill 連携](gh-skill-integration.md) - スキル公開と immutable release
 - [GitHub CLI のインストールと認証](https://docs.github.com/ja/get-started/using-github/github-cli)
 - [GitHub Release の作成](https://docs.github.com/ja/repositories/releasing-projects-on-github/managing-releases-in-a-repository)

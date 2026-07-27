@@ -28,3 +28,63 @@ jobs:
 
       - name: Docs check
         run: npm run docs:check
+
+  skill-publish-dry-run:
+    # gh skill が受理する形式かを配布前に確認する。gh は GitHub Actions ランナーに標準搭載。
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: gh skill publish --dry-run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh skill --version >/dev/null 2>&1; then
+            gh skill publish --dry-run
+          else
+            echo "::warning::gh skill サブコマンドが利用できないためスキップしました"
+          fi
+
+  setup-smoke-test:
+    # init.sh が実際に動き、validate.sh が通る構成を作れることを確認する。
+    # v5 では templates の複製が drift しても CI が気づかなかった。
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run init.sh into a fresh directory
+        run: |
+          mkdir -p /tmp/ckms-target
+          bash skills/project-setup/scripts/init.sh /tmp/ckms-target --yes
+
+      - name: Validate the generated structure
+        working-directory: /tmp/ckms-target
+        run: bash .agents/skills/project-setup/scripts/validate.sh
+
+      - name: Exercise the knowledge scripts
+        working-directory: /tmp/ckms-target
+        run: |
+          S=.agents/skills
+          bash $S/knowledge-management/scripts/add-entry.sh "Adopt PostgreSQL"
+          bash $S/knowledge-management/scripts/add-entry.sh "日本語のみのタイトル"
+          bash $S/pattern-library/scripts/add-pattern.sh "Retry with backoff"
+          bash $S/improvement-tracking/scripts/add-improvement.sh "Reduce bundle size"
+          bash $S/debug-workflow/scripts/create-session.sh "認証タイムアウト"
+
+      - name: Reject empty slugs
+        # 日本語のみのタイトルでスラッグが空になり、ファイル名が壊れる回帰を防ぐ
+        working-directory: /tmp/ckms-target
+        run: |
+          malformed=$(find .agents -name '*.md' \( -name '*-.md' -o -name '*_.md' \) -print)
+          if [ -n "$malformed" ]; then
+            echo "::error::empty slug produced malformed filenames: $malformed"
+            exit 1
+          fi
+
+      - name: Run hooks against the generated project
+        working-directory: /tmp/ckms-target
+        run: |
+          echo '{"session_id":"ci"}' | .cursor/hooks/inject-knowledge-index.sh | tee /tmp/hook-out.json
+          node -e "JSON.parse(require('fs').readFileSync('/tmp/hook-out.json','utf8'))"
+          echo "{\"file_path\":\"$PWD/src/app.ts\"}" | .cursor/hooks/log-activity.sh
+          echo '{"status":"completed","loop_count":0}' | .cursor/hooks/suggest-record.sh

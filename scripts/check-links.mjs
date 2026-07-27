@@ -50,7 +50,12 @@ async function main() {
   // Collect docs/**/*.md without relying on shell globs.
   const walk = async (dir) => {
     const { readdir } = await import('node:fs/promises');
-    const entries = await readdir(dir, { withFileTypes: true });
+    let entries;
+    try {
+      entries = await readdir(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
     for (const e of entries) {
       const full = path.join(dir, e.name);
       if (e.isDirectory()) {
@@ -61,7 +66,9 @@ async function main() {
     }
   };
 
-  await walk(path.join(process.cwd(), 'docs'));
+  for (const dir of ['docs', 'skills', 'agents', 'hooks', 'templates']) {
+    await walk(path.join(process.cwd(), dir));
+  }
 
   const uniq = Array.from(new Set(targets));
 

@@ -1,160 +1,180 @@
 # クイックスタートガイド
 
-## 5 分で始める導入手順
+## 導入方法を選ぶ
 
-### 1. リポジトリのクローン
+| 方法 | 向いているケース | 所要時間 |
+|------|-----------------|---------|
+| Cursor Marketplace | Cursor だけで使う。プロジェクトにファイルを置きたくない | 1 分 |
+| `init.sh` / `init.ps1` | プロジェクトに実体を置き、チームで Git 管理したい | 5 分 |
+| `gh skill install` | 特定のスキルだけ取り込みたい | 2 分 |
+| `apm install` | 他のエージェントパッケージとまとめて管理したい | 2 分 |
+
+このガイドは `init.sh` / `init.ps1` を使う手順を説明します。ほかの方法は [README](../../README.md) を参照してください。
+
+## 1. リポジトリのクローン
+
 ```bash
 git clone https://github.com/shioki/Cursor-Knowledge-Management-System.git
 cd Cursor-Knowledge-Management-System
 ```
 
-### 2. テンプレートを実際のプロジェクトにコピー
+## 2. セットアップスクリプトの実行
 
-**Mac/Linux (bash):**
+**Mac / Linux:**
+
 ```bash
-# あなたの実際のプロジェクトディレクトリに移動
-cd /path/to/your-actual-project
-
-# スキルをコピー（v4: .claude/skills で Cursor と Claude Code で共有）
-cp -r /path/to/Cursor-Knowledge-Management-System/templates/.claude/skills .claude/skills
-
-# コマンドをコピー
-cp -r /path/to/Cursor-Knowledge-Management-System/templates/.cursor/commands .cursor/commands
-
-# .cursorignore をコピー（推奨）
-cp /path/to/Cursor-Knowledge-Management-System/templates/.cursorignore .cursorignore
-
-# debug-sessions を作成
-mkdir -p .claude/debug-sessions
-
-# スクリプトに実行権限を付与
-find .claude/skills -name "*.sh" -exec chmod +x {} \;
+bash skills/project-setup/scripts/init.sh /path/to/your-project
 ```
 
 **Windows (PowerShell):**
+
 ```powershell
-# あなたの実際のプロジェクトディレクトリに移動
-cd C:\path\to\your-actual-project
-
-# スキルをコピー
-Copy-Item -Path "C:\path\to\Cursor-Knowledge-Management-System\templates\.claude\skills" -Destination ".claude\skills" -Recurse
-
-# コマンドをコピー
-Copy-Item -Path "C:\path\to\Cursor-Knowledge-Management-System\templates\.cursor\commands" -Destination ".cursor\commands" -Recurse
-
-# debug-sessions を作成
-New-Item -ItemType Directory -Path ".claude\debug-sessions" -Force
-
-# .cursorignore をコピー（推奨）
-Copy-Item -Path "C:\path\to\Cursor-Knowledge-Management-System\templates\.cursorignore" -Destination ".cursorignore"
+.\skills\project-setup\scripts\init.ps1 -TargetPath "C:\path\to\your-project"
 ```
 
-**セットアップスクリプトを使う場合（Mac/Linux）:**
+確認プロンプトを出さずに実行するには `--yes`（PowerShell では `-Yes`）を付けます。CI や自動化から呼ぶ場合はこちらを使ってください。
+
+### 配置されるもの
+
+```text
+your-project/
+├── .agents/
+│   ├── skills/              # スキル 13 種
+│   └── debug-sessions/      # デバッグセッションの保存先
+├── .cursor/
+│   ├── agents/
+│   │   └── knowledge-curator.md
+│   ├── hooks/               # 記録支援スクリプト
+│   └── hooks.json
+└── .cursorignore
+```
+
+`.agents/skills/` は Cursor・Claude Code・Codex が共通で読み込む公式ディレクトリです。1 か所に置けば 3 つのエージェントで共有できます。
+
+### 主なオプション
+
+| オプション | 効果 |
+|-----------|------|
+| `--yes` / `-Yes` | すべての確認に yes と答える |
+| `--legacy-claude` | `.claude/skills` に配置（v4.x 互換） |
+| `--cursor-only` | `.cursor/skills` に配置（Cursor のみ） |
+| `--with-agents-md` | `AGENTS.md` テンプレートも配置 |
+| `--no-hooks` | hooks を配置しない |
+| `--no-agents` | subagent を配置しない |
+
+### 手動でコピーする場合
+
 ```bash
-bash /path/to/Cursor-Knowledge-Management-System/templates/.claude/skills/project-setup/scripts/init.sh /path/to/your-project
+cd /path/to/your-project
+CKMS=/path/to/Cursor-Knowledge-Management-System
+
+cp -r "$CKMS/skills" .agents/skills
+cp -r "$CKMS/agents" .cursor/agents
+cp -r "$CKMS/hooks" .cursor/hooks
+cp "$CKMS/templates/.cursorignore" .cursorignore
+mkdir -p .agents/debug-sessions
+find .agents/skills -name "*.sh" -exec chmod +x {} \;
 ```
 
-**Windows でセットアップする場合:**
-- **PowerShell のみ**でコピーする場合は、上記の Copy-Item を実行してください。
-- **validate.sh** で構造を検証する場合は、**Git Bash** で `bash .claude/skills/project-setup/scripts/validate.sh` を実行してください。
-- Windows 用の一括コピースクリプト（init.ps1）を使う場合は、下記 [init.ps1 で一括コピーする場合（Windows）](#initps1-で一括コピーする場合windows) を参照してください。
+`.cursor/hooks.json` は [hooks/hooks.json](../../hooks/hooks.json) を参考に作成してください。スクリプトのパスを `.cursor/hooks/` 起点に書き換える必要があります。詳細は [hooks ガイド](../advanced/hooks-guide.md) にあります。
 
-### 3. 動作確認
+## 3. 動作確認
 
-#### スキルの確認
-1. Cursor Settings を開く（Mac: Cmd+Shift+J / Windows: Ctrl+Shift+J）
-2. Rules に移動
-3. Agent Decides セクションにスキルが表示されることを確認
+### スキル
 
-#### コマンドの確認
-1. Cursor のチャットを開く
-2. `/` を入力
-3. `record-decision`, `add-pattern` 等のコマンドが表示されることを確認
+1. Cursor Settings を開く（Mac: `Cmd+Shift+J` / Windows: `Ctrl+Shift+J`）
+2. Skills に移動
+3. ドメインスキル 7 種が表示されることを確認
 
-### 4. 初期カスタマイズ
+### アクションスキル
 
-#### 最小限の更新（10 分）
+1. チャットで `/` を入力
+2. `record-decision`、`add-pattern` などが候補に出ることを確認
+
+### 構造の検証
+
+```bash
+bash .agents/skills/project-setup/scripts/validate.sh
+```
+
+Windows では Git Bash で実行してください。エラー 0 件・警告 0 件になれば正常です。
+
+## 4. 初期カスタマイズ
+
+ここを飛ばすと、スキルは空のテンプレートを参照するだけになります。最低限の 2 つは必ず実施してください。
+
+### 最小限（10 分）
+
 1. チャットで `/update-context` と入力し、プロジェクトの基本情報を記入
 2. チャットで `/record-decision` と入力し、最初の技術判断を記録
 
-#### 推奨更新（20 分）
-上記に加えて:
-3. チャットで `/add-pattern` と入力し、初期パターンを登録
-4. `.claude/skills/team-standards/SKILL.md` をプロジェクトの規約に更新
+### 推奨（20 分）
 
-#### フル活用（30 分）
-上記すべてに加えて:
-5. デバッグテンプレートの確認
-6. 改善目標の設定
+3. `/add-pattern` で初期パターンを登録
+4. `.agents/skills/team-standards/SKILL.md` をプロジェクトの規約に更新
 
-### 5. 構造の検証（任意）
+`team-standards` の frontmatter にある `paths` は、このスキルをソースコード作業中だけ読み込ませるためのスコープ指定です。プロジェクトで使う言語に合わせて増減させてください。
 
-セットアップが正しいことを確認:
-```bash
-# Mac/Linux、または Windows の Git Bash
-bash .claude/skills/project-setup/scripts/validate.sh
-```
+### フル活用（30 分）
+
+5. `debug-workflow` のテンプレートを確認
+6. `improvement-tracking` の目標を設定
+7. `.agents/knowledge-hooks.conf` で hooks の挙動を調整（[hooks ガイド](../advanced/hooks-guide.md)）
 
 ## 導入完了チェックリスト
 
-### 初期設定
-- [ ] skills/ ディレクトリのコピー完了
-- [ ] commands/ ディレクトリのコピー完了
-- [ ] .cursorignore のコピー完了
-- [ ] スクリプトの実行権限付与完了（Mac/Linux）/ **Windows**: コピーは PowerShell で完了。検証は Git Bash で validate.sh を実行可能
-
-### 動作確認
+- [ ] `init.sh` / `init.ps1` の実行完了
+- [ ] `validate.sh` がエラー 0 件で通る
 - [ ] Cursor Settings でスキルが検出される
-- [ ] チャットで `/` コマンドが表示される
-- [ ] エージェントとの対話でスキルが自動適用される
-
-### 初期カスタマイズ
-- [ ] `/update-context` でプロジェクト情報を記入
-- [ ] `/record-decision` で最初の技術判断を記録
-- [ ] team-standards のカスタマイズ
+- [ ] チャットで `/record-decision` が候補に出る
+- [ ] `/update-context` でプロジェクト情報を記入した
+- [ ] `/record-decision` で最初の技術判断を記録した
+- [ ] `team-standards` をプロジェクトの規約に合わせた
 
 ## トラブルシューティング
 
-**Q: スキルが Cursor Settings に表示されない**
-A: `.claude/skills/`（または `.cursor/skills/`）ディレクトリがプロジェクトルート直下に配置されているか確認してください。各スキルフォルダに `SKILL.md` が存在することを確認してください。
+**スキルが Cursor Settings に表示されない**
 
-**Q: コマンドが `/` 入力で表示されない**
-A: `.cursor/commands/` ディレクトリがプロジェクトルート直下に配置されているか確認してください。Cursor 2.4 以上が必要です。
+`.agents/skills/` がプロジェクトルート直下にあり、各スキルフォルダに `SKILL.md` があることを確認してください。`validate.sh` が構造をチェックします。
 
-**Q: スクリプトが実行できない**
-A: Mac/Linux では `chmod +x` で実行権限を付与してください。**Windows** の場合は **Git Bash** または **WSL** で `bash` を指定して実行してください（例: `bash .claude/skills/project-setup/scripts/validate.sh`）。
+**`/` を入力してもアクションスキルが出ない**
 
-**Q: コピーコマンドが失敗する**
-A: パスが正しいか、書き込み権限があるかを確認してください。
+アクションスキルは `disable-model-invocation: true` を持つ通常のスキルです。スキルとして認識されていれば `/` の候補に出ます。スキル自体が検出されていない場合は上の項目を確認してください。
 
-### init.ps1 で一括コピーする場合（Windows）
+v5 以前から移行した場合、`.cursor/commands/` が残っていると候補が重複します。`validate.sh` が警告するので、確認のうえ削除してください。
 
-PowerShell で一括コピーするには、**Cursor-Knowledge-Management-System のリポジトリルートで**以下を実行します。ターゲットは実際のプロジェクトパスに置き換えてください。
+**スクリプトが実行できない**
 
-```powershell
-.\templates\.cursor\skills\project-setup\scripts\init.ps1 -TargetPath "C:\path\to\your-actual-project"
+Mac / Linux では `chmod +x` で実行権限を付与してください。Windows では Git Bash または WSL で `bash` を指定して実行します。
+
+**hooks が動かない**
+
+`.cursor/hooks/*.sh` に実行権限があるか確認してください。手元で直接実行して出力を確かめられます。
+
+```bash
+echo '{"session_id":"test"}' | .cursor/hooks/inject-knowledge-index.sh
 ```
 
-または、`init.ps1` があるディレクトリに移動してから:
+**セットアップが途中で止まる**
 
-```powershell
-cd path\to\Cursor-Knowledge-Management-System\templates\.cursor\skills\project-setup\scripts
-.\init.ps1 -TargetPath "C:\path\to\your-actual-project"
-```
+既存ファイルの上書き確認で入力待ちになっています。非対話環境では自動でスキップされますが、`--yes` を付ければ確認なしで進みます。
 
-## v2.x からの移行
+## 以前のバージョンからの移行
 
-v2.x（`.cursor/rules` 形式）を使用していた場合は、[v2.x からの移行ガイド](migration-from-rules.md) を参照してください。自動スクリプト、対話型コマンド、手動手順の 3 つの移行方法を提供しています。
+- v5.x から: [v5 からの移行ガイド](migration-from-v5.md)
+- v3.x から: [v3 からの移行ガイド](migration-from-v3.md)
+- v2.x（`.cursor/rules` 形式）から: [v2.x からの移行ガイド](migration-from-rules.md)
 
 ## 次のステップ
 
-- [スキルとコマンドの概要](skills-and-commands.md) - 基本概念を理解
-- [v2.x からの移行ガイド](migration-from-rules.md) - .cursor/rules からの移行
-- [スキルガイド](../templates/skills-guide.md) - 各スキルの詳細な使い方
-- [コマンドガイド](../templates/commands-guide.md) - 各コマンドの詳細な使い方
-- [完全ガイド](../cursor-knowledge-management-system.md) - システムの詳細理解
-- [チーム導入ガイド](../advanced/team-implementation.md) - チーム全体での活用
+- [スキルの全体像](skills-and-commands.md) — ドメインスキルとアクションスキルの違い
+- [スキルガイド](../templates/skills-guide.md) — ドメインスキル 7 種の詳細
+- [アクションスキルガイド](../templates/action-skills-guide.md) — アクションスキル 6 種の詳細
+- [hooks ガイド](../advanced/hooks-guide.md) — 記録を習慣にする仕組み
+- [subagents ガイド](../advanced/subagents-guide.md) — 知識ベースの棚卸し
+- [完全ガイド](../cursor-knowledge-management-system.md) — システム全体の設計
+- [チーム導入ガイド](../advanced/team-implementation.md) — チーム全体での活用
 
 ---
 
-**重要**: 導入後は継続的な更新が成功の鍵です。日々の技術判断を `/record-decision` で記録し続けることで、真の効果を実感できます。
+導入後は継続的な更新が成功の鍵です。日々の技術判断を `/record-decision` で記録し続けることで効果が出ます。記録が続かない場合は、[hooks](../advanced/hooks-guide.md) で仕組みとして補うことを検討してください。

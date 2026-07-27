@@ -1,0 +1,311 @@
+# OKF 調査と知識形式の改善方針
+
+本ドキュメントは、Google Cloud が提唱する **Open Knowledge Format（OKF）** の調査結果と、CKMS における今後の知識管理の方針を記録したものです。
+
+## 背景
+
+2026 年 6 月、Google Cloud は **Open Knowledge Format（OKF）v0.1** を公開しました。OKF は、AI エージェント向けのキュレーション済み知識を **Markdown + YAML frontmatter** のディレクトリバンドルとして表現する、ベンダーニュートラルなオープン仕様です。
+
+| 項目 | 内容 |
+|------|------|
+| 正式名称 | Open Knowledge Format（略称: OKF） |
+| 現行バージョン | v0.1（ドラフト） |
+| 必須フィールド | `type`（1 概念 = 1 ファイル） |
+| 推奨フィールド | `title`, `description`, `resource`, `tags`, `timestamp` |
+| 予約ファイル名 | `index.md`（目次）, `log.md`（変更履歴） |
+| 仕様 | [GoogleCloudPlatform/knowledge-catalog/okf/SPEC.md](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) |
+| 解説 | [Google Cloud ブログ（2026-06-12）](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing) |
+
+Google は OKF を **Obsidian、Karpathy の LLM Wiki、AGENTS.md / CLAUDE.md 系** と同系統の「LLM Wiki パターン」の標準化として位置づけています。CKMS も同じ思想（Markdown 知識ベース + エージェントによる段階的読込）を採用しているため、将来的な親和性は高いです。
+
+## CKMS との関係
+
+CKMS は **3 層構造** で動作します。OKF が対象とするのは主に **知識層（references/）** です。
+
+```mermaid
+graph TB
+    subgraph orchestration ["オーケストレーション層（CKMS 固有・維持）"]
+        Skills[".agents/skills/*/SKILL.md"]
+        Commands[".cursor/commands/*.md"]
+        AgentsMd["AGENTS.md"]
+    end
+
+    subgraph knowledge ["知識層（改善対象）"]
+        Legacy["現行: *_TEMPLATE.md に追記"]
+        Future["将来: 個別ファイル + リンク"]
+    end
+
+    Agent[Cursor / Claude Code / Codex] --> Skills
+    Agent --> Commands
+    Agent --> AgentsMd
+    Skills --> knowledge
+    Commands --> knowledge
+```
+
+| 層 | CKMS の役割 | OKF との関係 |
+|----|------------|-------------|
+| Skills / Commands | いつ・どう知識を使うか | 対象外（Cursor 等のエージェント仕様） |
+| AGENTS.md | 常時参照の基本方針 | 前身パターンとして Google が言及 |
+| references/ | 技術判断・パターン等の蓄積 | **OKF バンドル化の候補** |
+
+## 方針: OKF v1.0 まで様子見
+
+**現時点では OKF への正式対応は見送り、v1.0（メジャー）リリースとエコシステムの成熟を待つ** ことを CKMS の方針とします。
+
+### 様子見と判断する理由
+
+1. **v0.1 はドラフト** — 仕様・慣習がまだ固まりきっていない
+2. **CKMS は現行構成で実用可能** — Skills + Commands + モノリシック templates で運用実績がある
+3. **移行コストに対する即時リターンが限定的** — 外部 OKF Consumer（Google Knowledge Catalog 等）を使わない限り、恩恵は主に構造化・検索性の改善に留まる
+4. **後方互換の移行パスを確保できる** — 本ドキュメント後半の OKF 非依存改善を先に適用すれば、v1.0 時にスムーズに載せ替え可能
+
+### 再検討のトリガー
+
+次のいずれかが起きたら、OKF 正式対応を Issue / ロードマップで再評価してください。
+
+- OKF **v1.0** のリリース（破壊的変更方針の明文化）
+- Cursor / Claude Code 等が OKF を **ネイティブサポート**
+- チームで **Google Knowledge Catalog** 等の OKF Consumer を本番利用開始
+- 複数プロジェクト間で **知識バンドルの共有** が課題化
+
+---
+
+## OKF 非依存の軽量改善（今すぐ適用可能）
+
+OKF v1.0 を待つ間、**仕様に依存しない改善** を段階的に導入できます。いずれも CKMS 単体でメリットがあり、将来の OKF 移行コストも下げます。
+
+### 改善の 3 原則
+
+| 原則 | 内容 | OKF との対応 |
+|------|------|-------------|
+| **1 概念 1 ファイル** | 判断・パターン・デバッグ記録を個別 Markdown に分離 | OKF の基本単位と同一 |
+| **Markdown リンク** | 関連知識どうしを明示的に接続 | OKF のクロスリンク規約とほぼ同一 |
+| **目次による段階的開示** | カテゴリごとに `README.md` または `index.md` を置く | OKF の `index.md` に近い |
+
+### 推奨ディレクトリ構造
+
+既存の `references/` 配下に **サブディレクトリを追加** する形が移行しやすいです。デフォルトテンプレート（`*_TEMPLATE.md`）は当面残し、新規記録から個別ファイル方式へ移行します。
+
+```
+.agents/skills/
+├── knowledge-management/references/
+│   ├── KNOWLEDGE_TEMPLATE.md      # レガシー（既存エントリはここに残してよい）
+│   ├── README.md                  # 目次（新規）
+│   └── decisions/                 # 技術判断（新規）
+│       ├── README.md
+│       └── 2026-06-18-use-postgresql.md
+├── pattern-library/references/
+│   ├── PATTERNS_TEMPLATE.md
+│   ├── README.md
+│   └── patterns/
+│       └── api-error-handling.md
+├── debug-workflow/references/
+│   ├── DEBUG_TEMPLATE.md
+│   ├── README.md
+│   └── sessions/
+│       └── 2026-06-10-auth-timeout.md
+├── improvement-tracking/references/
+│   ├── IMPROVEMENTS_TEMPLATE.md
+│   ├── README.md
+│   └── improvements/
+│       └── refactor-auth-module.md
+└── project-context/references/
+    ├── CONTEXT_TEMPLATE.md
+    └── context/
+        └── project-overview.md
+```
+
+> **注**: `.claude/skills/` / `.cursor/skills/` を使うプロジェクトでも、同じ相対パス構造を適用してください。
+
+### ファイル命名規則
+
+| カテゴリ | ディレクトリ | 命名例 | 備考 |
+|---------|-------------|--------|------|
+| 技術判断（ADR） | `decisions/` | `YYYY-MM-DD-短いスラッグ.md` | 日付でソート可能 |
+| 実装パターン | `patterns/` | `機能-パターン名.md` | スラッグは kebab-case |
+| デバッグセッション | `sessions/` | `YYYY-MM-DD-問題の要約.md` | 調査開始日を先頭に |
+| 改善記録 | `improvements/` | `YYYY-MM-DD-改善タイトル.md` | 完了後もファイル名は変えない |
+| プロジェクト背景 | `context/` | `project-overview.md` 等 | 更新頻度が低いものは固定名 |
+
+スラッグは **英数字とハイフン** に統一し、スペースや日本語ファイル名は避けると Git・検索・将来の OKF 移行で扱いやすくなります。本文は日本語で記述して問題ありません。
+
+### 推奨 frontmatter（任意・OKF 準備用）
+
+OKF 準拠は **必須ではありません** が、将来の移行を意識した軽量 frontmatter を付けると、機械可読性と検索性が上がります。
+
+```markdown
+---
+title: PostgreSQL を採用した理由
+description: 本番 DB として PostgreSQL を選択した技術判断の記録
+tags: [database, adr]
+updated: 2026-06-18
+---
+
+# 判断内容
+...
+```
+
+| フィールド | 必須 | 説明 |
+|-----------|------|------|
+| `title` | 推奨 | 表示名（省略時はファイル名から推測） |
+| `description` | 推奨 | 1 行サマリ（目次・検索用） |
+| `tags` | 任意 | 横断カテゴリ |
+| `updated` | 任意 | 最終更新日（`YYYY-MM-DD`） |
+
+OKF v1.0 対応時は `updated` を `timestamp`（ISO 8601）に、`type` フィールドを追加する程度で移行できます。
+
+### クロスリンクの書き方
+
+関連する知識どうしは **Markdown リンク** で接続します。スキル間をまたぐ場合は、プロジェクトルートからの相対パスを使います。
+
+```markdown
+<!-- 同一スキル内 -->
+関連パターン: [API エラーハンドリング](../patterns/api-error-handling.md)
+
+<!-- 別スキルへ -->
+この判断の背景: [プロジェクト概要](../../project-context/references/context/project-overview.md)
+
+<!-- 関連する過去のデバッグ -->
+類似事象: [認証タイムアウト](../../debug-workflow/references/sessions/2026-06-10-auth-timeout.md)
+```
+
+リンクが切れていても運用は継続できます（未作成の知識へのプレースホルダとしても有効）。`/review-knowledge` 実行時にリンク切れを確認する運用が現実的です。
+
+### 目次ファイル（README.md）の例
+
+各カテゴリの `README.md` は、エージェントと人間の両方が **全体像を把握してから個別ファイルを開く** ための入口です。
+
+```markdown
+# 技術判断（Decisions）
+
+プロジェクトの設計判断・ADR を個別ファイルで管理します。
+
+## 一覧
+
+| 日付 | タイトル | 概要 |
+|------|---------|------|
+| 2026-06-18 | [PostgreSQL 採用](decisions/2026-06-18-use-postgresql.md) | 本番 DB として PostgreSQL を選択 |
+
+## レガシー
+
+2026-06-18 以前の記録は [KNOWLEDGE_TEMPLATE.md](KNOWLEDGE_TEMPLATE.md) を参照してください。
+```
+
+### カテゴリ別の記述例
+
+#### 技術判断（`decisions/`）
+
+```markdown
+---
+title: PostgreSQL を本番 DB として採用
+description: リレーショナル要件と運用実績を理由に PostgreSQL を選択
+tags: [database, adr]
+updated: 2026-06-18
+---
+
+# 判断内容
+
+本番環境のプライマリ DB として PostgreSQL 16 を採用する。
+
+# 検討した選択肢
+
+1. **PostgreSQL** — 運用実績が豊富、JSON 型も利用可能
+2. **MySQL** — チーム内の既存知見が少ない
+
+# 決定と理由
+
+**決定**: PostgreSQL 16
+
+**理由**: 既存の [API エラーハンドリングパターン](../patterns/api-error-handling.md) と整合する ORM サポートが充実しているため。
+
+# 影響範囲
+
+- `src/db/` モジュール
+- デプロイパイプラインのマイグレーション手順
+```
+
+#### 実装パターン（`patterns/`）
+
+```markdown
+---
+title: API エラーハンドリング
+description: REST API の標準エラーレスポンス形式
+tags: [api, pattern]
+updated: 2026-06-15
+---
+
+# 概要
+
+すべての API エンドポイントは統一されたエラー形式を返す。
+
+# 実装例
+
+（コードブロック）
+
+# 関連
+
+- [PostgreSQL 採用判断](../../knowledge-management/references/decisions/2026-06-18-use-postgresql.md)
+```
+
+---
+
+## 段階的な導入手順
+
+既存プロジェクトを壊さずに移行するための推奨フローです。
+
+```mermaid
+graph LR
+    S1["Step 1<br/>README.md 追加"]
+    S2["Step 2<br/>新規記録を個別ファイルへ"]
+    S3["Step 3<br/>リンクで関連付け"]
+    S4["Step 4<br/>棚卸し時にレガシー移行"]
+
+    S1 --> S2 --> S3 --> S4
+```
+
+| ステップ | 作業 | 既存への影響 |
+|---------|------|-------------|
+| 1 | 各 `references/` に `README.md` とサブディレクトリを作成 | なし |
+| 2 | `/record-decision` 等で **新規記録のみ** 個別ファイルに保存 | テンプレートはそのまま |
+| 3 | 新規ファイル間・レガシー記録へのリンクを追加 | なし |
+| 4 | `/review-knowledge` のタイミングで、価値の高いレガシーエントリを個別ファイルへ分割 | 任意・段階的 |
+
+**やらなくてよいこと（v1.0 まで）:**
+
+- デフォルトテンプレートや `add-entry.sh` の一括書き換え
+- OKF 必須の `type` フィールドの強制
+- `index.md` / `log.md` の予約ファイル名へのリネーム（`README.md` で十分）
+
+---
+
+## 将来の OKF 移行イメージ
+
+v1.0 リリース後に正式対応する場合のマッピング案です。現時点では **実装しない** 参考情報です。
+
+| CKMS（軽量改善後） | OKF v1.0 想定 |
+|-------------------|--------------|
+| `decisions/*.md` | `type: Decision Record` |
+| `patterns/*.md` | `type: Pattern` |
+| `sessions/*.md` | `type: Debug Session` |
+| `improvements/*.md` | `type: Improvement` |
+| `context/*.md` | `type: Project Context` |
+| `README.md`（目次） | `index.md` にリネーム可能 |
+| Git コミット履歴 | `log.md` の自動生成候補 |
+| `updated` | `timestamp`（ISO 8601） |
+
+Skills / Commands / AGENTS.md は引き続き CKMS のオーケストレーション層として維持し、知識の保存形式だけを OKF バンドルに寄せる **ハイブリッド構成** が想定されます。
+
+---
+
+## 関連ドキュメント
+
+- [スキルとコマンドの概要](../getting-started/skills-and-commands.md) — references/ の段階的読込の基本
+- [スキルガイド](../templates/skills-guide.md) — 各スキルの詳細
+- [コマンドガイド](../templates/commands-guide.md) — `/record-decision` 等の手順
+- [チーム導入ガイド](../advanced/team-implementation.md) — チームでの知識共有運用
+
+## 更新履歴
+
+| 日付 | 内容 |
+|------|------|
+| 2026-06-18 | 初版作成（OKF 調査結果、様子見方針、OKF 非依存の軽量改善ガイド） |

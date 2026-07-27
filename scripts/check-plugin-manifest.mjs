@@ -1,154 +1,140 @@
 #!/usr/bin/env node
-// .cursor-plugin/plugin.json と apm.yml のスキーマ検証
+// .cursor-plugin/plugin.json を公式スキーマで検証する。
+//
+// スキーマは schemas/cursor-plugin.schema.json にベンダリングしている
+// （https://github.com/cursor/plugins/blob/HEAD/schemas/plugin.schema.json）。
+// additionalProperties: false のため、仕様外のキーは Cursor 側で拒否される。
+// 自前の緩い検証ではそれを見逃すため、ajv で厳密に検証する。
 
-import { readFile, stat } from 'node:fs/promises';
+import { readFile, access, readdir } from 'node:fs/promises';
+import { constants } from 'node:fs';
 import path from 'node:path';
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
 
 const ROOT = process.cwd();
-const PLUGIN_MANIFEST = path.join(ROOT, '.cursor-plugin', 'plugin.json');
-const APM_MANIFEST = path.join(ROOT, 'apm.yml');
+const MANIFEST_PATH = path.join(ROOT, '.cursor-plugin', 'plugin.json');
+const SCHEMA_PATH = path.join(ROOT, 'schemas', 'cursor-plugin.schema.json');
 
-const problems = [];
-const warnings = [];
+// plugin.json でコンポーネントを明示しない場合、Cursor はプラグインルート直下の
+// これらのディレクトリ／ファイルを探索する。
+const DEFAULT_COMPONENT_PATHS = {
+  skills: 'skills',
+  agents: 'agents',
+  commands: 'commands',
+  rules: 'rules',
+  hooks: path.join('hooks', 'hooks.json'),
+};
 
-async function fileExists(p) {
+async function exists(target) {
   try {
-    await stat(p);
+    await access(target, constants.R_OK);
     return true;
   } catch {
     return false;
   }
 }
 
-async function checkPluginManifest() {
-  if (!(await fileExists(PLUGIN_MANIFEST))) {
-    problems.push('.cursor-plugin/plugin.json not found');
-    return;
-  }
-
-  let text;
-  try {
-    text = await readFile(PLUGIN_MANIFEST, 'utf8');
-  } catch (e) {
-    problems.push(`.cursor-plugin/plugin.json read error: ${e.message}`);
-    return;
-  }
-
-  let data;
-  try {
-    data = JSON.parse(text);
-  } catch (e) {
-    problems.push(`.cursor-plugin/plugin.json is not valid JSON: ${e.message}`);
-    return;
-  }
-
-  const requiredFields = ['name', 'version', 'description'];
-  for (const f of requiredFields) {
-    if (!data[f] || typeof data[f] !== 'string') {
-      problems.push(`.cursor-plugin/plugin.json: missing or invalid required field "${f}"`);
-    }
-  }
-
-  if (!data.author || typeof data.author !== 'object' || !data.author.name) {
-    warnings.push('.cursor-plugin/plugin.json: recommended field "author.name" missing');
-  }
-
-  if (!data.license) {
-    warnings.push('.cursor-plugin/plugin.json: recommended field "license" missing');
-  }
-
-  // Validate version format (semver-ish)
-  if (data.version && !/^\d+\.\d+\.\d+/.test(data.version)) {
-    problems.push(
-      `.cursor-plugin/plugin.json: version "${data.version}" is not in X.Y.Z format`
-    );
-  }
-
-  // Validate paths
-  if (!data.paths || typeof data.paths !== 'object') {
-    warnings.push(
-      '.cursor-plugin/plugin.json: "paths" object recommended (paths.skills / paths.commands)'
-    );
-  } else {
-    for (const key of ['skills', 'commands']) {
-      const rel = data.paths[key];
-      if (!rel) {
-        warnings.push(`.cursor-plugin/plugin.json: paths.${key} missing`);
-        continue;
-      }
-      const abs = path.join(ROOT, rel);
-      if (!(await fileExists(abs))) {
-        problems.push(
-          `.cursor-plugin/plugin.json: paths.${key} "${rel}" does not exist on disk`
-        );
-      }
-    }
-  }
-}
-
-async function checkApmManifest() {
-  if (!(await fileExists(APM_MANIFEST))) {
-    warnings.push('apm.yml not found (optional, required only if publishing via APM)');
-    return;
-  }
-
-  const text = await readFile(APM_MANIFEST, 'utf8');
-
-  const required = ['name', 'version', 'description'];
-  for (const key of required) {
-    const re = new RegExp(`^${key}\\s*:\\s*\\S`, 'm');
-    if (!re.test(text)) {
-      problems.push(`apm.yml: missing required top-level key "${key}"`);
-    }
-  }
-
-  const versionMatch = /^version\s*:\s*(\S+)/m.exec(text);
-  if (versionMatch && !/^\d+\.\d+\.\d+/.test(versionMatch[1])) {
-    problems.push(`apm.yml: version "${versionMatch[1]}" is not in X.Y.Z format`);
-  }
-
-  if (!/^license\s*:/m.test(text)) {
-    warnings.push('apm.yml: recommended field "license" missing');
-  }
-
-  if (!/^paths\s*:/m.test(text)) {
-    warnings.push('apm.yml: recommended "paths:" section missing');
-  }
-}
-
-async function checkVersionConsistency() {
-  let pluginVersion = null;
-  let apmVersion = null;
-
-  try {
-    const p = JSON.parse(await readFile(PLUGIN_MANIFEST, 'utf8'));
-    pluginVersion = p.version;
-  } catch {
-    /* handled above */
-  }
-
-  try {
-    const text = await readFile(APM_MANIFEST, 'utf8');
-    const m = /^version\s*:\s*(\S+)/m.exec(text);
-    if (m) apmVersion = m[1];
-  } catch {
-    /* optional */
-  }
-
-  if (pluginVersion && apmVersion && pluginVersion !== apmVersion) {
-    problems.push(
-      `version mismatch: .cursor-plugin/plugin.json=${pluginVersion} vs apm.yml=${apmVersion}`
-    );
-  }
-}
-
 async function main() {
-  await checkPluginManifest();
-  await checkApmManifest();
-  await checkVersionConsistency();
+  const problems = [];
+  const warnings = [];
 
-  for (const w of warnings) {
-    console.warn(`[plugin-check] WARN: ${w}`);
+  if (!(await exists(MANIFEST_PATH))) {
+    console.error(`[plugin-check] ERROR: manifest not found: ${MANIFEST_PATH}`);
+    process.exit(1);
+  }
+
+  if (!(await exists(SCHEMA_PATH))) {
+    console.error(`[plugin-check] ERROR: vendored schema not found: ${SCHEMA_PATH}`);
+    console.error('  Fetch it from https://github.com/cursor/plugins/blob/HEAD/schemas/plugin.schema.json');
+    process.exit(1);
+  }
+
+  let manifest;
+  const rawManifest = await readFile(MANIFEST_PATH, 'utf8');
+  try {
+    manifest = JSON.parse(rawManifest);
+  } catch (e) {
+    console.error(`[plugin-check] ERROR: invalid JSON in ${MANIFEST_PATH}`);
+    console.error(`  ${e.message}`);
+    process.exit(1);
+  }
+
+  const schema = JSON.parse(await readFile(SCHEMA_PATH, 'utf8'));
+
+  // $schema は manifest 側のメタキーであり、スキーマ本体には定義がない。
+  // additionalProperties: false に引っかかるため検証対象から外す。
+  const { $schema: declaredSchema, ...manifestForValidation } = manifest;
+
+  const ajv = new Ajv({ allErrors: true, strict: false });
+  addFormats(ajv);
+  const validate = ajv.compile(schema);
+
+  if (!validate(manifestForValidation)) {
+    for (const err of validate.errors ?? []) {
+      const where = err.instancePath || '(root)';
+      let detail = `${where} ${err.message}`;
+      if (err.keyword === 'additionalProperties') {
+        detail = `${where}: unknown property "${err.params.additionalProperty}" (schema sets additionalProperties: false — Cursor will reject it)`;
+      }
+      problems.push(detail);
+    }
+  }
+
+  if (declaredSchema && declaredSchema !== schema.$id) {
+    warnings.push(`$schema is "${declaredSchema}" but the official $id is "${schema.$id}"`);
+  }
+
+  // バージョン整合性: plugin.json と apm.yml
+  const apmPath = path.join(ROOT, 'apm.yml');
+  if (manifest.version && (await exists(apmPath))) {
+    const apmRaw = await readFile(apmPath, 'utf8');
+    const apmVersion = /^version:\s*(.+)$/m.exec(apmRaw)?.[1]?.trim();
+    if (apmVersion && apmVersion !== manifest.version) {
+      problems.push(
+        `version mismatch: plugin.json is "${manifest.version}" but apm.yml is "${apmVersion}"`
+      );
+    }
+  }
+
+  // コンポーネントが実際に見つかるかを確認する。
+  // 明示指定が無い場合はデフォルト探索先の存在を確かめる。スキーマは通るのに
+  // コンポーネント 0 件になる、という v5 で起きた事故を防ぐ。
+  let foundComponents = 0;
+  for (const [key, defaultPath] of Object.entries(DEFAULT_COMPONENT_PATHS)) {
+    if (manifest[key] !== undefined) {
+      // 明示指定された場合はグロブになりうるので存在確認までは行わない
+      foundComponents += 1;
+      continue;
+    }
+    if (await exists(path.join(ROOT, defaultPath))) {
+      foundComponents += 1;
+    }
+  }
+
+  if (foundComponents === 0) {
+    problems.push(
+      'no components found: the manifest declares none and no default directory ' +
+        `(${Object.values(DEFAULT_COMPONENT_PATHS).join(', ')}) exists at the plugin root`
+    );
+  }
+
+  // スキルはデフォルト探索されるため、隠しディレクトリに置くと見つからない
+  if (manifest.skills === undefined) {
+    const skillsRoot = path.join(ROOT, 'skills');
+    if (await exists(skillsRoot)) {
+      const entries = await readdir(skillsRoot, { withFileTypes: true });
+      const skillDirs = entries.filter((e) => e.isDirectory());
+      if (skillDirs.length === 0) {
+        problems.push('skills/ exists but contains no skill directories');
+      } else {
+        console.log(`[plugin-check] discovered ${skillDirs.length} skills via default lookup`);
+      }
+    }
+  }
+
+  if (warnings.length > 0) {
+    for (const w of warnings) console.warn(`[plugin-check] WARN: ${w}`);
   }
 
   if (problems.length > 0) {
@@ -157,9 +143,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(
-    `[plugin-check] OK (${warnings.length} warning${warnings.length === 1 ? '' : 's'})`
-  );
+  console.log(`[plugin-check] OK (${manifest.name} v${manifest.version ?? 'unversioned'})`);
 }
 
 main().catch((e) => {

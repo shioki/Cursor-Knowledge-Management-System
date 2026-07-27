@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# GitHub Release 作成スクリプト（v5.0.0 以降 immutable release 対応）
+# GitHub Release 作成スクリプト（immutable release 対応）
 #
-# 用法: ./scripts/release.sh v5.0.0 [--dry-run] [--skip-skill-publish]
+# 用法: ./scripts/release.sh v6.0.0 [--dry-run] [--skip-skill-publish]
 # 事前に gh auth login または GH_TOKEN の設定が必要です。
 #
 # 主な機能:
 #   1. .cursor-plugin/plugin.json / apm.yml のバージョン一致検証
-#   2. docs:check (skills/commands/plugin/links) の実行
+#   2. docs:check (skills/components/plugin/links) と gh skill publish --dry-run の実行
 #   3. immutable release の推奨アナウンス
 #   4. gh release create 実行
 #   5. 任意で `gh skill publish` 連携（--skip-skill-publish で無効化）
@@ -74,12 +74,21 @@ if [[ -f "$APM_MANIFEST" ]]; then
 fi
 
 # --- 事前検証 ---
+# 検証を飛ばしてリリースできてしまうと検証の意味がないため、npm が無い場合は失敗させる。
+if ! command -v npm &>/dev/null; then
+  echo "エラー: npm が見つかりません。リリース前検証 (docs:check) を実行できません。"
+  echo "  Node.js / npm をインストールしてから再実行してください。"
+  exit 1
+fi
+
 echo ""
-echo "==> docs:check を実行中 (skills / commands / plugin / links)..."
-if command -v npm &>/dev/null; then
-  npm run --silent docs:check
-else
-  echo "警告: npm が見つかりません。docs:check をスキップします。"
+echo "==> docs:check を実行中 (skills / components / plugin / links)..."
+npm run --silent docs:check
+
+if gh skill --version &>/dev/null; then
+  echo ""
+  echo "==> gh skill publish --dry-run を実行中..."
+  gh skill publish --dry-run
 fi
 
 # --- リリースノート ---

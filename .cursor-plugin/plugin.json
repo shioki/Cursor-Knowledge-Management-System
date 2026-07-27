@@ -1,35 +1,25 @@
 {
-  "$schema": "https://cursor.com/schemas/plugin.json",
+  "$schema": "https://cursor.com/schemas/cursor-plugin/plugin.json",
   "name": "cursor-knowledge-management-system",
-  "description": "Cursor 3.x / Claude Code / Codex で共用可能な `.agents/skills/` 準拠のエージェントスキル 7 種とカスタムコマンド 7 種。技術判断・パターン・デバッグ・改善活動を蓄積。init / Marketplace / gh skill / APM により配布可能。",
-  "version": "5.0.1",
+  "displayName": "Cursor Knowledge Management System",
+  "description": "技術判断・実装パターン・デバッグ記録・改善活動をプロジェクト内に蓄積する知識管理システム。Agent Skills 13 種、知識キュレーター subagent、記録を促す hooks を同梱し、Cursor / Claude Code / Codex で共用できます。",
+  "version": "6.0.0",
   "author": {
-    "name": "shioki",
-    "url": "https://github.com/shioki/Cursor-Knowledge-Management-System"
+    "name": "shioki"
   },
   "license": "MIT",
   "homepage": "https://github.com/shioki/Cursor-Knowledge-Management-System",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/shioki/Cursor-Knowledge-Management-System.git"
-  },
+  "repository": "https://github.com/shioki/Cursor-Knowledge-Management-System",
+  "category": "productivity",
   "keywords": [
     "knowledge-management",
     "skills",
-    "commands",
     "adr",
+    "decision-record",
     "debug",
     "patterns",
     "team-standards",
-    "codex",
-    "claude-code",
-    "agents-skills"
-  ],
-  "paths": {
-    "skills": "templates/.agents/skills",
-    "commands": "templates/.cursor/commands"
-  },
-  "compatibility": {
-    "cursor": ">=3.0.0"
-  }
+    "hooks",
+    "subagents"
+  ]
 }

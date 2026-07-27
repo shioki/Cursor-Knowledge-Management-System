@@ -283,6 +283,7 @@ cursor-knowledge-management-system/
 - **[カスタムスキル・コマンド作成](docs/advanced/custom-skills.md)** - 独自のスキルとコマンドの作り方
 
 ### Reference
+- **[OKF 調査と知識形式の改善方針](docs/reference/okf-and-knowledge-evolution.md)** - Google OKF の調査と、様子見期間の軽量改善ガイド
 - **[完全ガイド](docs/cursor-knowledge-management-system.md)** - システムの詳細説明
 - **[Cursor プラグイン・マーケットプレイス](docs/reference/cursor-plugins-and-marketplace.md)** - プラグイン構成と本システムの対応
 - **[Marketplace 提出手順](docs/reference/marketplace-submission.md)**（v5） - 審査フローとチェックリスト

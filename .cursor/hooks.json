@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "./hooks/inject-knowledge-index.sh",
+        "timeout": 10
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "./hooks/log-activity.sh",
+        "timeout": 5
+      }
+    ]
+  }
+}

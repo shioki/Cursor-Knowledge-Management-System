@@ -1,7 +1,7 @@
 # 📋 Cursor AI 知識管理システム 開発記録
 
 **作成日**: 2025年6月15日（初版） / 2026年2月7日（v3.0.0 全面改訂）  
-**最終更新**: 2026-04-26（v4/v5 要約の追記・正典の明記）  
+**最終更新**: 2026-07-28（v6.0.0 の節を追記）  
 **プロジェクト**: Cursor AI の Agent Skills と Custom Commands を活用した知識管理システム  
 **目的**: AI 支援開発における一貫性・品質向上・効率的な知識蓄積の実現
 
@@ -9,10 +9,11 @@
 
 ---
 
-## v4.0.0 / v5.0.0 の要約（2026年）
+## v4.0.0 / v5.0.0 / v6.0.0 の要約（2026年）
 
 - **v4.0.0（2026-03）**: スキル配置を `templates/.claude/skills/` を中核にし、Cursor と Claude Code で同一スキルを共有可能化。`--cursor-only` やパス検出（`_skill-base.sh`）を整備。
 - **v5.0.0（2026-04）**: 正規パスを **`templates/.agents/skills/`**（Cursor 3.x / Claude Code / Codex 公式互換）に移行。Cursor Plugin（[`.cursor-plugin/plugin.json`](../../.cursor-plugin/plugin.json)）、Microsoft APM（[`apm.yml`](../../apm.yml)）、`gh skill`、AGENTS.md テンプレ、init の `--with-agents-md` / `--legacy-claude` 等を追加。配布は **init / Marketplace / gh skill / APM** の四経路。
+- **v6.0.0（2026-07）**: 配布物を **リポジトリ直下の非隠しディレクトリ**（`skills/` / `agents/` / `hooks/`）へ集約。Custom Commands をアクションスキルへ統合し、hooks と subagent を新規提供。詳細は本書末尾の「v6.0.0 時点の構成」を参照。
 
 詳細は [CHANGELOG.md](../../CHANGELOG.md) と [RELEASE_NOTES_v5.0.0.md](../../RELEASE_NOTES_v5.0.0.md) を参照。
 
@@ -25,7 +26,7 @@
 - **初期目的**: Claude Code向けの知識管理システムをCursor AI開発に適用
 - **v2.x**: Cursor AI公式の`.cursor/rules`形式（MDC）への移行
 - **v3.0.0**: Agent Skills + Custom Commands への全面移行
-- **v4.0.0 以降**: 上記「v4.0.0 / v5.0.0 の要約」を参照（現行のディレクトリと配布形態は v5 基準）
+- **v4.0.0 以降**: 上記「v4.0.0 / v5.0.0 / v6.0.0 の要約」を参照（現行のディレクトリと配布形態は v6 基準）
 - **スコープ**: 個人開発者からエンタープライズチームまで対応
 
 ### 主な目標（v3.0.0 時点の設計。現行の追加要件は CHANGELOG 参照）
@@ -633,9 +634,9 @@ User → /commands（ユーザー起点のアクション）
 
 ---
 
-## 📊 最終成果物（v3.0.0 / Agent Skills + Commands 版）
+## 📊 成果物スナップショット（v3.0.0 時点）
 
-### リポジトリ構成（最新版）
+### リポジトリ構成（v3.0.0 時点。現行の構成は本書末尾の v6.0.0 の節を参照）
 ```
 cursor-knowledge-management-system/
 ├── README.md                           # プロジェクト概要（インフォグラフィック付き）
@@ -669,7 +670,7 @@ cursor-knowledge-management-system/
 └── templates/
     ├── .cursorignore                   # Cursor 無視ファイル設定
     ├── .agents/
-    │   └── skills/                   # 7 つの Agent Skills（v5 正規。旧 .claude/.cursor 配置は互換用）
+    │   └── skills/                   # 7 つの Agent Skills（v5 当時の正規パス。旧 .claude/.cursor 配置は互換用）
     │       ├── project-context/
     │       ├── team-standards/
     │       ├── knowledge-management/

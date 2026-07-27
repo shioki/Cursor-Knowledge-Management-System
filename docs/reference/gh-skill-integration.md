@@ -10,6 +10,12 @@ GitHub CLI に追加された [`gh skill`](https://github.blog/changelog/2026-04
   gh extension upgrade --all
   ```
 
+## スキルの置き場所
+
+本リポジトリのスキルは、リポジトリ直下の `skills/` にあります。`gh skill` はリポジトリのルートからスキルディレクトリを探索するため、追加のオプションなしでそのまま見つかります。
+
+v5 までは `templates/.agents/skills/` に置いていましたが、`gh skill` は `--allow-hidden-dirs` を指定しない限りドットで始まるディレクトリの配下を走査しません。そのため v5 の利用者は毎回このフラグを付ける必要がありました。v6 で配置をルートの `skills/` に移したことで、この制約は解消しています。
+
 ## 個別スキルのインストール
 
 ### Cursor 向け
@@ -19,10 +25,10 @@ GitHub CLI に追加された [`gh skill`](https://github.blog/changelog/2026-04
 gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor
 
 # タグ指定
-gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management@v5.0.1 --agent cursor
+gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management@v6.0.0 --agent cursor
 
 # タグ固定（以降 gh skill update でも更新されない）
-gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v5.0.1
+gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.0.0
 ```
 
 インストール先は `--agent cursor` の場合、自動的に `.cursor/skills/` または `~/.cursor/skills/` になります。`--scope user` を付けるとユーザーグローバルにインストールされます。
@@ -38,6 +44,16 @@ gh skill install shioki/Cursor-Knowledge-Management-System debug-workflow --agen
 ```bash
 gh skill install shioki/Cursor-Knowledge-Management-System pattern-library --agent codex
 ```
+
+### アクションスキルを入れる場合
+
+`/record-decision` のようなスラッシュ起動のワークフローも、v6 からはスキルとして配布されています。コマンド名がそのままスキル名です。
+
+```bash
+gh skill install shioki/Cursor-Knowledge-Management-System record-decision --agent cursor
+```
+
+アクションスキルは記録先のディレクトリ構成を対応するドメインスキルと共有します。`record-decision` は `knowledge-management` の `references/decisions/` に書き込むため、両方を入れておくと参照と記録の双方が揃います。
 
 ## 対話的インストール
 
@@ -78,23 +94,29 @@ gh skill search knowledge-management
 
 ## 本パッケージの gh skill publish 対応
 
-本リポジトリでは、すべての SKILL.md に以下のフロントマターを揃えており、`gh skill publish` のバリデーションを通る構成になっています:
+本リポジトリでは、13 個すべての SKILL.md に以下のフロントマターを揃えており、`gh skill publish` のバリデーションを通る構成になっています:
 
-- `name`
+- `name`（フォルダ名と一致する kebab-case）
 - `description`
 - `license`
 - `compatibility`
 - `metadata.tags`
+
+`npm run skills:check` がこれらを Agent Skills 仕様に沿って検証します。仕様に無い最上位キーは Cursor 側で無視されるため、見つかった場合は警告します。
 
 ### メンテナ向け: リリース時の検証
 
 新しいバージョンをタグとして push する前に、以下で検証できます:
 
 ```bash
+# 公開せずに検証だけ行う
+npm run skill:check
+
+# 実際に公開する
 gh skill publish
 ```
 
-問題があれば `gh skill publish --fix` で frontmatter を自動補修できます。
+`npm run skill:check` は `gh skill publish --dry-run` のエイリアスです。`npm run release -- vX.Y.Z` も内部で同じ dry-run を実行するため、リリース手順に沿っていれば個別に叩く必要はありません。問題があれば `gh skill publish --fix` で frontmatter を自動補修できます。
 
 ### Immutable release の有効化
 

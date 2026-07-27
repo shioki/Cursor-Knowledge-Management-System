@@ -21,38 +21,73 @@ Cursor はプラグインによって拡張でき、エージェントが外部�
 - **`AGENTS.md` のネスト対応**: サブディレクトリに `AGENTS.md` を配置して、そのサブツリーでのみ適用される指示を与えられる
 - **Cursor Plugin マニフェスト**: `.cursor-plugin/plugin.json` により Skills / Subagents / MCP / Hooks / Rules / Commands をバンドル配布可能
 
-本システムも v5.0.0 からこれらに対応しています。詳細は [Cursor Plugin 開発ガイド](../advanced/plugin-development.md) を参照してください。
+## 本システムが提供するコンポーネント
 
-## 本システムがカバーするもの
+v6.0.0 時点で、本プラグインは次のコンポーネントを同梱しています。
 
-Cursor Knowledge Management System は、主に次の要素を提供します。
+| 要素 | 提供 | 実体 |
+|------|------|------|
+| **Skills** | 13 種 | リポジトリ直下の `skills/`。ドメインスキル 7 種とアクションスキル 6 種 |
+| **Subagents** | 1 件 | [`agents/knowledge-curator.md`](../../agents/knowledge-curator.md)。知識ベースの棚卸しを行う読み取り専用エージェント |
+| **Hooks** | 3 イベント | [`hooks/hooks.json`](../../hooks/README.md)。`sessionStart` / `afterFileEdit` / `stop` |
+| **Rules / AGENTS.md** | テンプレート同梱 | `templates/AGENTS.md.template` と `templates/AGENTS.md.nested-example.md`（[詳細](../getting-started/agents-md-guide.md)） |
+| **Commands** | 提供しない | v5 までの 7 コマンドはアクションスキルへ統合されました（後述） |
+| **MCP servers** | 提供しない | 日時処理などで必要な場合は [MCP サーバ日時処理設定ガイド](mcp-datetime-setup.md) を参照して個別に設定してください |
 
-- **Plugin マニフェスト**: [.cursor-plugin/plugin.json](../../.cursor-plugin/plugin.json)（v5.0.0）で Marketplace 配布に対応
-- **Skills（7 つ）**: プロジェクト背景、チーム標準、知識管理、パターンライブラリ、デバッグワークフロー、改善追跡、プロジェクトセットアップ。`.agents/skills/` に配置され、Cursor Settings > Rules の「Agent Decides」で参照されます
-- **Commands（7 つ）**: `/record-decision`、`/add-pattern`、`/start-debug`、`/log-improvement`、`/review-knowledge`、`/update-context`、`/migrate-from-rules`。`.cursor/commands/` に配置され、チャットで `/` から起動します
-- **AGENTS.md テンプレート**: ルート用・ネスト用の両方を同梱（[詳細](../getting-started/agents-md-guide.md)）
+### Skills
 
-本テンプレートは「スキル＋コマンド＋軽量 Rules」による知識管理に特化しており、必要に応じて MCP や他のプラグインと組み合わせて利用できます。
+ドメインスキル 7 種（`project-context`、`team-standards`、`knowledge-management`、`pattern-library`、`debug-workflow`、`improvement-tracking`、`project-setup`）は、エージェントが `description` を読んで必要と判断したときにだけ読み込まれます。
 
-## 本システムで未カバーだが関連するもの
+アクションスキル 6 種（`record-decision`、`add-pattern`、`start-debug`、`log-improvement`、`review-knowledge`、`update-context`）は `disable-model-invocation: true` を設定しており、ユーザーが `/record-decision` のように明示的に呼び出したときだけ起動します。v5 までは `.cursor/commands/` の Custom Commands として提供していた機能ですが、Commands は Cursor 固有の仕組みで Claude Code や Codex では使えませんでした。スキルに統合したことで、呼び出し方を変えないまま 3 つのエージェントで共用できるようになっています。詳細は [アクションスキルガイド](../templates/action-skills-guide.md) を参照してください。
 
-- **MCP**: 日時処理など、エージェントが外部ツールと連携する場合は MCP サーバを利用できます。設定方法は [MCP サーバ日時処理設定ガイド](mcp-datetime-setup.md) を参照してください
-- **Subagents・Hooks**: 本テンプレートでは提供していませんが、[Cursor Marketplace](https://cursor.com/ja/blog/marketplace) で提供される他プラグインと組み合わせることで、並列タスク実行や挙動のカスタマイズを補完できます
+なお `/migrate-from-rules` は v6 で廃止しました。Cursor に組み込みの `/migrate-to-skills` と役割が重複するためです。
+
+### Subagents と Hooks
+
+Subagents と Hooks は v5 では未提供でしたが、v6 で追加しました。使い方はそれぞれ [Subagents ガイド](../advanced/subagents-guide.md)、[Hooks ガイド](../advanced/hooks-guide.md) を参照してください。
+
+hooks はエージェントのライフサイクルに介入する仕組みである以上、常時オンが望ましいとは限りません。`sessionStart`（知識の索引を注入）と `afterFileEdit`（編集ファイルをログに追記）は副作用が小さいため既定で有効ですが、`stop`（記録漏れの提案）は `followup_message` によって 1 ターンを追加消費するため、設定ファイルで明示的に有効化しない限り何もせずに終了します。
+
+## plugin.json の構造
+
+[.cursor-plugin/plugin.json](../../.cursor-plugin/plugin.json) は、Cursor 公式のプラグインスキーマに準拠したメタデータだけを持ちます。
+
+```json
+{
+  "$schema": "https://cursor.com/schemas/cursor-plugin/plugin.json",
+  "name": "cursor-knowledge-management-system",
+  "displayName": "Cursor Knowledge Management System",
+  "description": "...",
+  "version": "6.0.0",
+  "author": { "name": "shioki" },
+  "license": "MIT",
+  "homepage": "https://github.com/shioki/Cursor-Knowledge-Management-System",
+  "repository": "https://github.com/shioki/Cursor-Knowledge-Management-System",
+  "category": "productivity",
+  "keywords": ["knowledge-management", "skills", "..."]
+}
+```
+
+コンポーネントの場所を書いていないのは意図的です。マニフェストで明示しない場合、Cursor はプラグインルート直下の `skills/`、`agents/`、`commands/`、`rules/`、`hooks/hooks.json` を探索します。本リポジトリはこの既定の配置に合わせてあるため、パスを列挙する必要がありません。
+
+v5 のマニフェストは `paths.skills` / `paths.commands` / `compatibility` といった独自キーを持ち、`repository` をオブジェクトで書いていました。公式スキーマは `additionalProperties: false` のため、これらは Cursor 側で拒否されます。v6 ではスキーマを [`schemas/cursor-plugin.schema.json`](../../schemas/cursor-plugin.schema.json) にベンダリングし、`npm run plugin:check` が ajv で厳密に検証します。同じ検証で、スキーマは通るのにコンポーネントが 1 件も見つからない状態も検出します。
 
 ## Cursor Marketplace でできること
 
 - **プラグインを探してインストールする**: 事前構築されたプラグイン（AWS、Figma、Linear、Stripe など）を Cursor に追加できます
 - **独自プラグインを作成して共有する**: Skills、Subagents、MCP、Hooks、Rules を組み合わせたプラグインを投稿し、コミュニティと共有できます
 
-本システムを Marketplace に提出する手順は [Marketplace 提出手順](marketplace-submission.md) を参照してください。
+本システムを Marketplace に提出する手順は [Marketplace 提出手順](marketplace-submission.md) を参照してください。ローカルでの動作確認は [Cursor Plugin 開発ガイド](../advanced/plugin-development.md) にまとめています。
 
 ## 配布経路の比較
 
-| 経路 | 対象範囲 | 利用タイミング | 本システムでの対応 |
-|------|---------|---------------|-------------------|
-| **手動 init.sh** | プロジェクト単位、一括 | 即時、手元リポジトリからコピー | ✅ デフォルト |
-| **Cursor Marketplace** | プラグイン単位、Cursor GUI | ユーザーが Cursor から選択 | ✅ [plugin.json](../../.cursor-plugin/plugin.json) 同梱 |
-| **gh skill install** | スキル単位、CLI | 個別スキルをピンポイント導入 | ✅ ([詳細](gh-skill-integration.md)) |
-| **apm install** | パッケージ単位、依存管理 | 利用側の apm.yml に宣言 | ✅ ([詳細](apm-integration.md)) |
+v6 でリポジトリ直下の非隠しディレクトリに配布物を集約したのは、この 4 経路が同じ配置をそのまま読めるようにするためです。とくに `gh skill install` は `--allow-hidden-dirs` を付けない限り隠しディレクトリ配下のスキルを検出しないため、v5 の `templates/.agents/skills/` は不利な配置でした。
+
+| 経路 | 対象範囲 | 利用タイミング | 参照元 |
+|------|---------|---------------|-------|
+| **init.sh** | プロジェクト単位、一括 | 即時、手元リポジトリからコピー | `skills/project-setup/scripts/init.sh` |
+| **Cursor Marketplace** | プラグイン単位、Cursor GUI | ユーザーが Cursor から選択 | [plugin.json](../../.cursor-plugin/plugin.json) のデフォルト探索 |
+| **gh skill install** | スキル単位、CLI | 個別スキルをピンポイント導入 | ルートの `skills/`（[詳細](gh-skill-integration.md)） |
+| **apm install** | パッケージ単位、依存管理 | 利用側の apm.yml に宣言 | [apm.yml](../../apm.yml) の `paths`（[詳細](apm-integration.md)） |
 
 詳細は [Cursor のブログ（プラグインで Cursor を拡張する）](https://cursor.com/ja/blog/marketplace) および Cursor の公式ドキュメントを参照してください。
