@@ -1,14 +1,16 @@
 # Cursor Knowledge Management System
 
-A knowledge-management template for AI-assisted development using **Agent Skills** (`.agents/skills/`) and **Custom Commands** (`.cursor/commands/`). The same skill set can be shared across **Cursor 3.x**, **Claude Code**, and **Codex**.
+A knowledge-management template for AI-assisted development. It accumulates technical decisions, implementation patterns, debug sessions, and improvements inside your project so the agent can reuse them later. The same skill set is shared across **Cursor**, **Claude Code**, and **Codex** via `.agents/skills/`.
 
-> **v5.x** ships as an installable **Cursor Plugin**, uses the standard **`.agents/skills/`** layout, and supports **four distribution paths**: manual **init**, **Cursor Marketplace**, **`gh skill`**, and **Microsoft APM**. `AGENTS.md` templates are included.
+> **v6.0.0** unifies everything into **Agent Skills** (7 domain skills + 6 action skills), adds **hooks** and a **subagent**, and splits the knowledge layer into **one concept per file**. Slash commands are gone as a separate concept — they are now action skills, so they work outside Cursor too.
 >
-> For the full narrative, infographics, and complete doc index, see the Japanese **[README.md](README.md)**.
+> For the full narrative and the complete doc index, see the Japanese **[README.md](README.md)**.
 
-## Why skills + commands
+## Why Agent Skills
 
-Compared to heavy `alwaysApply` rules, Agent Skills load **only what the model needs**, with details in `references/`. Custom commands start structured workflows with `/command-name`.
+With `.cursor/rules`, every `alwaysApply` rule was sent on every request and glob-matched rules were loaded regardless of relevance. Agent Skills instead let the model read only each skill's `description`, pick the ones that fit the conversation, and open `references/` only when needed.
+
+v6 makes that progressive loading actually hold: each decision, pattern, and improvement is its own file, indexed by a per-directory `README.md`. Before v6, scripts appended to a single template file, so the whole history had to be read every time.
 
 ## Quick start (four distribution options)
 
@@ -18,24 +20,30 @@ Compared to heavy `alwaysApply` rules, Agent Skills load **only what the model n
 git clone https://github.com/shioki/Cursor-Knowledge-Management-System.git
 cd Cursor-Knowledge-Management-System
 
-# Default (v5): install under .agents/skills (shared with Cursor / Claude Code / Codex)
-bash templates/.agents/skills/project-setup/scripts/init.sh /path/to/your-project
+# Default: install under .agents/skills (shared with Cursor / Claude Code / Codex)
+bash skills/project-setup/scripts/init.sh /path/to/your-project
+
+# Non-interactive (CI / automation)
+bash skills/project-setup/scripts/init.sh /path/to/your-project --yes
 
 # Also drop AGENTS.md templates
-bash templates/.agents/skills/project-setup/scripts/init.sh /path/to/your-project --with-agents-md
+bash skills/project-setup/scripts/init.sh /path/to/your-project --with-agents-md
+
+# Skip Cursor-specific components
+bash skills/project-setup/scripts/init.sh /path/to/your-project --no-hooks --no-agents
 
 # v4-compatible path (.claude/skills)
-bash templates/.agents/skills/project-setup/scripts/init.sh /path/to/your-project --legacy-claude
+bash skills/project-setup/scripts/init.sh /path/to/your-project --legacy-claude
 
 # Cursor-only (.cursor/skills)
-bash templates/.agents/skills/project-setup/scripts/init.sh /path/to/your-project --cursor-only
+bash skills/project-setup/scripts/init.sh /path/to/your-project --cursor-only
 ```
 
-Windows: use `templates/.agents/skills/project-setup/scripts/init.ps1` with the same intent.
+Windows: use `skills/project-setup/scripts/init.ps1` with the same options.
 
 ### 2. Cursor Marketplace (plugin)
 
-Install from the Cursor Marketplace as a plugin. See [Plugin development](docs/advanced/plugin-development.md) and [Marketplace submission](docs/reference/marketplace-submission.md).
+Install from the Cursor Marketplace. See [plugin development](docs/advanced/plugin-development.md) and [Marketplace submission](docs/reference/marketplace-submission.md).
 
 ### 3. `gh skill` (single skill)
 
@@ -43,17 +51,17 @@ Install from the Cursor Marketplace as a plugin. See [Plugin development](docs/a
 gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor
 
 # Pin a tag for supply-chain stability
-gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v5.0.1
+gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.0.0
 ```
 
-Details: [gh skill integration](docs/reference/gh-skill-integration.md).
+Skills now live in the non-hidden `skills/` directory, so `--allow-hidden-dirs` is no longer needed. Details: [gh skill integration](docs/reference/gh-skill-integration.md).
 
 ### 4. Microsoft APM (bundle)
 
 ```yaml
 dependencies:
   apm:
-    - shioki/Cursor-Knowledge-Management-System#v5.0.1
+    - shioki/Cursor-Knowledge-Management-System#v6.0.0
 ```
 
 Then `apm install`. Details: [APM integration](docs/reference/apm-integration.md).
@@ -62,23 +70,31 @@ Then `apm install`. Details: [APM integration](docs/reference/apm-integration.md
 
 | Area | Notes |
 |------|--------|
-| **7 skills** | project-context, team-standards, knowledge-management, pattern-library, debug-workflow, improvement-tracking, project-setup |
-| **7 commands** | e.g. `/record-decision`, `/add-pattern`, `/update-context`, `/migrate-from-rules` |
+| **7 domain skills** | project-context, team-standards, knowledge-management, pattern-library, debug-workflow, improvement-tracking, project-setup |
+| **6 action skills** | `/record-decision`, `/add-pattern`, `/start-debug`, `/log-improvement`, `/review-knowledge`, `/update-context` |
+| **3 hooks** | `sessionStart` injects the knowledge index, `afterFileEdit` logs activity, `stop` nudges you to record (off by default) |
+| **1 subagent** | `knowledge-curator` audits the knowledge base in an isolated, read-only context |
 | **Plugin manifest** | [.cursor-plugin/plugin.json](.cursor-plugin/plugin.json) |
 | **APM manifest** | [apm.yml](apm.yml) |
 
+Hooks and subagents are Cursor-specific; skills work everywhere and the system is fully functional without them.
+
 ## After install
 
-1. Run `/update-context` in Cursor to fill project basics.
+1. Run `/update-context` to fill in project basics.
 2. Run `/record-decision` to log your first decision.
-3. Edit `team-standards` `SKILL.md` to match your conventions.
+3. Edit the `team-standards` `SKILL.md` to match your conventions.
+
+Skipping these leaves the skills pointing at empty templates.
 
 ## Requirements
 
-- **Cursor** 3.0+ recommended for `.agents/skills/`. Older versions may use `.cursor/skills/` or `.claude/skills/`.
+- **Cursor** 3.0+ recommended for `.agents/skills/`, hooks, and subagents. Older versions can use `.cursor/skills/` for skills only.
 - **Git** 2.0+
 - **Shell scripts**: Bash on Mac/Linux; on Windows prefer **Git Bash** or **WSL** for `init.sh` / `release.sh`.
-- **Optional**: GitHub CLI (`gh`) for `gh skill`; [Microsoft APM](https://github.com/microsoft/apm) for `apm install`.
+- **Optional**: GitHub CLI (`gh`) 2.90.0+ for `gh skill`; [Microsoft APM](https://github.com/microsoft/apm) for `apm install`.
+
+Hook scripts depend only on POSIX shell utilities — no `jq`, `python`, or `node` required.
 
 ## Quality checks (this repository)
 
@@ -87,13 +103,14 @@ npm ci
 npm run docs:check
 ```
 
-Runs skill structure, command structure, plugin/apm manifest checks, and Markdown link checks.
+Runs skill structure validation against the Agent Skills spec, hooks/subagent component checks, plugin and APM manifest schema validation, and Markdown link checks.
 
 ## Docs (mixed JA / EN)
 
 - [CHANGELOG.md](CHANGELOG.md) — release history
 - [Quick start (JA)](docs/getting-started/quick-start.md)
-- [Skills guide (JA)](docs/templates/skills-guide.md) · [Commands guide (JA)](docs/templates/commands-guide.md)
+- [Skills guide (JA)](docs/templates/skills-guide.md) · [Action skills guide (JA)](docs/templates/action-skills-guide.md)
+- [Migration from v5 (JA)](docs/getting-started/migration-from-v5.md)
 - [CONTRIBUTING.md](CONTRIBUTING.md) — PRs and version alignment
 
 ## License
@@ -102,5 +119,5 @@ Runs skill structure, command structure, plugin/apm manifest checks, and Markdow
 
 ---
 
-**Last updated**: 2026-04-26  
-**Version**: 5.0.1 ([CHANGELOG](CHANGELOG.md) · [release notes v5.0.0](RELEASE_NOTES_v5.0.0.md))
+**Last updated**: 2026-08-01  
+**Version**: 6.0.0 ([CHANGELOG](CHANGELOG.md) · [release notes v6.0.0](RELEASE_NOTES_v6.0.0.md))

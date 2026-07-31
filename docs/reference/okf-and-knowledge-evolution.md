@@ -25,28 +25,30 @@ CKMS は **3 層構造** で動作します。OKF が対象とするのは主に
 ```mermaid
 graph TB
     subgraph orchestration ["オーケストレーション層（CKMS 固有・維持）"]
-        Skills[".agents/skills/*/SKILL.md"]
-        Commands[".cursor/commands/*.md"]
+        Domain[".agents/skills/*/SKILL.md<br/>ドメインスキル"]
+        Action[".agents/skills/*/SKILL.md<br/>アクションスキル"]
         AgentsMd["AGENTS.md"]
     end
 
     subgraph knowledge ["知識層（改善対象）"]
-        Legacy["現行: *_TEMPLATE.md に追記"]
-        Future["将来: 個別ファイル + リンク"]
+        Current["v6: 1 概念 1 ファイル + README 索引"]
+        Future["将来: OKF バンドル化"]
     end
 
-    Agent[Cursor / Claude Code / Codex] --> Skills
-    Agent --> Commands
+    Agent[Cursor / Claude Code / Codex] --> Domain
+    Agent --> Action
     Agent --> AgentsMd
-    Skills --> knowledge
-    Commands --> knowledge
+    Domain --> knowledge
+    Action --> knowledge
 ```
 
 | 層 | CKMS の役割 | OKF との関係 |
 |----|------------|-------------|
-| Skills / Commands | いつ・どう知識を使うか | 対象外（Cursor 等のエージェント仕様） |
+| Skills | いつ・どう知識を使うか | 対象外（エージェント側の仕様） |
 | AGENTS.md | 常時参照の基本方針 | 前身パターンとして Google が言及 |
 | references/ | 技術判断・パターン等の蓄積 | **OKF バンドル化の候補** |
+
+v6 で知識層を 1 概念 1 ファイル + `README.md` 索引に分割したため、OKF が求める粒度にかなり近づきました。残る差分は `id` / `type` などの必須フィールドと、予約ファイル名（`index.md` / `log.md`）の扱いです。
 
 ## 方針: OKF v1.0 まで様子見
 
@@ -55,9 +57,9 @@ graph TB
 ### 様子見と判断する理由
 
 1. **v0.1 はドラフト** — 仕様・慣習がまだ固まりきっていない
-2. **CKMS は現行構成で実用可能** — Skills + Commands + モノリシック templates で運用実績がある
+2. **CKMS は現行構成で実用可能** — v6 で 1 概念 1 ファイル + 索引方式に移行済みで、運用上の不足はない
 3. **移行コストに対する即時リターンが限定的** — 外部 OKF Consumer（Google Knowledge Catalog 等）を使わない限り、恩恵は主に構造化・検索性の改善に留まる
-4. **後方互換の移行パスを確保できる** — 本ドキュメント後半の OKF 非依存改善を先に適用すれば、v1.0 時にスムーズに載せ替え可能
+4. **後方互換の移行パスを確保できる** — 本ドキュメント後半の OKF 非依存改善を v6 で適用済みのため、v1.0 時にスムーズに載せ替えられる
 
 ### 再検討のトリガー
 
@@ -70,9 +72,9 @@ graph TB
 
 ---
 
-## OKF 非依存の軽量改善（今すぐ適用可能）
+## OKF 非依存の軽量改善（v6.0.0 で適用済み）
 
-OKF v1.0 を待つ間、**仕様に依存しない改善** を段階的に導入できます。いずれも CKMS 単体でメリットがあり、将来の OKF 移行コストも下げます。
+OKF v1.0 を待つ間の「仕様に依存しない改善」として本節が提案していた内容は、**v6.0.0 で標準実装になりました**。`/record-decision` などのアクションスキルは最初から個別ファイルを生成し、`README.md` 索引を自動更新します。以下は、その設計の根拠と、独自にカスタマイズする際の規約として残しています。
 
 ### 改善の 3 原則
 
@@ -82,56 +84,54 @@ OKF v1.0 を待つ間、**仕様に依存しない改善** を段階的に導入
 | **Markdown リンク** | 関連知識どうしを明示的に接続 | OKF のクロスリンク規約とほぼ同一 |
 | **目次による段階的開示** | カテゴリごとに `README.md` または `index.md` を置く | OKF の `index.md` に近い |
 
-### 推奨ディレクトリ構造
+### ディレクトリ構造（v6 の実装）
 
-既存の `references/` 配下に **サブディレクトリを追加** する形が移行しやすいです。デフォルトテンプレート（`*_TEMPLATE.md`）は当面残し、新規記録から個別ファイル方式へ移行します。
+`references/` 配下にカテゴリごとのサブディレクトリを置き、それぞれの `README.md` を索引にします。`*_TEMPLATE.md` は v5 以前の記録を保持するレガシーファイルとして残ります。
 
-```
-.agents/skills/
-├── knowledge-management/references/
-│   ├── KNOWLEDGE_TEMPLATE.md      # レガシー（既存エントリはここに残してよい）
-│   ├── README.md                  # 目次（新規）
-│   └── decisions/                 # 技術判断（新規）
-│       ├── README.md
-│       └── 2026-06-18-use-postgresql.md
-├── pattern-library/references/
-│   ├── PATTERNS_TEMPLATE.md
-│   ├── README.md
-│   └── patterns/
-│       └── api-error-handling.md
-├── debug-workflow/references/
-│   ├── DEBUG_TEMPLATE.md
-│   ├── README.md
-│   └── sessions/
-│       └── 2026-06-10-auth-timeout.md
-├── improvement-tracking/references/
-│   ├── IMPROVEMENTS_TEMPLATE.md
-│   ├── README.md
-│   └── improvements/
-│       └── refactor-auth-module.md
-└── project-context/references/
-    ├── CONTEXT_TEMPLATE.md
-    └── context/
-        └── project-overview.md
+```text
+.agents/
+├── skills/
+│   ├── knowledge-management/references/
+│   │   ├── KNOWLEDGE_TEMPLATE.md      # レガシー（v5 以前の記録）
+│   │   └── decisions/
+│   │       ├── README.md              # 索引（スクリプトが自動更新）
+│   │       └── 2026-06-18-use-postgresql.md
+│   ├── pattern-library/references/
+│   │   ├── PATTERNS_TEMPLATE.md
+│   │   └── patterns/
+│   │       ├── README.md
+│   │       └── api-error-handling.md
+│   ├── improvement-tracking/references/
+│   │   ├── IMPROVEMENTS_TEMPLATE.md
+│   │   └── improvements/
+│   │       ├── README.md
+│   │       └── 2026-06-20-refactor-auth-module.md
+│   └── project-context/references/
+│       └── CONTEXT_TEMPLATE.md        # 単一ファイルのまま（更新頻度が低く分割の利得が小さい）
+└── debug-sessions/
+    └── 2026-06-10-auth-timeout.md
 ```
 
-> **注**: `.claude/skills/` / `.cursor/skills/` を使うプロジェクトでも、同じ相対パス構造を適用してください。
+デバッグセッションだけは `.agents/debug-sessions/` に置き、スキル配下ではありません。作業中の一時記録という性格が強く、`.cursorignore` で個人用セッションを除外しやすくするためです。
+
+> **注**: `.claude/skills/` / `.cursor/skills/` を使うプロジェクトでも、同じ相対パス構造が適用されます。
 
 ### ファイル命名規則
 
 | カテゴリ | ディレクトリ | 命名例 | 備考 |
 |---------|-------------|--------|------|
 | 技術判断（ADR） | `decisions/` | `YYYY-MM-DD-短いスラッグ.md` | 日付でソート可能 |
-| 実装パターン | `patterns/` | `機能-パターン名.md` | スラッグは kebab-case |
-| デバッグセッション | `sessions/` | `YYYY-MM-DD-問題の要約.md` | 調査開始日を先頭に |
+| 実装パターン | `patterns/` | `機能-パターン名.md` | 日付を付けない（パターンは更新され続けるため） |
+| デバッグセッション | `.agents/debug-sessions/` | `YYYY-MM-DD-問題の要約.md` | 調査開始日を先頭に |
 | 改善記録 | `improvements/` | `YYYY-MM-DD-改善タイトル.md` | 完了後もファイル名は変えない |
-| プロジェクト背景 | `context/` | `project-overview.md` 等 | 更新頻度が低いものは固定名 |
 
-スラッグは **英数字とハイフン** に統一し、スペースや日本語ファイル名は避けると Git・検索・将来の OKF 移行で扱いやすくなります。本文は日本語で記述して問題ありません。
+スラッグは **英数字とハイフン** に統一します。スクリプトが日本語タイトルを自動でスラッグ化しますが、変換結果が空になる場合はタイムスタンプにフォールバックします。読みやすいファイル名にしたい場合は、英語のスラッグを明示的に指定してください。本文は日本語で記述して問題ありません。
 
-### 推奨 frontmatter（任意・OKF 準備用）
+改善記録のファイル名を変えないのは、日付が「いつ提案したか」を示すためです。ステータスが変わったときは frontmatter の `status` を更新します。リネームすると索引や既存のリンクが壊れます。
 
-OKF 準拠は **必須ではありません** が、将来の移行を意識した軽量 frontmatter を付けると、機械可読性と検索性が上がります。
+### frontmatter（v6 のスクリプトが自動生成）
+
+`add-entry.sh` などが以下の形式で frontmatter を生成します。OKF 準拠は必須ではありませんが、将来の移行を意識した軽量な形にしてあります。
 
 ```markdown
 ---
@@ -173,7 +173,7 @@ OKF v1.0 対応時は `updated` を `timestamp`（ISO 8601）に、`type` フィ
 
 ### 目次ファイル（README.md）の例
 
-各カテゴリの `README.md` は、エージェントと人間の両方が **全体像を把握してから個別ファイルを開く** ための入口です。
+各カテゴリの `README.md` は、エージェントと人間の両方が **全体像を把握してから個別ファイルを開く** ための入口です。v6 では記録スクリプトが一覧行を自動追記するため、手作業での更新は原則不要です。
 
 ```markdown
 # 技術判断（Decisions）
@@ -249,31 +249,22 @@ updated: 2026-06-15
 
 ---
 
-## 段階的な導入手順
+## 既存の記録の扱い
 
-既存プロジェクトを壊さずに移行するための推奨フローです。
-
-```mermaid
-graph LR
-    S1["Step 1<br/>README.md 追加"]
-    S2["Step 2<br/>新規記録を個別ファイルへ"]
-    S3["Step 3<br/>リンクで関連付け"]
-    S4["Step 4<br/>棚卸し時にレガシー移行"]
-
-    S1 --> S2 --> S3 --> S4
-```
+v5 以前から使っているプロジェクトでは、`*_TEMPLATE.md` に既存の記録が溜まっています。これらを一括変換する必要はありません。
 
 | ステップ | 作業 | 既存への影響 |
 |---------|------|-------------|
-| 1 | 各 `references/` に `README.md` とサブディレクトリを作成 | なし |
-| 2 | `/record-decision` 等で **新規記録のみ** 個別ファイルに保存 | テンプレートはそのまま |
-| 3 | 新規ファイル間・レガシー記録へのリンクを追加 | なし |
-| 4 | `/review-knowledge` のタイミングで、価値の高いレガシーエントリを個別ファイルへ分割 | 任意・段階的 |
+| 1 | v6 へ移行する（スクリプトが個別ファイルを生成するようになる） | なし |
+| 2 | 新規記録が個別ファイルに保存される | テンプレートはそのまま |
+| 3 | 各索引の「レガシー」節から `*_TEMPLATE.md` へリンクしておく | なし |
+| 4 | `/review-knowledge` のタイミングで、価値の高いレガシーエントリだけ個別ファイルへ分割 | 任意・段階的 |
 
-**やらなくてよいこと（v1.0 まで）:**
+分割の判断基準は「今後も参照されるか」です。半年以上参照されていない記録は、テンプレートに残したままで構いません。移行作業そのものに時間をかける価値はありません。
 
-- デフォルトテンプレートや `add-entry.sh` の一括書き換え
-- OKF 必須の `type` フィールドの強制
+**やらなくてよいこと（OKF v1.0 まで）:**
+
+- OKF 必須の `type` フィールドの付与
 - `index.md` / `log.md` の予約ファイル名へのリネーム（`README.md` で十分）
 
 ---
@@ -282,26 +273,26 @@ graph LR
 
 v1.0 リリース後に正式対応する場合のマッピング案です。現時点では **実装しない** 参考情報です。
 
-| CKMS（軽量改善後） | OKF v1.0 想定 |
-|-------------------|--------------|
+| CKMS v6 | OKF v1.0 想定 |
+|---------|--------------|
 | `decisions/*.md` | `type: Decision Record` |
 | `patterns/*.md` | `type: Pattern` |
-| `sessions/*.md` | `type: Debug Session` |
+| `.agents/debug-sessions/*.md` | `type: Debug Session` |
 | `improvements/*.md` | `type: Improvement` |
-| `context/*.md` | `type: Project Context` |
-| `README.md`（目次） | `index.md` にリネーム可能 |
+| `CONTEXT_TEMPLATE.md` | `type: Project Context` |
+| `README.md`（索引） | `index.md` にリネーム可能 |
 | Git コミット履歴 | `log.md` の自動生成候補 |
 | `updated` | `timestamp`（ISO 8601） |
 
-Skills / Commands / AGENTS.md は引き続き CKMS のオーケストレーション層として維持し、知識の保存形式だけを OKF バンドルに寄せる **ハイブリッド構成** が想定されます。
+Skills / AGENTS.md は引き続き CKMS のオーケストレーション層として維持し、知識の保存形式だけを OKF バンドルに寄せる **ハイブリッド構成** が想定されます。v6 で 1 概念 1 ファイル化を済ませているため、実際の作業は frontmatter の追加とファイル名の変更に限られる見込みです。
 
 ---
 
 ## 関連ドキュメント
 
-- [スキルとコマンドの概要](../getting-started/skills-and-commands.md) — references/ の段階的読込の基本
+- [スキルの全体像](../getting-started/skills-and-commands.md) — references/ の段階的読込の基本
 - [スキルガイド](../templates/skills-guide.md) — 各スキルの詳細
-- [コマンドガイド](../templates/commands-guide.md) — `/record-decision` 等の手順
+- [アクションスキルガイド](../templates/action-skills-guide.md) — `/record-decision` 等の手順
 - [チーム導入ガイド](../advanced/team-implementation.md) — チームでの知識共有運用
 
 ## 更新履歴
@@ -309,3 +300,4 @@ Skills / Commands / AGENTS.md は引き続き CKMS のオーケストレーシ�
 | 日付 | 内容 |
 |------|------|
 | 2026-06-18 | 初版作成（OKF 調査結果、様子見方針、OKF 非依存の軽量改善ガイド） |
+| 2026-08-01 | v6.0.0 で軽量改善を標準実装したことを反映。様子見方針は継続 |

@@ -2,6 +2,57 @@
 
 このプロジェクトの重要な変更履歴を記録します。
 
+## [6.0.0] - 2026-08-01
+
+### 🎉 Major Release - Agent Skills への統一と記録の習慣化
+
+#### 💥 Breaking Changes
+
+- **配布物の配置**: `templates/.agents/skills/` → ルート直下の [`skills/`](skills/) に移動。`init.sh` のパスは `skills/project-setup/scripts/init.sh` に変わりました
+- **カスタムコマンドの廃止**: `templates/.cursor/commands/` の 7 コマンドを削除し、6 つのアクションスキル（`disable-model-invocation: true`）に統合。`/record-decision` などの呼び出し方は変わりません
+- **`/migrate-from-rules` の廃止**: Cursor 組み込みの `/migrate-to-skills` と役割が重複するため削除。`migrate-from-rules.sh` も同時に削除しました
+- **`templates/.cursor/skills/` の削除**: `templates/.agents/skills/` との二重管理で 7 つの SKILL.md すべてが drift していたため削除
+- **知識の保存形式**: 単一の `*_TEMPLATE.md` への追記から、1 概念 1 ファイル + `README.md` 索引に変更。既存の `*_TEMPLATE.md` はレガシーファイルとして読み取り可能なまま残ります
+- **`plugin.json` のスキーマ準拠**: 公式スキーマに存在しない `paths` / `compatibility` を削除し、`repository` を文字列に修正。v5 の `plugin.json` はスキーマ違反によりコンポーネントが検出されない状態でした
+- **`npm run commands:check` の廃止**: `npm run components:check` に置き換え
+
+#### ✨ Added
+
+- **hooks 3 種**: [`hooks/`](hooks/) を新設
+  - `sessionStart` — 蓄積済み知識の索引を初期コンテキストへ注入
+  - `afterFileEdit` — 編集ファイルを `knowledge-activity.log` に追記
+  - `stop` — 記録漏れがありそうなときに記録を促す（既定で無効、`loop_limit: 1`）
+  - 依存は POSIX シェルと `sed` / `awk` / `find` のみ。`jq` / `python` / `node` は不要
+- **knowledge-curator subagent**: [`agents/knowledge-curator.md`](agents/knowledge-curator.md)（`readonly: true`）を追加。`/review-knowledge` から委譲し、知識ベースの全走査を別コンテキストに隔離します
+- **アクションスキル 6 種**: `record-decision` / `add-pattern` / `start-debug` / `log-improvement` / `review-knowledge` / `update-context`
+- **`init.sh` / `init.ps1` の新オプション**: `--yes`（非対話）、`--no-hooks`、`--no-agents`。`init.ps1` に上書き確認を追加し bash 版と挙動を揃えました
+- **`team-standards` の `paths`**: ソースコードを扱っているときだけ読み込まれるようスコープを設定
+- **リポジトリ自身の dogfooding**: ルートに [`AGENTS.md`](AGENTS.md) と `.cursor/hooks.json` を追加
+- **新規ドキュメント**:
+  - [docs/advanced/hooks-guide.md](docs/advanced/hooks-guide.md)
+  - [docs/advanced/subagents-guide.md](docs/advanced/subagents-guide.md)
+  - [docs/templates/action-skills-guide.md](docs/templates/action-skills-guide.md)
+  - [docs/getting-started/migration-from-v5.md](docs/getting-started/migration-from-v5.md)
+
+#### 🔄 Changed
+
+- **`check-skill-structure.mjs`**: YAML パーサによる厳密な frontmatter 検証に置き換え。`name` の長さと kebab-case、`description` の長さ、未知キー、`paths` / `disable-model-invocation` の型を Agent Skills 仕様に沿って検証し、`templates/` への複製も検出します
+- **`check-plugin-manifest.mjs`**: ajv と公式スキーマ（[`schemas/`](schemas/) にベンダリング）による検証に置き換え
+- **`check-links.mjs`**: 対象に `skills/` / `agents/` / `hooks/` / `templates/` を追加
+- **CI**: `gh skill publish --dry-run` ジョブと、`init.sh` / `validate.sh` / 記録スクリプト / hooks を通しで実行するスモークテストジョブを追加
+- **`release.sh`**: `npm` が見つからない場合に `docs:check` をスキップせず失敗させるよう変更
+- **`validate.sh`**: v6 構造の検証に対応し、`.cursor/commands/` の残存を警告
+- **`gh skill install`**: `skills/` が非隠しディレクトリになったため `--allow-hidden-dirs` が不要になりました
+
+#### 🐛 Fixed
+
+- **日本語タイトルでファイル名が壊れる問題**: `create-session.sh` などでスラッグが空になり、`2026-07-28-.md` のようなファイルが生成されていました。スラッグ化を共通関数に集約し、変換結果が空の場合はタイムスタンプにフォールバックします
+- **frontmatter の `description`**: HTML コメントを値にしていた箇所を、空文字列 + 行コメントに修正
+
+### 📋 v5.x からの移行
+
+`init.sh` を再実行すると、スキルの更新と hooks / subagent の配置が行われます。`.cursor/commands/` は手動で削除してください（`validate.sh` が警告します）。詳細は [v5 からの移行ガイド](docs/getting-started/migration-from-v5.md) を参照してください。
+
 ## [5.0.1] - 2026-04-26
 
 ### Changed

@@ -1,6 +1,8 @@
-# v3.x から v4.0.0 への移行ガイド
+# v3.x からの移行ガイド
 
-v3.x（`.cursor/skills`）で運用中のプロジェクトを v4.0.0（`.claude/skills`）に移行する手順です。
+v3.x（`.cursor/skills`）で運用中のプロジェクトを新しい配置に移す手順です。
+
+> **注**: 本ガイドは v3 → v4（`.claude/skills`）の移行手順として書かれたものです。現行の v6 では `.agents/skills/` が既定の配置になっているため、最短経路は下記オプション C（`init.sh` の実行）です。v5 から更新する場合は [v5 からの移行ガイド](migration-from-v5.md) を参照してください。
 
 ## 移行の必要性
 
@@ -50,17 +52,19 @@ bash .claude/skills/project-setup/scripts/validate.sh
    - 動作確認後、問題がなければ削除可能
    - `rm -rf .cursor/skills` で削除（バックアップ推奨）
 
-### オプション C: 新規プロジェクトで init を使用
+### オプション C: init.sh で最新構成にする（推奨）
 
-新規プロジェクトの場合は、init を実行するだけで v4 構成になります:
+v6 の `init.sh` を実行すると、`.agents/skills/` への配置と hooks / subagent の導入まで一度に済みます。
 
 ```bash
-bash path/to/Cursor-Knowledge-Management-System/templates/.claude/skills/project-setup/scripts/init.sh /path/to/your-project
+bash path/to/Cursor-Knowledge-Management-System/skills/project-setup/scripts/init.sh /path/to/your-project
 ```
+
+既存の `.cursor/skills/` は上書きされないため、動作確認をしてから削除してください。v6 の知識層は 1 概念 1 ファイル方式に変わっていますが、v3 の `*_TEMPLATE.md` はレガシーファイルとしてそのまま読めます。詳細は [v5 からの移行ガイド](migration-from-v5.md) の「知識層の変更」節を参照してください。
 
 ## Cursor のみで利用する場合
 
-Claude Code を導入していない場合は、`--cursor-only` で従来どおり `.cursor/skills` に配置できます:
+Claude Code や Codex を使わない場合は、`--cursor-only` で `.cursor/skills` に配置できます。
 
 ```bash
 bash path/to/.../init.sh /path/to/your-project --cursor-only

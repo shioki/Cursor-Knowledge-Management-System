@@ -1,7 +1,7 @@
 # AGENTS.md
 
 > プロジェクトルート用テンプレート。Cursor 3.x / Claude Code / Codex など、AGENTS.md をサポートする全エージェントで共通して読み込まれます。
-> 本プロジェクトのスキル（`.agents/skills/`）とコマンド（`.cursor/commands/`）と併用してください。
+> 本プロジェクトのスキル（`.agents/skills/`）と併用してください。手順の詳細はスキル側に置き、このファイルには全体のポリシーだけを書きます。
 
 ## プロジェクト概要
 
@@ -33,22 +33,40 @@
 
 ## 知識管理システムとの連携
 
-本プロジェクトは `.agents/skills/` 配下に以下のスキルを備えています:
+本プロジェクトは `.agents/skills/` 配下にスキルを備えています。
+
+### ドメインスキル（エージェントが自動選択）
 
 | スキル名 | 用途 |
 |---------|------|
+| `project-context` | プロジェクト背景・制約・技術スタック |
+| `team-standards` | チーム開発標準（ソースコードを扱うときに読み込まれる） |
 | `knowledge-management` | 技術判断の記録・参照 |
 | `pattern-library` | 実装パターンの検索・登録 |
 | `debug-workflow` | バグ調査・デバッグセッション |
 | `improvement-tracking` | 改善提案・効果測定 |
-| `project-context` | プロジェクト背景・制約 |
-| `team-standards` | チーム開発標準 |
-| `project-setup` | セットアップ支援 |
+| `project-setup` | セットアップ支援・構造検証 |
 
-エージェントはコンテキストに応じてこれらを自動選択します。ユーザー側から明示する場合は:
+会話の文脈から必要なものが自動で選ばれます。ユーザーが指定する必要はありません。
 
-- Cursor: チャットで `/skill-name` または `/record-decision` 等のコマンド
-- Claude Code: `/knowledge-management` など
+### アクションスキル（`/` で明示起動）
+
+| 起動 | 用途 |
+|------|------|
+| `/record-decision` | 技術判断を記録する |
+| `/add-pattern` | 実装パターンを登録する |
+| `/start-debug` | デバッグセッションを開始する |
+| `/log-improvement` | 改善内容を記録する |
+| `/review-knowledge` | 知識ベースを棚卸しする |
+| `/update-context` | プロジェクトのコンテキストを更新する |
+
+記録を作る操作はすべてアクションスキルです。エージェントが自動で実行することはないため、ユーザーがチャットで入力してください。Cursor / Claude Code / Codex のいずれでも同じ書き方で起動できます。
+
+### 記録の方針
+
+- 技術選定や設計方針を決めたら `/record-decision` で理由ごと残す
+- 再利用したい実装ができたら `/add-pattern` で登録する
+- 前提（技術スタック・体制・制約）が変わったら `/update-context` で追随させる
 
 ## ブランチ・コミット規約
 

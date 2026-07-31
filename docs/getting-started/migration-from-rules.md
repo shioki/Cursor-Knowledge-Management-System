@@ -2,7 +2,9 @@
 
 ## 概要
 
-このガイドでは、v2.x（`.cursor/rules` 形式）から v3.0.0（Agent Skills + Commands 形式）への移行方法を解説します。
+このガイドでは、v2.x（`.cursor/rules` 形式）から現行の Agent Skills 形式への移行方法を解説します。
+
+> **注**: v2.x の構成はかなり古いものです。以下の説明は v3.0.0 の転換を軸にしていますが、実際の移行先は最新の v6.0.0 になります。v6 ではコマンドもスキルに統合されているため、本ガイドの「コマンド」はすべてアクションスキルに読み替えてください。
 
 ## なぜ移行するのか
 
@@ -147,62 +149,47 @@ graph LR
 | `/log-improvement` | 改善内容を記録 |
 | `/review-knowledge` | 知識ベースの定期レビュー |
 | `/update-context` | コンテキスト情報を更新 |
-| `/migrate-from-rules` | v2.x からの移行を支援 |
+
+v3 には `/migrate-from-rules` コマンドもありましたが、Cursor 組み込みの `/migrate-to-skills` と役割が重複するため v6 で廃止しました。
 
 ## 移行方法
 
-3 つの方法から選べます。
+2 つの方法から選べます。専用の移行スクリプトは v6 で廃止したため、標準の `init.sh` でスキルを配置してから、データを手作業で転記する流れになります。
 
-### 方法 1: 自動スクリプトで移行（推奨）
-
-最も簡単な方法です。スクリプトが旧ファイルのバックアップ、データの転記、旧ファイルの削除を自動で行います。
+### 方法 1: init.sh で配置してから転記（推奨）
 
 ```bash
 # 1. 新しいテンプレートを取得
 git clone https://github.com/shioki/Cursor-Knowledge-Management-System.git
 cd Cursor-Knowledge-Management-System
 
-# 2. マイグレーションスクリプトを実行
-bash templates/.cursor/skills/project-setup/scripts/migrate-from-rules.sh /path/to/your-project
+# 2. 旧ファイルをバックアップ
+cp -r /path/to/your-project/.cursor /path/to/your-project/.cursor-backup-v2
+
+# 3. スキル一式を配置
+bash skills/project-setup/scripts/init.sh /path/to/your-project
 ```
 
-スクリプトが行うこと:
-1. 旧ファイルを `.cursor/backup-v2/` にバックアップ
-2. 新しい skills/ と commands/ をコピー
-3. 旧データファイルの内容を新しい references/ に転記
-4. 旧 rules/ ディレクトリを削除（確認付き）
-5. 移行結果のレポートを出力
+配置後、次節の対応表に従って旧データを転記し、`.cursor/rules/` と旧データファイルを削除します。バックアップを取ってあるので、転記漏れがあっても復元できます。
 
-### 方法 2: コマンドで対話的に移行
+### 方法 2: エージェントに転記を任せる
 
-Cursor のチャットでエージェントと対話しながら移行する方法です。
+Cursor のチャットで、旧ファイルの内容を新しい構造へ移すよう依頼する方法です。
 
-1. まず新しいテンプレートの skills/ と commands/ を手動でコピー
-2. Cursor のチャットで `/migrate-from-rules` と入力
-3. エージェントが旧ファイルを検出し、対話形式で移行を支援
+1. 方法 1 の手順 1〜3 でスキルを配置する
+2. チャットで「`.cursor-backup-v2/knowledge.md` の記録を `/record-decision` の形式で個別ファイルに分割して」のように依頼する
+3. 生成結果を確認してから旧ファイルを削除する
 
-### 方法 3: 手動で移行
+記録が多い場合は、価値の高いものだけを選んで移すのが現実的です。半年以上参照していない記録は、バックアップに残したままで構いません。
 
-自分のペースで一つずつ移行する方法です。
+### 転記の手順
 
-#### Step 1: 新しい skills/ と commands/ をコピー
+#### Step 1: 既存データを個別ファイルに転記
 
-```bash
-# Mac/Linux
-cp -r templates/.cursor/skills /path/to/your-project/.cursor/skills
-cp -r templates/.cursor/commands /path/to/your-project/.cursor/commands
-find /path/to/your-project/.cursor/skills -name "*.sh" -exec chmod +x {} \;
-
-# Windows (PowerShell)
-Copy-Item -Path "templates\.cursor\skills" -Destination "/path/to/your-project\.cursor\skills" -Recurse
-Copy-Item -Path "templates\.cursor\commands" -Destination "/path/to/your-project\.cursor\commands" -Recurse
-```
-
-#### Step 2: 既存データを新しい references/ に転記
-
-旧ファイルに記録していた実際のデータを、対応する新しい references/ ファイルにコピーしてください。
+旧ファイルの記録を、1 判断 1 ファイルの形式に分割します。
 
 例: `.cursor/knowledge.md` に以下の記録があった場合:
+
 ```markdown
 ## 設計判断の記録
 
@@ -212,15 +199,15 @@ REST vs GraphQL の選択
 ...
 ```
 
-これを `.cursor/skills/knowledge-management/references/KNOWLEDGE_TEMPLATE.md` の「設計判断の記録」セクションに転記します。
+これは `.agents/skills/knowledge-management/references/decisions/2025-06-15-api-design.md` として保存し、`decisions/README.md` の一覧に 1 行追加します。`/record-decision` を使えば、ファイル生成と索引更新が自動で行われます。
 
-#### Step 3: カスタマイズしたルール内容を保存
+#### Step 2: カスタマイズしたルール内容を保存
 
-`team-standards.mdc` にプロジェクト固有の規約を書いていた場合は、その内容を `.cursor/skills/team-standards/SKILL.md` の該当セクションに反映してください。
+`team-standards.mdc` にプロジェクト固有の規約を書いていた場合は、その内容を `.agents/skills/team-standards/SKILL.md` の該当セクションに反映してください。
 
-#### Step 4: 旧ファイルを削除
+#### Step 3: 旧ファイルを削除
 
-すべてのデータ転記が完了したら、旧ファイルを削除します:
+すべてのデータ転記が完了したら、旧ファイルを削除します。
 
 ```bash
 rm -rf .cursor/rules/
@@ -228,15 +215,13 @@ rm -f .cursor/knowledge.md .cursor/patterns.md .cursor/context.md
 rm -f .cursor/debug-log.md .cursor/improvements.md
 ```
 
-#### Step 5: 動作確認
+#### Step 4: 動作確認
 
 ```bash
-# 構造検証
-bash .cursor/skills/project-setup/scripts/validate.sh
-
-# Cursor Settings > Rules でスキルが検出されることを確認
-# チャットで / を入力してコマンドが表示されることを確認
+bash .agents/skills/project-setup/scripts/validate.sh
 ```
+
+あわせて、Cursor の Settings > Rules でスキルが検出されること、チャットで `/` を入力してアクションスキルが候補に出ることを確認してください。
 
 ## カスタムルールの移行
 
@@ -257,7 +242,7 @@ alwaysApply: true
 ```
 
 ```yaml
-# 新: .cursor/skills/my-rule/SKILL.md
+# 新: .agents/skills/my-rule/SKILL.md
 ---
 name: my-rule
 description: このスキルが適用される場面の詳細な説明。エージェントはこの説明に基づいて自動判断します。
@@ -275,9 +260,9 @@ description: このスキルが適用される場面の詳細な説明。エー�
 # 新: description に「TypeScript ファイルの編集時に使用」と記載
 ```
 
-### 手動参照のルール → disable-model-invocation スキル
+### 手動参照のルール → アクションスキル
 
-手動で参照していたルールは、自動適用を無効にしたスキルに変換します:
+手動で参照していたルールは、自動適用を無効にしたスキル（アクションスキル）に変換します。`/special-operation` で明示的に呼び出せます。
 
 ```yaml
 ---
@@ -286,6 +271,8 @@ description: 特殊な操作を行うスキル
 disable-model-invocation: true
 ---
 ```
+
+v6 の `/record-decision` などは、すべてこの形式で実装されています。書き方は [アクションスキルガイド](../templates/action-skills-guide.md) を参照してください。
 
 ## よくある質問
 
@@ -296,23 +283,24 @@ A: スキルではエージェントが description に基づいて自動判断�
 A: はい。代わりにエージェントが文脈から判断します。description に「TypeScript ファイルの編集時に使用」のように記載することで、同等の効果が得られます。
 
 **Q: 旧データは消える？**
-A: 自動スクリプトを使う場合、旧ファイルは `.cursor/backup-v2/` にバックアップされます。手動移行の場合は、削除前に必ずバックアップを取ってください。
+A: `init.sh` は `.cursor/rules/` や旧データファイルに触れません。削除は手作業なので、その前に必ずバックアップを取ってください。
 
 **Q: 移行後に元に戻せる？**
-A: `.cursor/backup-v2/` からいつでも復元できます。新しい skills/ と commands/ を削除し、バックアップから rules/ とデータファイルを復元すれば v2.x の状態に戻ります。
+A: バックアップを取ってあれば戻せます。`.agents/skills/` を削除し、バックアップから `rules/` とデータファイルを復元すれば v2.x の状態になります。
 
 **Q: 一部だけ先に移行できる？**
-A: はい。skills/ と rules/ は共存可能です。段階的に移行し、すべてのルールをスキルに変換した後で rules/ を削除できます。
+A: はい。`.agents/skills/` と `.cursor/rules/` は共存できます。段階的に移行し、すべてのルールをスキルに変換した後で `rules/` を削除してください。
 
 ## 次のステップ
 
 移行が完了したら:
 
-- [スキルとコマンドの概要](skills-and-commands.md) - 新しい仕組みの理解
-- [スキルガイド](../templates/skills-guide.md) - 各スキルの使い方
-- [コマンドガイド](../templates/commands-guide.md) - 各コマンドの使い方
-- [カスタムスキル・コマンド作成](../advanced/custom-skills.md) - 独自スキルの作り方
+- [スキルの全体像](skills-and-commands.md) - 新しい仕組みの理解
+- [スキルガイド](../templates/skills-guide.md) - ドメインスキル 7 種の使い方
+- [アクションスキルガイド](../templates/action-skills-guide.md) - `/record-decision` 等の使い方
+- [カスタムスキル作成](../advanced/custom-skills.md) - 独自スキルの作り方
+- [hooks ガイド](../advanced/hooks-guide.md) - 記録を習慣にする仕組み
 
 ---
 
-**サポート**: 移行で問題が発生した場合は、Cursor のチャットで `/migrate-from-rules` コマンドを使用してエージェントに支援を依頼できます。
+**サポート**: 移行で問題が発生した場合は、Cursor のチャットで旧ファイルのパスを示して支援を依頼してください。Cursor 組み込みの `/migrate-to-skills` も、ルールからスキルへの変換に利用できます。

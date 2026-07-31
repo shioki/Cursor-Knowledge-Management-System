@@ -691,6 +691,103 @@ cursor-knowledge-management-system/
 
 ---
 
+## v6.0.0 時点の構成（2026-07）
+
+上記までのスナップショットは各時点の記録です。ここでは現行（v6.0.0）の構成と、そこへ至った判断を記録します。
+
+### 背景
+
+v5 では配布物が `templates/.agents/skills/` と `templates/.cursor/skills/` に二重に存在し、7 つの `SKILL.md` すべてが drift していました。どちらが正なのかがリポジトリの構造から読み取れないことが原因です。
+
+加えて、隠しディレクトリ配下という配置自体が配布経路と噛み合っていませんでした。`gh skill install` は `--allow-hidden-dirs` を付けない限りドットで始まるディレクトリを走査せず、Cursor Plugin のデフォルト探索もプラグインルート直下の `skills/` / `agents/` / `commands/` / `rules/` / `hooks/hooks.json` を見ます。v5 の `plugin.json` はこれを `paths.skills` で補おうとしていましたが、そのキーは公式スキーマ（`additionalProperties: false`）に存在せず、Cursor 側で拒否される状態でした。
+
+### 実施内容
+
+1. **配布物をリポジトリ直下へ集約**
+   - スキルの実体を `skills/` に一本化し、`templates/` からは削除（`templates/.cursor/` は完全撤廃）
+   - `templates/` に残すのは `AGENTS.md.template` / `AGENTS.md.nested-example.md` / `.cursorignore` のみ
+   - 複製の再発は `npm run skills:check` が検出する
+
+2. **Custom Commands のアクションスキルへの統合**
+   - 7 コマンドのうち 6 つを `disable-model-invocation: true` のスキルへ変換。`/record-decision` などの呼び出し方は変わらないまま、Claude Code / Codex でも使えるようになった
+   - `/migrate-from-rules` と `migrate-from-rules.sh` は廃止。Cursor 組み込みの `/migrate-to-skills` と役割が重複するため
+
+3. **hooks と subagent の新規提供**
+   - `hooks/hooks.json`: `sessionStart`（知識の索引を注入・既定有効）、`afterFileEdit`（活動ログ・既定有効）、`stop`（記録提案・既定無効・`loop_limit: 1`）
+   - `agents/knowledge-curator.md`: `readonly: true` の棚卸し用 subagent
+   - hook スクリプトは `jq` / `python` / `node` に依存させず、POSIX シェルの範囲で実装
+
+4. **知識層を 1 概念 1 ファイルへ**
+   - 技術判断は `skills/knowledge-management/references/decisions/YYYY-MM-DD-スラッグ.md`、パターンは `skills/pattern-library/references/patterns/スラッグ.md`、改善は `skills/improvement-tracking/references/improvements/YYYY-MM-DD-スラッグ.md`
+   - 各ディレクトリの `README.md` が索引。旧 `*_TEMPLATE.md` はレガシー記録の保管場所として残す
+   - 単一ファイルへの追記方式では、参照のたびに全文が読み込まれ、オンデマンド読み込みの前提が崩れるため
+
+5. **plugin.json の公式スキーマ準拠**
+   - `paths` / `compatibility` / `author.url` を削除し、`repository` を文字列 URI に変更
+   - スキーマを `schemas/cursor-plugin.schema.json` にベンダリングし、`scripts/check-plugin-manifest.mjs` が ajv で検証
+   - コンポーネントの場所は明示せず、デフォルト探索に任せる
+
+6. **検証スクリプトの再編**
+   - `commands:check` を廃止し、hooks と subagent を検証する `components:check` に置き換え
+   - `skills:check` を yaml パーサによる Agent Skills 仕様準拠検証へ刷新し、`templates/` への複製ガードを内蔵
+   - `links:check` の対象に `skills/` / `agents/` / `hooks/` / `templates/` を追加
+   - `skill:check`（`gh skill publish --dry-run`）を追加
+   - `release.sh` は `npm` が無い環境で検証をスキップせず、エラーで停止するよう変更
+
+7. **セットアップスクリプト**
+   - ソースは `skills/project-setup/scripts/init.sh`
+   - `--yes` / `-Yes` による非対話モードを追加（非対話環境ではプロンプトで停止せずスキップ）
+   - `--no-hooks` / `--no-agents` で hooks・subagent の配置を抑止できる
+   - 配置先は `<base>/skills/`、`<base>/debug-sessions/`、`.cursor/agents/`、`.cursor/hooks/` と `.cursor/hooks.json`、`.cursorignore`
+
+### リポジトリ構成（v6.0.0 時点）
+
+```
+Cursor-Knowledge-Management-System/
+├── skills/                             # Agent Skills 13 種（唯一の正）
+│   ├── project-context/                # ドメイン（自動選択）7 種
+│   ├── team-standards/
+│   ├── knowledge-management/           # references/decisions/ が技術判断の置き場
+│   ├── pattern-library/                # references/patterns/
+│   ├── debug-workflow/
+│   ├── improvement-tracking/           # references/improvements/
+│   ├── project-setup/                  # scripts/{init.sh,init.ps1,validate.sh}
+│   ├── record-decision/                # アクション（明示起動）6 種
+│   ├── add-pattern/
+│   ├── start-debug/
+│   ├── log-improvement/
+│   ├── review-knowledge/
+│   └── update-context/
+├── agents/
+│   └── knowledge-curator.md            # 知識ベース棚卸し subagent（readonly）
+├── hooks/
+│   ├── hooks.json
+│   ├── _hook-lib.sh                    # 共通ライブラリ
+│   ├── inject-knowledge-index.sh       # sessionStart
+│   ├── log-activity.sh                 # afterFileEdit
+│   └── suggest-record.sh               # stop（既定無効）
+├── .cursor-plugin/plugin.json          # 公式スキーマ準拠のマニフェスト
+├── schemas/cursor-plugin.schema.json   # ベンダリングした公式スキーマ
+├── apm.yml                             # paths: skills / agents / hooks
+├── templates/
+│   ├── AGENTS.md.template
+│   ├── AGENTS.md.nested-example.md
+│   └── .cursorignore
+├── scripts/
+│   ├── check-skill-structure.mjs
+│   ├── check-components.mjs
+│   ├── check-plugin-manifest.mjs
+│   ├── check-links.mjs
+│   └── release.sh
+└── docs/
+```
+
+### この構成が解いた問題
+
+配布経路ごとに配置を変える必要がなくなりました。Cursor Plugin のデフォルト探索、`gh skill install`、`apm install` の 3 経路が同じディレクトリをそのまま読み、`init.sh` も同じ場所からコピーします。正が 1 箇所しかないため、v5 のような drift が構造的に起こりません。
+
+---
+
 **作成者**: AI Assistant (Claude Sonnet 4 → Claude claude-4.6-opus-high-thinking)  
 **協力**: shioki氏（品質管理・技術調査・ユーザビリティ改善提案・アーキテクチャ方針決定）  
 **重要な貢献**: MDC形式の発見と移行提案、テンプレートガイド分割提案、Agent Skills + Commands 全面移行の方針決定
