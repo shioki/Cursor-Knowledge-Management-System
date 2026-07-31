@@ -99,7 +99,14 @@ if [[ ! -f "$NOTES_FILE" ]]; then
   exit 1
 fi
 
-TITLE="${VERSION} - Knowledge Management Plugin"
+# タイトルの副題はリリースノートの Codename から取る。ハードコードすると
+# 版が上がるたびに前版の副題が残る。
+CODENAME=$(sed -n 's/^\*\*Codename\*\*:[[:space:]]*//p' "$NOTES_FILE" | head -1)
+if [[ -n "$CODENAME" ]]; then
+  TITLE="${VERSION} - ${CODENAME}"
+else
+  TITLE="$VERSION"
+fi
 echo ""
 echo "リリースを作成します: $VERSION"
 echo "  タイトル: $TITLE"
