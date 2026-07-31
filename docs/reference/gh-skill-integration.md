@@ -120,9 +120,9 @@ gh skill publish
 
 ### Immutable release の有効化
 
-本パッケージのサプライチェーン保全のため、GitHub リポジトリ設定で **immutable releases** を有効化してください:
+本パッケージのサプライチェーン保全のため、GitHub リポジトリ設定で **release immutability** を有効化してください:
 
-**Settings → Rules → Releases → Require immutable**
+**Settings → General → Releases → Enable release immutability**
 
 これにより、公開済みのタグやリリースアセットが（管理者であっても）書き換えられなくなり、`gh skill install --pin` で固定したユーザーは常に同じ内容を取得できるようになります。
 

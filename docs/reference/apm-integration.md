@@ -103,7 +103,7 @@ hooks を同梱している以上、導入側は実行されるスクリプト�
 
 ### immutable release の有効化
 
-GitHub リポジトリの **Settings → Rules → Releases → Require immutable** を有効化すると、公開後のリリース内容を改竄できなくなり、APM / gh skill 両方での供給網保全に寄与します。
+GitHub リポジトリの **Settings → General → Releases → Enable release immutability** を有効化すると、公開後のリリース内容を改竄できなくなり、APM / gh skill 両方での供給網保全に寄与します。
 
 ## 関連ドキュメント
 

@@ -319,7 +319,7 @@ npm run release -- v6.0.0
 
 **Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、Git Bash または WSL で実行してください。
 
-**immutable release の有効化（推奨）**: GitHub リポジトリの Settings → Rules → Releases → Require immutable を有効化してください。`gh skill install --pin` や `apm install <repo>#<tag>` の供給網保全に寄与します。
+**immutable release の有効化（推奨）**: GitHub リポジトリの Settings → General → Releases → Enable release immutability を有効化してください。`gh skill install --pin` や `apm install <repo>#<tag>` の供給網保全に寄与します。
 
 ## ライセンス
 

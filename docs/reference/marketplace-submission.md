@@ -18,7 +18,7 @@ Cursor Marketplace は公開前に手動セキュリティレビューが行わ�
 
 ### 推奨
 
-- [ ] GitHub リポジトリで **immutable releases** を有効化している（`Settings → Rules → Releases → Require immutable`）
+- [ ] GitHub リポジトリで **release immutability** を有効化している（`Settings → General → Releases → Enable release immutability`）
 - [ ] **Tag protection** を設定し、勝手にタグを書き換えられないようにしている
 - [ ] **Secret scanning** を有効化している
 - [ ] **Code scanning** を有効化している（CodeQL など）

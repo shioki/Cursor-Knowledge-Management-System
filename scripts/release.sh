@@ -116,7 +116,7 @@ echo ""
 # --- immutable release の警告 ---
 cat <<'EOF'
 [INFO] immutable release の推奨
-  GitHub リポジトリの Settings → Rules → Releases → Require immutable を有効化してください。
+  GitHub リポジトリの Settings → General → Releases → Enable release immutability を有効化してください。
   これにより、公開後のタグ・アセットの改竄が防止され、`gh skill install --pin` および
   `apm install <repo>#<tag>` の供給網保全に寄与します。
 EOF
