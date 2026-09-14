@@ -104,7 +104,7 @@ apm install
 
 詳細は [APM 連携](docs/reference/apm-integration.md) を参照してください。
 
-> **Claude Code で使う場合の注意**: 上記 2〜4 の経路はファイルを配置するだけで、`init.sh` が行う `.claude/skills` の橋渡し（シンボリックリンク作成）や `CLAUDE.md` の生成は行いません。Claude Code でも使いたい場合は、下記の「手動コピー」にある Claude Code 橋渡しの手順を追加で実行してください。
+> **Claude Code で使う場合の注意**: Marketplace / `gh skill` / APM はファイルを置くだけで、`init.sh` が行う `.claude/skills` のシンボリックリンクや `CLAUDE.md` は作りません。これは後から足す予定の欠落ではなく、それらの経路に post-install を載せる仕組みが無い（APM の lifecycle も利用側プロジェクト + trust 前提）ための設計です。スキルだけ Claude Code に入れるなら `gh skill install … --agent claude-code` で足ります。hooks と `CLAUDE.md` まで揃えるなら `init.sh`、または下記の手動コピーを使ってください。詳細は [APM 連携](docs/reference/apm-integration.md) と [gh skill 連携](docs/reference/gh-skill-integration.md) を参照してください。
 
 ### 手動コピー
 

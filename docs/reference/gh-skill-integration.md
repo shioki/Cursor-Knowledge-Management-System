@@ -39,7 +39,9 @@ gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management 
 gh skill install shioki/Cursor-Knowledge-Management-System debug-workflow --agent claude-code
 ```
 
-`--agent claude-code` は `.claude/skills/` に直接インストールするため、`init.sh` のようなシンボリックリンク橋渡しは不要です（スキル自体はこの経路が一番シンプルです）。ただし `gh skill install` が扱うのはスキル単体のみで、hooks（`hooks/claude-code/` + `.claude/settings.json`）や `CLAUDE.md` の生成は行いません。これらも使いたい場合は [README.md の「手動コピー」](../../README.md#手動コピー) を参照してください。
+`--agent claude-code` は `.claude/skills/` に直接インストールするため、`init.sh` のようなシンボリックリンク橋渡しは不要です（スキル自体はこの経路が一番シンプルです）。ただし `gh skill install` が扱うのはスキル単体のみで、hooks（`hooks/claude-code/` + `.claude/settings.json`）や `CLAUDE.md` の生成は行いません。
+
+`gh skill` に post-install hook は無く、スキルコピー以外をこの経路で自動化する手段はありません。hooks と `CLAUDE.md` も使いたい場合は [README.md の「手動コピー」](../../README.md#手動コピー) か `init.sh` を使ってください。スキルだけ Claude Code に載せたい用途では、`--agent claude-code` で完結します。
 
 ### Codex 向け
 

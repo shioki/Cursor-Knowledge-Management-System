@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **APM / gh skill の Claude Code 橋渡し**: これらの経路では symlink / `CLAUDE.md` / settings を自動化しない、と明言した（利用側 lifecycle + trust は `init.sh` より重い。`gh skill` に post-install は無い）。スキルだけなら `gh skill install --agent claude-code`。フル構成は `init.sh`
+
 ### Fixed
 
 - **`init.sh` の相互排他フラグ検証**: `--legacy-claude` と `--cursor-only` を同時に指定すると、`init.ps1` はエラーにするのに `init.sh` は後勝ちで `--cursor-only` を黙って採用していた。`init.sh` にも同じ相互排他チェックを追加

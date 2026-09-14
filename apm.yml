@@ -21,10 +21,11 @@ homepage: https://github.com/shioki/Cursor-Knowledge-Management-System
 # v6.0.0: 非隠しディレクトリをリポジトリ直下に置き、Cursor Plugin のデフォルト探索と
 #         gh skill の探索（--allow-hidden-dirs 不要）の両方をそのまま通す。
 #
-# 注意: apm install はファイルを配置するだけで、init.sh のような橋渡し処理
-# （.claude/skills のシンボリックリンク作成、CLAUDE.md 生成）は行わない。
-# APM 経由で Claude Code にも使わせたい場合は、README.md の「手動コピー」に
-# ある Claude Code 橋渡しの手順を別途実行すること。
+# 注意: apm install はファイル配置のみ。Claude Code 橋渡し（.claude/skills の
+# シンボリックリンク、CLAUDE.md、settings.json）は自動化しない（設計判断。
+# APM lifecycle は利用側プロジェクト + trust 前提であり、gh skill に
+# post-install は無い）。フル構成は init.sh、スキルだけなら
+# `gh skill install --agent claude-code`。詳細は docs/reference/apm-integration.md
 paths:
   skills: skills
   agents: agents
