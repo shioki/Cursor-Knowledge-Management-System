@@ -4,7 +4,7 @@
 
 Cursor Knowledge Management System をチーム全体に導入し、知識共有と開発品質の向上を実現するためのガイドです。
 
-v6 では配布物がスキル 13 種・subagent・hooks の 3 つにまとまり、すべてリポジトリのファイルとして共有されます。Cursor 専用の設定は subagent と hooks だけで、スキルは Cursor / Claude Code / Codex のどれからでも同じものが読まれます。チーム内でエディタが統一されていなくても、知識ベースは共有できます。
+v6 では配布物がスキル 13 種・subagent・hooks の 3 つにまとまり、すべてリポジトリのファイルとして共有されます。スキルの実体は `.agents/skills/` の 1 か所で、Cursor / Codex はこれを直接読み、Claude Code は `.claude/skills` へのシンボリックリンク（`init.sh` が自動作成）経由で読みます。subagent は Cursor 専用、hooks は Cursor 版・Claude Code 版の両方を用意しています。チーム内でエディタが統一されていなくても、知識ベースは共有できます。
 
 ## 導入フロー
 

@@ -145,7 +145,12 @@ echo ""
 echo "--- スクリプト権限検証 ---"
 SCRIPT_COUNT=0
 MISSING_EXEC=0
-for base in .agents/skills .claude/skills .cursor/skills .cursor/hooks; do
+for base in .agents/skills .claude/skills .cursor/skills .cursor/hooks .claude/hooks; do
+  # シンボリックリンク（Claude Code 橋渡し）は他の base の実体を指しているため、
+  # 二重カウントを避けてここではスキップする（存在確認は別セクションで行う）。
+  if [ -L "$base" ]; then
+    continue
+  fi
   if [ -d "$base" ]; then
     while IFS= read -r script; do
       SCRIPT_COUNT=$((SCRIPT_COUNT + 1))
@@ -188,6 +193,33 @@ if [ -f "AGENTS.md" ]; then
   echo "  [OK] AGENTS.md が見つかりました"
 else
   echo "  [INFO] AGENTS.md はありません（init.sh --with-agents-md で追加できます）"
+fi
+
+if [ -f "CLAUDE.md" ]; then
+  if grep -q '^@AGENTS.md$' "CLAUDE.md" 2>/dev/null; then
+    echo "  [OK] CLAUDE.md が見つかりました（@AGENTS.md を import）"
+  else
+    echo "  [WARN] CLAUDE.md はありますが @AGENTS.md の import がありません"
+    WARNINGS=$((WARNINGS + 1))
+  fi
+else
+  echo "  [INFO] CLAUDE.md はありません（init.sh --with-agents-md で追加できます）"
+fi
+
+if [ "$SKILLS_BASE" = ".agents/skills" ]; then
+  if [ -L ".claude/skills" ]; then
+    if [ -d ".claude/skills" ]; then
+      echo "  [OK] .claude/skills（Claude Code 橋渡し）が ${SKILLS_BASE} を正しく解決しています"
+    else
+      echo "  [ERROR] .claude/skills が壊れたシンボリックリンクです（リンク先が存在しません）"
+      ERRORS=$((ERRORS + 1))
+    fi
+  elif [ -d ".claude/skills" ]; then
+    echo "  [WARN] .claude/skills がシンボリックリンクではなくコピーです。${SKILLS_BASE} の更新が反映されません"
+    WARNINGS=$((WARNINGS + 1))
+  else
+    echo "  [INFO] .claude/skills（Claude Code 橋渡し）はありません（init.sh --no-claude-bridge を外すと作成されます）"
+  fi
 fi
 
 echo ""

@@ -39,17 +39,21 @@ bash skills/project-setup/scripts/init.sh /path/to/your-project
 ```text
 your-project/
 ├── .agents/
-│   ├── skills/              # スキル 13 種
+│   ├── skills/              # スキル 13 種（唯一の実体）
 │   └── debug-sessions/      # デバッグセッションの保存先
+├── .claude/
+│   ├── skills/              # .agents/skills へのシンボリックリンク
+│   ├── hooks/               # 記録支援スクリプト（Claude Code 用）
+│   └── settings.json
 ├── .cursor/
 │   ├── agents/
 │   │   └── knowledge-curator.md
-│   ├── hooks/               # 記録支援スクリプト
+│   ├── hooks/               # 記録支援スクリプト（Cursor 用）
 │   └── hooks.json
 └── .cursorignore
 ```
 
-`.agents/skills/` は Cursor・Claude Code・Codex が共通で読み込む公式ディレクトリです。1 か所に置けば 3 つのエージェントで共有できます。
+`.agents/skills/` は Cursor と Codex が直接読み込む公式ディレクトリです。Claude Code は `.claude/skills/` しか標準で探索しないため、`init.sh` がシンボリックリンクを自動作成して橋渡しします（`--no-claude-bridge` で無効化可）。
 
 ### 主なオプション
 
@@ -58,9 +62,10 @@ your-project/
 | `--yes` / `-Yes` | すべての確認に yes と答える |
 | `--legacy-claude` | `.claude/skills` に配置（v4.x 互換） |
 | `--cursor-only` | `.cursor/skills` に配置（Cursor のみ） |
-| `--with-agents-md` | `AGENTS.md` テンプレートも配置 |
+| `--with-agents-md` | `AGENTS.md` テンプレートも配置（`CLAUDE.md` も同時に作成） |
 | `--no-hooks` | hooks を配置しない |
 | `--no-agents` | subagent を配置しない |
+| `--no-claude-bridge` | `.claude/skills` への橋渡しを作らない |
 
 ### 手動でコピーする場合
 

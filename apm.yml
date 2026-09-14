@@ -12,7 +12,7 @@
 #
 name: cursor-knowledge-management-system
 version: 6.0.0
-description: "Cursor / Claude Code / Codex 共用。Agent Skills 13 種で技術判断・パターン・デバッグ・改善活動を蓄積。知識キュレーター subagent と記録支援 hooks を同梱。"
+description: "Agent Skills 13 種で技術判断・パターン・デバッグ・改善活動を蓄積。Cursor / Codex は skills/ を直接読み込み、Claude Code は .claude/skills への手動または init.sh 橋渡しで利用（下記 paths コメント参照）。知識キュレーター subagent と記録支援 hooks（Cursor 版・Claude Code 版）を同梱。"
 author: shioki
 license: MIT
 homepage: https://github.com/shioki/Cursor-Knowledge-Management-System
@@ -20,6 +20,11 @@ homepage: https://github.com/shioki/Cursor-Knowledge-Management-System
 # このパッケージが提供するコンポーネントの配置
 # v6.0.0: 非隠しディレクトリをリポジトリ直下に置き、Cursor Plugin のデフォルト探索と
 #         gh skill の探索（--allow-hidden-dirs 不要）の両方をそのまま通す。
+#
+# 注意: apm install はファイルを配置するだけで、init.sh のような橋渡し処理
+# （.claude/skills のシンボリックリンク作成、CLAUDE.md 生成）は行わない。
+# APM 経由で Claude Code にも使わせたい場合は、README.md の「手動コピー」に
+# ある Claude Code 橋渡しの手順を別途実行すること。
 paths:
   skills: skills
   agents: agents

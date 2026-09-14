@@ -4,12 +4,21 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Claude Code ネイティブ対応**: `.agents/skills` を Claude Code が標準では探索しない問題を修正するため、`init.sh` / `init.ps1` が `.claude/skills` へのシンボリックリンク（またはフォールバックのコピー）を自動作成するようにした（`--no-claude-bridge` で無効化可）
+- **CLAUDE.md の自動生成**: `--with-agents-md` 指定時、`@AGENTS.md` を import するだけの `CLAUDE.md` も作成するようにした（Claude Code は AGENTS.md を自動では読まないため）
+- **Claude Code 版 hooks**: `hooks/claude-code/`（`session-start.sh` / `post-tool-use-log-activity.sh` / `stop-suggest-record.sh`）と `templates/.claude/settings.json.template` を追加。Cursor 版と同じ挙動を `.claude/settings.json` のスキーマ（`SessionStart` / `PostToolUse` / `Stop`）で提供する
+- **知識索引ロジックの共通化**: `hooks/_hook-lib.sh` に `ckms_build_knowledge_index` を追加し、Cursor 版・Claude Code 版の sessionStart hook が共通ロジックを使うようにした
+
 ### Changed
 
 - **並行利用ガイド**: Cursor と Claude Code で調査と実装を分けるときの引き継ぎ形式（再現・対象・方針・テスト・完了報告）を追記
 
 ### Fixed
 
+- **CKMS 自身の Claude Code 対応**: リポジトリ直下に `CLAUDE.md`（`@AGENTS.md` を import）と `.claude/skills`（`skills/` へのシンボリックリンク）を追加し、このリポジトリ自体を Claude Code から開いたときに AGENTS.md とスキルが読み込まれるようにした
+- **ドキュメントの是正**: 「`.agents/skills/` に置けば Claude Code からも自動で読み込まれる」という不正確な説明を、実際の橋渡しの仕組み（シンボリックリンク、CLAUDE.md import）に基づく説明へ修正（README、各種ガイド、`apm.yml`、`.cursor-plugin/plugin.json`）
 - **記録スクリプトのタイトルエスケープ**: `|` / `:` / `"` / 改行を含むタイトルで YAML frontmatter と索引 `README.md` の表が壊れていた。`_skill-base.sh` に `ckms_yaml_escape` / `ckms_table_escape` を追加し、`add-entry.sh` / `add-pattern.sh` / `add-improvement.sh` と `ckms_index_upsert` で適用する
 - **スラッグ化の改行混入**: タイトル内の改行が `sed` の行分割でファイル名に残る問題を、`ckms_slugify` で改行を先に畳むことで修正
 - **`ckms_read_title`**: ダブルクォートで囲まれた `title` の `\"` / `\\` を復元するよう更新

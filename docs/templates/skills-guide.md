@@ -352,7 +352,7 @@ bash .agents/skills/improvement-tracking/scripts/add-improvement.sh "API レス�
 #### セットアップ
 
 ```bash
-# 既定: .agents/skills に配置（Cursor / Claude Code / Codex 共用）
+# 既定: .agents/skills に配置。Claude Code へは .claude/skills のシンボリックリンクで橋渡し
 bash skills/project-setup/scripts/init.sh /path/to/your-project
 
 # 非対話モード（CI 向け）
@@ -364,9 +364,10 @@ bash skills/project-setup/scripts/init.sh /path/to/your-project --yes
 | `--yes` / `-y` | すべての確認に yes と答える |
 | `--legacy-claude` | `.claude/skills` に配置（v4.x 互換） |
 | `--cursor-only` | `.cursor/skills` に配置（Cursor のみ） |
-| `--with-agents-md` | `AGENTS.md` テンプレートも配置 |
+| `--with-agents-md` | `AGENTS.md` テンプレートも配置（`CLAUDE.md` も同時に作成） |
 | `--no-hooks` | hooks を配置しない |
 | `--no-agents` | subagent を配置しない |
+| `--no-claude-bridge` | `.claude/skills` への橋渡しを作らない |
 
 Windows では同じディレクトリの `init.ps1`、または Git Bash / WSL で `init.sh` を使ってください。
 

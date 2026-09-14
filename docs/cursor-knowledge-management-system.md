@@ -175,6 +175,10 @@ your-project/
 │   ├── debug-sessions/
 │   ├── knowledge-activity.log                   # hooks が生成
 │   └── knowledge-hooks.conf                     # hooks の設定（任意）
+├── .claude/
+│   ├── skills/                                   # .agents/skills へのシンボリックリンク
+│   ├── hooks/
+│   └── settings.json
 ├── .cursor/
 │   ├── agents/knowledge-curator.md
 │   ├── hooks/
@@ -182,7 +186,7 @@ your-project/
 └── .cursorignore
 ```
 
-`.agents/` は Cursor・Claude Code・Codex が共通で読み込む公式ディレクトリです。`.cursor/` に置かれる subagent と hooks は Cursor 固有の機能なので共有されませんが、どちらも補助機能であり、無くてもスキルは動作します。
+`.agents/` はスキルの実体を置く唯一のディレクトリです。Cursor と Codex はこれを直接読みますが、**Claude Code は `.agents/` を標準では探索しない**ため、`.claude/skills` へのシンボリックリンクで橋渡しします（`init.sh` が自動作成）。`.cursor/` に置かれる subagent は Cursor 固有の機能で共有されませんが、補助機能なので無くてもスキルは動作します。hooks は Cursor 版・Claude Code 版の両方を用意しています。
 
 ## 知識管理の方法論
 

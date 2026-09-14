@@ -10,17 +10,21 @@ Cursor Knowledge Management System（CKMS）そのもののリポジトリです
 |-------------|------|
 | `skills/` | Agent Skills 13 種（唯一の正） |
 | `agents/` | subagent 定義 |
-| `hooks/` | `hooks.json` と hook スクリプト |
+| `hooks/` | `hooks.json` と hook スクリプト（Cursor 用）、`hooks/claude-code/` に Claude Code 用 |
 | `.cursor-plugin/` | プラグインマニフェスト |
 | `templates/` | `AGENTS.md` テンプレートと `.cursorignore` |
 | `scripts/` | CI 検証・リリース用スクリプト |
 | `docs/` | ドキュメント |
+| `CLAUDE.md` | `@AGENTS.md` の import のみ。本文を複製しない |
+| `.claude/skills` | `skills/` へのシンボリックリンク。Claude Code はこのパスしか探索しないため橋渡しする |
 
 ## 守ること
 
 ### 配布物を複製しない
 
 `skills/` の内容を `templates/` などに複製しないでください。v5 では `templates/.agents/skills/` と `templates/.cursor/skills/` の二重管理により、7 つの `SKILL.md` すべてが drift しました。`npm run skills:check` がこの再発を検出します。
+
+同じ理由で、`.claude/skills` は `skills/` のシンボリックリンクとして扱い、複製しないでください（`init.sh` の配布先でも同様。シンボリックリンクが張れない環境のみ、警告を出した上でコピーにフォールバックします）。
 
 ### スキルの規約
 

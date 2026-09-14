@@ -6,7 +6,7 @@ v6.0.0 で、CKMS が提供する機能はすべて Agent Skills に統一され
 
 ## Agent Skills とは
 
-エージェントにドメイン固有の能力を追加する仕組みです。`SKILL.md` を含むフォルダとして定義し、`.agents/skills/` に置くと Cursor・Claude Code・Codex が共通して読み込みます。
+エージェントにドメイン固有の能力を追加する仕組みです。`SKILL.md` を含むフォルダとして定義し、`.agents/skills/` に置きます。Cursor と Codex はこのディレクトリを直接読みますが、Claude Code は `.claude/skills/` しか標準で探索しないため、CKMS は `.claude/skills` を `.agents/skills` へのシンボリックリンクとして自動作成して橋渡しします（`init.sh` 参照）。
 
 ```text
 .agents/skills/

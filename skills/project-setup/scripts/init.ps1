@@ -15,8 +15,11 @@
 #   WithAgentsMd  - AGENTS.md テンプレートも配置（既存は保持）
 #   NoHooks       - hooks を配置しない
 #   NoAgents      - subagent を配置しない
+#   NoClaudeBridge - .claude/skills への橋渡し（Claude Code 用）を作らない
 #
-# デフォルト: .agents/skills に配置（Cursor / Claude Code / Codex 共用）
+# デフォルト: .agents/skills に配置。Cursor はこれをそのまま読み、Claude Code は
+# .agents/skills を標準では探索しないため、.claude/skills にシンボリックリンク
+# （権限が無い環境ではコピー）で橋渡しする。
 #
 # 注意: 知識管理スクリプト（*.sh）の実行には Git Bash または WSL が必要です。
 
@@ -34,7 +37,9 @@ param(
     [Parameter(Mandatory = $false)]
     [switch]$NoHooks,
     [Parameter(Mandatory = $false)]
-    [switch]$NoAgents
+    [switch]$NoAgents,
+    [Parameter(Mandatory = $false)]
+    [switch]$NoClaudeBridge
 )
 
 $ErrorActionPreference = "Stop"
@@ -91,7 +96,10 @@ Write-Host "ターゲット: $TargetPath"
 Write-Host "モード:     $ModeLabel"
 Write-Host ("hooks:      " + $(if ($NoHooks) { "配置しない" } else { "配置する" }))
 Write-Host ("subagent:   " + $(if ($NoAgents) { "配置しない" } else { "配置する" }))
-Write-Host ("AGENTS.md:  " + $(if ($WithAgentsMd) { "配置する" } else { "配置しない" }))
+Write-Host ("AGENTS.md:  " + $(if ($WithAgentsMd) { "配置する（CLAUDE.md も作成）" } else { "配置しない" }))
+if (-not $CursorOnly -and -not $LegacyClaude) {
+    Write-Host ("Claude Code 橋渡し (.claude/skills): " + $(if ($NoClaudeBridge) { "作成しない" } else { "作成する" }))
+}
 Write-Host ""
 
 # skills/
@@ -118,6 +126,30 @@ if (-not (Test-Path $SessionsDest)) {
     New-Item -ItemType Directory -Path $SessionsDest -Force | Out-Null
     New-Item -ItemType File -Path (Join-Path $SessionsDest ".gitkeep") -Force | Out-Null
     Write-Host "debug-sessions/ を作成しました"
+}
+
+# .claude/skills への橋渡し（Claude Code 用）
+# シンボリックリンクの作成には管理者権限または開発者モードが必要な場合がある。
+# 失敗した場合はコピーにフォールバックする（自動追従はしない）。
+$ClaudeDir = Join-Path $TargetPath ".claude"
+if (-not $CursorOnly -and -not $LegacyClaude -and -not $NoClaudeBridge) {
+    $ClaudeSkillsDest = Join-Path $ClaudeDir "skills"
+    if (Test-Path $ClaudeSkillsDest) {
+        Write-Host "情報: $ClaudeSkillsDest は既に存在します（変更しません）"
+    } else {
+        if (-not (Test-Path $ClaudeDir)) {
+            New-Item -ItemType Directory -Path $ClaudeDir -Force | Out-Null
+        }
+        try {
+            New-Item -ItemType SymbolicLink -Path $ClaudeSkillsDest -Target $SkillsDest -ErrorAction Stop | Out-Null
+            Write-Host "Claude Code 用に .claude/skills を作成しました（$SkillsDest へのシンボリックリンク）"
+        } catch {
+            Copy-Item -Path $SkillsDest -Destination $ClaudeSkillsDest -Recurse -Force
+            Write-Host "警告: シンボリックリンクを作成できなかったため .claude/skills をコピーしました"
+            Write-Host "      このコピーは自動追従しません。$SkillsDest を更新したら再実行してください"
+            Write-Host "      （管理者権限または開発者モードでシンボリックリンクが作成できます）"
+        }
+    }
 }
 
 $CursorDir = Join-Path $TargetPath ".cursor"
@@ -195,6 +227,27 @@ if (-not $NoHooks) {
             Write-Host "hooks.json を作成しました: $HooksJson"
         }
         Write-Host "注意: hooks スクリプトの実行には Git Bash または WSL が必要です"
+
+        # Claude Code 用 hooks（.agents 配置かつ橋渡しが有効な場合のみ）
+        $SourceClaudeHooks = Join-Path $SourceHooks "claude-code"
+        if (-not $CursorOnly -and -not $LegacyClaude -and -not $NoClaudeBridge -and (Test-Path $SourceClaudeHooks)) {
+            $ClaudeHooksDest = Join-Path $ClaudeDir "hooks"
+            if (-not (Test-Path $ClaudeHooksDest)) {
+                New-Item -ItemType Directory -Path $ClaudeHooksDest -Force | Out-Null
+            }
+            Copy-Item -Path (Join-Path $SourceClaudeHooks "*.sh") -Destination $ClaudeHooksDest -Force
+            Write-Host "Claude Code 用 hooks スクリプトを配置しました: $ClaudeHooksDest"
+
+            $ClaudeSettings = Join-Path $ClaudeDir "settings.json"
+            $ClaudeSettingsSrc = Join-Path $SourceTemplates ".claude\settings.json.template"
+            if (Test-Path $ClaudeSettings) {
+                Write-Host "情報: $ClaudeSettings は既に存在します（上書きしません）"
+                Write-Host "      hooks / permissions を手動で統合してください: $ClaudeSettingsSrc"
+            } elseif (Test-Path $ClaudeSettingsSrc) {
+                Copy-Item -Path $ClaudeSettingsSrc -Destination $ClaudeSettings -Force
+                Write-Host "settings.json を作成しました: $ClaudeSettings"
+            }
+        }
     }
 }
 
@@ -227,6 +280,17 @@ if ($WithAgentsMd) {
         Copy-Item -Path $AgentsMdSrc -Destination $AgentsMdDest -Force
         Write-Host "AGENTS.md をコピーしました"
     }
+
+    # Claude Code は AGENTS.md を自動では読まないため、import 一行だけの
+    # CLAUDE.md を置いて橋渡しする（本文は複製しない）。
+    $ClaudeMdDest = Join-Path $TargetPath "CLAUDE.md"
+    if (Test-Path $ClaudeMdDest) {
+        Write-Host "情報: $ClaudeMdDest は既に存在します（上書きしません）"
+        Write-Host "      AGENTS.md を読ませるには '@AGENTS.md' の行を追加してください"
+    } else {
+        Set-Content -Path $ClaudeMdDest -Value "@AGENTS.md" -Encoding UTF8
+        Write-Host "CLAUDE.md を作成しました（@AGENTS.md を import）"
+    }
 }
 
 Write-Host ""
@@ -243,6 +307,8 @@ if ($CursorOnly) {
     Write-Host "（.cursor/skills は Cursor のみが読み込みます）"
 } elseif ($LegacyClaude) {
     Write-Host "（Cursor と Claude Code で .claude/skills を共有利用できます）"
+} elseif ($NoClaudeBridge) {
+    Write-Host "（Cursor / Codex は .agents/skills を読み込みます。Claude Code 用の橋渡しは -NoClaudeBridge で無効化されています）"
 } else {
-    Write-Host "（Cursor / Claude Code / Codex で .agents/skills を共有利用できます）"
+    Write-Host "（Cursor は .agents/skills を、Claude Code は .claude/skills 経由の橋渡しで読み込みます。Codex は .agents/skills を直接読みます）"
 }

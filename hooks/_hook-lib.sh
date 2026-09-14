@@ -64,3 +64,64 @@ ckms_noop_exit() {
   printf '{}'
   exit 0
 }
+
+# 蓄積済み知識（技術判断・パターン・改善記録・デバッグセッション）の索引を
+# Markdown テキストとして組み立てる。中身は読み込まず、ファイル名とタイトルの
+# 一覧だけを返す。エージェント間で共通のロジックなので、sessionStart 系の
+# hook（Cursor の inject-knowledge-index.sh、Claude Code の session-start.sh）
+# の両方から呼ぶ。
+#
+# 該当する記録が 1 件もない場合は空文字を返す（呼び出し側で noop に分岐する）。
+#
+# Usage: ckms_build_knowledge_index <base>
+ckms_build_knowledge_index() {
+  local base="$1" max_entries body
+
+  max_entries="$(ckms_conf "$base" index_max_entries 30)"
+  case "$max_entries" in
+    ''|*[!0-9]*) max_entries=30 ;;
+  esac
+
+  # カテゴリ内のファイルを「- ファイル名 — title」の形式で列挙する。
+  # Usage: _ckms_list_category <ディレクトリ> <見出し>
+  _ckms_list_category() {
+    local dir="$1" heading="$2" count=0 total=0 file title
+    [ -d "$dir" ] || return 0
+
+    total=$(find "$dir" -maxdepth 1 -name '*.md' ! -name 'README.md' 2>/dev/null | wc -l | tr -d ' ')
+    [ "$total" -gt 0 ] || return 0
+
+    printf '\n### %s（%s 件）\n' "$heading" "$total"
+    while IFS= read -r file; do
+      [ "$count" -lt "$max_entries" ] || break
+      title="$(ckms_read_title "$file")"
+      if [ -n "$title" ]; then
+        printf -- '- `%s` — %s\n' "$(basename "$file")" "$title"
+      else
+        printf -- '- `%s`\n' "$(basename "$file")"
+      fi
+      count=$((count + 1))
+    done <<< "$(find "$dir" -maxdepth 1 -name '*.md' ! -name 'README.md' 2>/dev/null | sort -r)"
+
+    if [ "$total" -gt "$count" ]; then
+      printf -- '- （ほか %s 件。ディレクトリを一覧して確認してください）\n' "$((total - count))"
+    fi
+  }
+
+  body="$(
+    _ckms_list_category "${base}/skills/knowledge-management/references/decisions" "技術判断"
+    _ckms_list_category "${base}/skills/pattern-library/references/patterns" "実装パターン"
+    _ckms_list_category "${base}/skills/improvement-tracking/references/improvements" "改善記録"
+    _ckms_list_category "${base}/debug-sessions" "デバッグセッション"
+  )"
+
+  [ -n "$body" ] || return 0
+
+  printf '## このプロジェクトに蓄積済みの知識（索引）\n'
+  printf '\n'
+  printf 'ベースディレクトリ: `%s/`\n' "$base"
+  printf '%s\n' "$body"
+  printf '\n'
+  printf 'これは索引です。内容が必要になった時点で該当ファイルだけを読んでください。\n'
+  printf '関連する判断やパターンが既にある作業では、まずここを参照してから提案してください。\n'
+}

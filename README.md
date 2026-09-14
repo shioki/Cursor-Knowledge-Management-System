@@ -1,6 +1,6 @@
 # Cursor Knowledge Management System
 
-技術判断・実装パターン・デバッグ記録・改善活動をプロジェクト内に蓄積し、次の作業で自動的に活かすための知識管理システムです。Agent Skills 13 種を中心に、記録を促す hooks と棚卸し用の subagent を組み合わせています。Cursor・Claude Code・Codex いずれでも `.agents/skills/` 上の同一スキルを共用できます。
+技術判断・実装パターン・デバッグ記録・改善活動をプロジェクト内に蓄積し、次の作業で自動的に活かすための知識管理システムです。Agent Skills 13 種を中心に、記録を促す hooks と棚卸し用の subagent を組み合わせています。Cursor・Codex は `.agents/skills/` を直接読み、Claude Code はシンボリックリンクによる橋渡し（`init.sh` が自動作成）で同じスキルを共用します。
 
 英語の短い導入は [README.en.md](README.en.md) を参照してください。
 
@@ -37,7 +37,7 @@ v6 では知識層を 1 概念 1 ファイルに分割し、ディレクトリ�
 - **knowledge-curator subagent**（v6.0.0）: 知識ベースの全走査を別コンテキストに隔離する
 - **1 概念 1 ファイル**（v6.0.0）: 記録が増えても読み込みコストが上がらない構造
 - **4 つの配布経路**: init スクリプト / Cursor Marketplace / `gh skill` / Microsoft APM
-- **マルチエージェント対応**: `.agents/skills/` を軸に Cursor / Claude Code / Codex で共用
+- **マルチエージェント対応**: `.agents/skills/` を軸に Cursor / Codex は直接、Claude Code はシンボリックリンク橋渡しで共用。hooks も Cursor 版・Claude Code 版の両方を提供
 - **AGENTS.md テンプレート**: ルート用・ネストサブディレクトリ用を同梱
 
 ## クイックスタート
@@ -48,17 +48,18 @@ v6 では知識層を 1 概念 1 ファイルに分割し、ディレクトリ�
 git clone https://github.com/shioki/Cursor-Knowledge-Management-System.git
 cd Cursor-Knowledge-Management-System
 
-# 既定: .agents/skills に配置（Cursor / Claude Code / Codex 共用）
+# 既定: .agents/skills に配置。Cursor / Codex は直接、Claude Code は
+# .claude/skills へのシンボリックリンク（自動作成）経由で読み込む
 bash skills/project-setup/scripts/init.sh /path/to/your-project
 
 # 確認プロンプトを出さずに実行（CI・自動化向け）
 bash skills/project-setup/scripts/init.sh /path/to/your-project --yes
 
-# AGENTS.md テンプレートも配置
+# AGENTS.md テンプレートも配置（CLAUDE.md も同時に作成）
 bash skills/project-setup/scripts/init.sh /path/to/your-project --with-agents-md
 
-# hooks / subagent を配置しない
-bash skills/project-setup/scripts/init.sh /path/to/your-project --no-hooks --no-agents
+# hooks / subagent / Claude Code 橋渡しを配置しない
+bash skills/project-setup/scripts/init.sh /path/to/your-project --no-hooks --no-agents --no-claude-bridge
 
 # v4.x 互換（.claude/skills に配置）
 bash skills/project-setup/scripts/init.sh /path/to/your-project --legacy-claude
@@ -103,6 +104,8 @@ apm install
 
 詳細は [APM 連携](docs/reference/apm-integration.md) を参照してください。
 
+> **Claude Code で使う場合の注意**: 上記 2〜4 の経路はファイルを配置するだけで、`init.sh` が行う `.claude/skills` の橋渡し（シンボリックリンク作成）や `CLAUDE.md` の生成は行いません。Claude Code でも使いたい場合は、下記の「手動コピー」にある Claude Code 橋渡しの手順を追加で実行してください。
+
 ### 手動コピー
 
 ```bash
@@ -112,10 +115,19 @@ TARGET=/path/to/your-project
 
 cp -r "$CKMS/skills" "$TARGET/.agents/skills"
 cp -r "$CKMS/agents" "$TARGET/.cursor/agents"
-cp -r "$CKMS/hooks"  "$TARGET/.cursor/hooks"
+cp -r "$CKMS/hooks"/*.sh "$TARGET/.cursor/hooks/"
 cp "$CKMS/templates/.cursorignore" "$TARGET/.cursorignore"
 mkdir -p "$TARGET/.agents/debug-sessions"
 find "$TARGET/.agents/skills" -name "*.sh" -exec chmod +x {} \;
+
+# Claude Code にも読ませる場合（.agents/skills を複製せず橋渡しする）
+mkdir -p "$TARGET/.claude"
+ln -s "../.agents/skills" "$TARGET/.claude/skills"
+mkdir -p "$TARGET/.claude/hooks"
+cp "$CKMS/hooks/claude-code"/*.sh "$TARGET/.claude/hooks/"
+chmod +x "$TARGET/.claude/hooks"/*.sh
+cp "$CKMS/templates/.claude/settings.json.template" "$TARGET/.claude/settings.json"
+printf '@AGENTS.md\n' > "$TARGET/CLAUDE.md"
 ```
 
 `.cursor/hooks.json` は [hooks/hooks.json](hooks/hooks.json) を参考に作成し、スクリプトのパスを `.cursor/hooks/` 起点に書き換えてください。
@@ -154,10 +166,10 @@ graph TB
 |---|---|---|---|---|---|
 | **起動** | エージェントが自動判断 | ユーザーが `/名前` | イベント駆動 | スキルから委譲 | 常時参照 |
 | **役割** | 回答に知識を反映 | 記録・レビューの実行 | 記録の起点を作る | 大量走査の隔離 | 全体の基本方針 |
-| **配置** | `.agents/skills/` | `.agents/skills/` | `.cursor/hooks/` | `.cursor/agents/` | ルート or サブディレクトリ |
-| **共有** | 全エージェント | 全エージェント | Cursor のみ | Cursor のみ | 全エージェント |
+| **配置** | `.agents/skills/` | `.agents/skills/` | `.cursor/hooks/` + `.claude/hooks/` | `.cursor/agents/` | ルート or サブディレクトリ |
+| **共有** | 全エージェント（Claude Code は橋渡し） | 全エージェント（Claude Code は橋渡し） | Cursor 版・Claude Code 版を別々に提供 | Cursor のみ | 全エージェント（Claude Code は CLAUDE.md 経由） |
 
-hooks と subagent は Cursor 固有の機能なので共有されませんが、どちらも補助機能であり、無くてもスキルは動作します。
+subagent は Cursor 固有の機能なので共有されませんが、補助機能であり無くてもスキルは動作します。hooks はスキーマが異なるため Cursor 版・Claude Code 版を別スクリプトとして提供しています（[hooks ガイド](docs/advanced/hooks-guide.md)）。
 
 ## プロジェクト構造
 
@@ -279,7 +291,8 @@ v5 まで `.cursor/commands/` にあった `/migrate-from-rules` は廃止しま
 ## システム要件
 
 - **Cursor**: 3.0 以上推奨（`.agents/skills/` の公式サポート、hooks、subagents）。2.4 以上でも `.cursor/skills/` 経由でスキルのみ動作
-- **Git**: 2.0 以上
+- **Claude Code**: `.claude/skills/` を探索する版であれば動作（スキルの橋渡しに必要）。hooks の `.claude/settings.json` スキーマ（`hookSpecificOutput` の形式など）はバージョンによって変わりうるため、導入後に [hooks ガイド](docs/advanced/hooks-guide.md) の動作確認手順で実機確認してください
+- **Git**: 2.0 以上（`.claude/skills` のシンボリックリンク作成に `core.symlinks` の有効化が必要な場合あり。Windows は管理者権限または開発者モード）
 - **Mac / Linux**: Bash は標準で利用可能。スクリプトはそのまま実行できます
 - **Windows**: スクリプトの実行には **Git Bash** または **WSL** が必要です。セットアップのみ `init.ps1` で完結します
 - **（任意）GitHub CLI**: `gh skill install` 利用時に `v2.90.0` 以上

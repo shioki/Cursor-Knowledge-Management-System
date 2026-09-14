@@ -10,7 +10,7 @@ Cursor IDE と Claude Code（ターミナル CLI）、および Codex を同一�
 
 ## セットアップ
 
-既定では `.agents/skills/` にスキルを配置します。これは Cursor・Claude Code・Codex が共通で読み込む公式ディレクトリなので、1 か所に置くだけで全ツールから共有されます。
+既定では `.agents/skills/` にスキルを配置します。これは Cursor と Codex が標準で探索するディレクトリですが、**Claude Code は `.agents/skills/` を標準では探索しません**（探索先は `.claude/skills/` のみ）。そのため `init.sh` は `.claude/skills` を `.agents/skills` へのシンボリックリンクとして自動作成し、複製せずに橋渡しします。
 
 ```bash
 bash path/to/Cursor-Knowledge-Management-System/skills/project-setup/scripts/init.sh /path/to/your-project
@@ -21,38 +21,44 @@ bash path/to/Cursor-Knowledge-Management-System/skills/project-setup/scripts/ini
 ```text
 プロジェクトルート/
 ├── .agents/
-│   ├── skills/                 # スキル 13 種（全エージェント共通）
+│   ├── skills/                 # スキル 13 種（唯一の実体）
 │   │   ├── knowledge-management/
 │   │   ├── record-decision/
 │   │   └── ...
 │   └── debug-sessions/         # デバッグセッション記録
+├── .claude/
+│   ├── skills/                 # .agents/skills へのシンボリックリンク（Claude Code 用）
+│   ├── hooks/                  # 記録支援スクリプト（Claude Code 用）
+│   └── settings.json
 └── .cursor/
     ├── agents/                 # subagent（Cursor のみ）
     ├── hooks/                  # 記録支援スクリプト（Cursor のみ）
     └── hooks.json
 ```
 
+`--with-agents-md` を付けた場合は、プロジェクトルートに `AGENTS.md` と、その `@AGENTS.md` を import するだけの `CLAUDE.md` も作成されます。Claude Code は AGENTS.md も自動では読まないため、この import が無いと恒久指示が届きません。
+
 ## v6 で共有できる範囲が広がった
 
 v5 まで、`/record-decision` などの記録ワークフローは `.cursor/commands/` に置かれた Cursor 専用コマンドでした。Claude Code から同じ操作をするには、スキル本文を読んで手作業でたどる必要がありました。
 
-v6 ではこれらをアクションスキルに統合したため、`.agents/skills/` に置かれ、全エージェントから同じように呼び出せます。
+v6 ではこれらをアクションスキルに統合したため、`.agents/skills/` に置かれ、Cursor・Codex からは直接、Claude Code からは `.claude/skills` の橋渡し経由で同じように呼び出せます。
 
 | 機能 | v5 | v6 |
 |------|----|----|
-| ドメインスキル 7 種 | 共有 | 共有 |
-| 記録ワークフロー 6 種 | Cursor のみ | 共有 |
+| ドメインスキル 7 種 | 共有 | 共有（Claude Code は橋渡し経由） |
+| 記録ワークフロー 6 種 | Cursor のみ | 共有（Claude Code は橋渡し経由） |
 | subagent | なし | Cursor のみ |
-| hooks | なし | Cursor のみ |
+| hooks | なし | 両方（スキーマは別、`hooks/` と `hooks/claude-code/`） |
 
-subagent と hooks は Cursor 固有の仕組みなので共有できません。ただしどちらも補助機能で、無くてもスキルは動作します。Claude Code から `/review-knowledge` を使った場合、サブエージェントに委譲せずスキル自身が走査します。
+subagent は Cursor 固有の仕組みなので共有できません。無くてもスキルは動作するので、Claude Code から `/review-knowledge` を使った場合はサブエージェントに委譲せずスキル自身が走査します。hooks は v6.1 で Claude Code 向けにも用意しましたが、入出力のスキーマが異なるため別スクリプトです（[hooks ガイド](../advanced/hooks-guide.md)）。
 
 ## スキルの呼び出し
 
 | ツール | 呼び出し方 |
 |--------|-----------|
 | Cursor | エージェントが文脈に応じて自動適用。アクションスキルは `/` で選択 |
-| Claude Code | 自動適用。明示する場合は `/skill-name` |
+| Claude Code | `.claude/skills` の橋渡しが作成されていれば自動適用。明示する場合は `/skill-name` |
 | Codex | 自動適用 |
 
 ## 推奨ワークフロー

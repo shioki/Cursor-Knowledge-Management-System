@@ -1,8 +1,10 @@
 # CKMS hooks
 
-エージェントのライフサイクルに合わせて知識管理を補助する hooks です。Cursor Plugin として導入した場合は自動で読み込まれ、`init.sh` で導入した場合は `.cursor/hooks/` と `.cursor/hooks.json` に配置されます。
+エージェントのライフサイクルに合わせて知識管理を補助する hooks です。このディレクトリ直下は **Cursor 用**で、Cursor Plugin として導入した場合は自動で読み込まれ、`init.sh` で導入した場合は `.cursor/hooks/` と `.cursor/hooks.json` に配置されます。
 
-## 提供する hooks
+**Claude Code 用**は `claude-code/` サブディレクトリです。スキーマが異なるため別スクリプトになっています（詳細は [hooks ガイド](../docs/advanced/hooks-guide.md)）。`init.sh` では `.claude/hooks/` と `.claude/settings.json` に配置されます。
+
+## 提供する hooks（Cursor）
 
 | イベント | スクリプト | 役割 | 既定 |
 |---------|-----------|------|------|
@@ -10,7 +12,15 @@
 | `afterFileEdit` | `log-activity.sh` | 編集したファイルを軽量ログに追記する | 有効 |
 | `stop` | `suggest-record.sh` | 記録漏れがありそうなときに記録を促す | **無効** |
 
-`sessionStart` が注入するのは索引だけで、知識ファイル本体は読み込みません。「どこに何があるか」をエージェントに知らせ、実際の読み込みは必要になった時点で行わせる設計です。
+`sessionStart` が注入するのは索引だけで、知識ファイル本体は読み込みません。「どこに何があるか」をエージェントに知らせ、実際の読み込みは必要になった時点で行わせる設計です。索引の組み立ては `_hook-lib.sh` の `ckms_build_knowledge_index` が担い、`claude-code/session-start.sh` とも共通です。
+
+## 提供する hooks（Claude Code）
+
+| イベント | スクリプト | 役割 | 既定 |
+|---------|-----------|------|------|
+| `SessionStart` | `claude-code/session-start.sh` | 同上 | 有効 |
+| `PostToolUse`（`matcher: "Edit\|Write"`） | `claude-code/post-tool-use-log-activity.sh` | 同上 | 有効 |
+| `Stop` | `claude-code/stop-suggest-record.sh` | 同上（`decision: "block"` + `reason` を使用） | **無効** |
 
 ## 設定
 
@@ -49,4 +59,4 @@ activity_log_max_lines = 500
 
 ## 無効化
 
-不要な hook は `hooks.json`（プロジェクト導入時は `.cursor/hooks.json`）から該当エントリを削除してください。すべて不要な場合はファイルごと削除して問題ありません。hooks が無くてもスキルは通常どおり動作します。
+不要な hook は Cursor なら `hooks.json`（プロジェクト導入時は `.cursor/hooks.json`）、Claude Code なら `.claude/settings.json` の `hooks` から該当エントリを削除してください。すべて不要な場合はファイルごと削除して問題ありません。hooks が無くてもスキルは通常どおり動作します。

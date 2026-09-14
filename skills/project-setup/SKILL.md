@@ -34,7 +34,7 @@ metadata:
 
 `init.sh` は Mac / Linux 用です。Windows では同じディレクトリの `init.ps1`、または Git Bash / WSL で `init.sh` を使ってください。
 
-**デフォルト**: `.agents/skills` に配置（Cursor / Claude Code / Codex で共有）
+**デフォルト**: `.agents/skills` に配置。Cursor / Codex はこれを直接読み、Claude Code は標準では `.agents/skills` を探索しないため `.claude/skills` へのシンボリックリンクで橋渡しする（自動作成）
 
 ```bash
 bash path/to/cursor-knowledge-management-system/skills/project-setup/scripts/init.sh /path/to/target-project
@@ -47,16 +47,19 @@ bash path/to/cursor-knowledge-management-system/skills/project-setup/scripts/ini
 | `--yes` / `-y` | すべての確認に yes と答える（CI・非対話環境向け） |
 | `--legacy-claude` | `.claude/skills` に配置（v4.x 互換） |
 | `--cursor-only` | `.cursor/skills` に配置（Cursor のみ） |
-| `--with-agents-md` | `AGENTS.md` テンプレートも配置 |
+| `--with-agents-md` | `AGENTS.md` テンプレートも配置（`CLAUDE.md` も同時に作成） |
 | `--no-hooks` | hooks を配置しない |
 | `--no-agents` | subagent を配置しない |
+| `--no-claude-bridge` | `.claude/skills` への橋渡しを作らない |
 
 配置されるもの:
 
 - `<base>/skills/` — スキル 13 種
 - `<base>/debug-sessions/` — デバッグセッションの保存先
+- `.claude/skills` — `<base>/skills` へのシンボリックリンク（Claude Code 用。既定で作成）
+- `.claude/hooks/` と `.claude/settings.json` — 記録支援 hooks（Claude Code 用）
 - `.cursor/agents/knowledge-curator.md` — 知識ベース棚卸し用の subagent
-- `.cursor/hooks/` と `.cursor/hooks.json` — 記録支援 hooks
+- `.cursor/hooks/` と `.cursor/hooks.json` — 記録支援 hooks（Cursor 用）
 - `.cursorignore`
 
 手動でコピーする場合:
@@ -65,10 +68,19 @@ bash path/to/cursor-knowledge-management-system/skills/project-setup/scripts/ini
 # Mac/Linux
 cp -r skills /path/to/your-project/.agents/skills
 cp -r agents /path/to/your-project/.cursor/agents
-cp -r hooks /path/to/your-project/.cursor/hooks
+cp hooks/*.sh /path/to/your-project/.cursor/hooks/
 cp templates/.cursorignore /path/to/your-project/.cursorignore
 mkdir -p /path/to/your-project/.agents/debug-sessions
 find /path/to/your-project/.agents/skills -name "*.sh" -exec chmod +x {} \;
+
+# Claude Code にも読ませる場合
+mkdir -p /path/to/your-project/.claude
+ln -s ../.agents/skills /path/to/your-project/.claude/skills
+mkdir -p /path/to/your-project/.claude/hooks
+cp hooks/claude-code/*.sh /path/to/your-project/.claude/hooks/
+chmod +x /path/to/your-project/.claude/hooks/*.sh
+cp templates/.claude/settings.json.template /path/to/your-project/.claude/settings.json
+printf '@AGENTS.md\n' > /path/to/your-project/CLAUDE.md
 ```
 
 手動コピーの場合、`.cursor/hooks.json` は `hooks/hooks.json` を参考に自分で作成してください。スクリプトのパスを `.cursor/hooks/` 起点に書き換える必要があります。

@@ -2,6 +2,18 @@
 
 知識管理システムの最大の課題は、記録が続かないことです。スキルは「記録したい」と思った瞬間には役立ちますが、その瞬間自体が訪れないと何も蓄積されません。hooks はエージェントのライフサイクルに割り込み、この「思い出す」部分を仕組みで補います。
 
+CKMS は Cursor と Claude Code の両方に hooks を提供しますが、**スキーマが全く異なる**ため別々のスクリプトになっています。共通のロジック（索引の組み立てなど）は `hooks/_hook-lib.sh` に寄せてあります。
+
+| | Cursor | Claude Code |
+|---|--------|-------------|
+| 配置 | `hooks/*.sh` + `hooks/hooks.json` | `hooks/claude-code/*.sh` + `.claude/settings.json` |
+| 入出力 | stdin/stdout の単純な JSON | stdin/stdout の JSON（イベントごとにキーが異なる） |
+| 索引注入イベント | `sessionStart` | `SessionStart` |
+| 編集ログイベント | `afterFileEdit` | `PostToolUse`（`matcher: "Edit\|Write"`） |
+| 記録提案イベント | `stop`（`followup_message`） | `Stop`（`decision: "block"` + `reason`） |
+
+以降はまず Cursor 版を説明し、最後に Claude Code 版との違いをまとめます。
+
 ## CKMS が提供する 3 つの hook
 
 | イベント | スクリプト | 役割 | 既定 |
@@ -124,6 +136,55 @@ bash skills/project-setup/scripts/init.sh /path/to/project --no-hooks
 }
 ```
 
+## Claude Code 版 hooks
+
+Claude Code は Cursor と異なるスキーマを使うため、`hooks/claude-code/` に専用のスクリプトを用意しています。設定は `.claude/settings.json` に書きます（テンプレート: [templates/.claude/settings.json.template](../../templates/.claude/settings.json.template)）。
+
+| スクリプト | 対応する Cursor 版 | イベント |
+|-----------|-------------------|---------|
+| `hooks/claude-code/session-start.sh` | `inject-knowledge-index.sh` | `SessionStart` |
+| `hooks/claude-code/post-tool-use-log-activity.sh` | `log-activity.sh` | `PostToolUse`（`matcher: "Edit\|Write"`） |
+| `hooks/claude-code/stop-suggest-record.sh` | `suggest-record.sh` | `Stop` |
+
+設定ファイルの例:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [{ "type": "command", "command": ".claude/hooks/session-start.sh" }] }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{ "type": "command", "command": ".claude/hooks/post-tool-use-log-activity.sh" }]
+      }
+    ],
+    "Stop": [
+      { "hooks": [{ "type": "command", "command": ".claude/hooks/stop-suggest-record.sh" }] }
+    ]
+  }
+}
+```
+
+`init.sh` を使えば、`.agents/skills` 配置（既定）かつ `--no-claude-bridge` を付けなかった場合に自動で配置されます。
+
+### followup_message との違い
+
+Cursor 版の `stop` フックは `followup_message` を返し、次のユーザーメッセージとして**自動送信**されます。Claude Code の `Stop` hook にはこの仕組みが無いため、代わりに `decision: "block"` + `reason` を使います。これは「まだ応答を終えるべきではない理由」として Claude に渡され、応答が継続する形になります。ユーザーの新しい発言として扱われる Cursor 版とは体感が異なる点に注意してください。
+
+無限ループを避けるため、`stop-suggest-record.sh` は入力 JSON に `stop_hook_active: true`（直前の `Stop` hook の block によって発生したイベントであることを示すフィールド）が含まれる場合は何もしません。このフィールド名は Claude Code のバージョンによって変わる可能性があるため、導入後は実際に無限ループしないか確認してください。
+
+### 動作確認
+
+```bash
+echo '{"session_id":"test"}' | .claude/hooks/session-start.sh
+echo '{"tool_name":"Edit","tool_input":{"file_path":"'"$PWD"'/src/app.ts"}}' | .claude/hooks/post-tool-use-log-activity.sh
+echo '{"status":"completed"}' | .claude/hooks/stop-suggest-record.sh
+```
+
+`hookSpecificOutput` のキー名（`additionalContext` など）は Claude Code のバージョンによって変わりうる仕様です。導入したバージョンで実際に会話へ反映されるか確認してください。
+
 ## 無効化と削除
 
 不要な hook は `hooks.json` から該当エントリを削除してください。すべて不要ならファイルごと削除して構いません。hooks が無くてもスキルは通常どおり動作します。
@@ -166,3 +227,4 @@ chmod +x .cursor/hooks/*.sh
 - [hooks/README.md](../../hooks/README.md) — スクリプトの仕様
 - [subagents ガイド](subagents-guide.md)
 - [Cursor Hooks 公式ドキュメント](https://cursor.com/ja/docs/agent/hooks)
+- [Claude Code Hooks 公式ドキュメント](https://code.claude.com/docs/en/hooks)

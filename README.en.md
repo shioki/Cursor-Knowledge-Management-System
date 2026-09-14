@@ -1,6 +1,6 @@
 # Cursor Knowledge Management System
 
-A knowledge-management template for AI-assisted development. It accumulates technical decisions, implementation patterns, debug sessions, and improvements inside your project so the agent can reuse them later. The same skill set is shared across **Cursor**, **Claude Code**, and **Codex** via `.agents/skills/`.
+A knowledge-management template for AI-assisted development. It accumulates technical decisions, implementation patterns, debug sessions, and improvements inside your project so the agent can reuse them later. The skill set lives in `.agents/skills/`, which **Cursor** and **Codex** read directly; **Claude Code** only looks under `.claude/skills/`, so `init.sh` bridges it there with a symlink (no duplication).
 
 > **v6.0.0** unifies everything into **Agent Skills** (7 domain skills + 6 action skills), adds **hooks** and a **subagent**, and splits the knowledge layer into **one concept per file**. Slash commands are gone as a separate concept — they are now action skills, so they work outside Cursor too.
 >
@@ -20,17 +20,18 @@ v6 makes that progressive loading actually hold: each decision, pattern, and imp
 git clone https://github.com/shioki/Cursor-Knowledge-Management-System.git
 cd Cursor-Knowledge-Management-System
 
-# Default: install under .agents/skills (shared with Cursor / Claude Code / Codex)
+# Default: install under .agents/skills. Cursor/Codex read it directly;
+# init.sh also symlinks .claude/skills there for Claude Code
 bash skills/project-setup/scripts/init.sh /path/to/your-project
 
 # Non-interactive (CI / automation)
 bash skills/project-setup/scripts/init.sh /path/to/your-project --yes
 
-# Also drop AGENTS.md templates
+# Also drop AGENTS.md (and a CLAUDE.md that imports it)
 bash skills/project-setup/scripts/init.sh /path/to/your-project --with-agents-md
 
-# Skip Cursor-specific components
-bash skills/project-setup/scripts/init.sh /path/to/your-project --no-hooks --no-agents
+# Skip hooks / subagent / the Claude Code bridge
+bash skills/project-setup/scripts/init.sh /path/to/your-project --no-hooks --no-agents --no-claude-bridge
 
 # v4-compatible path (.claude/skills)
 bash skills/project-setup/scripts/init.sh /path/to/your-project --legacy-claude
@@ -72,12 +73,13 @@ Then `apm install`. Details: [APM integration](docs/reference/apm-integration.md
 |------|--------|
 | **7 domain skills** | project-context, team-standards, knowledge-management, pattern-library, debug-workflow, improvement-tracking, project-setup |
 | **6 action skills** | `/record-decision`, `/add-pattern`, `/start-debug`, `/log-improvement`, `/review-knowledge`, `/update-context` |
-| **3 hooks** | `sessionStart` injects the knowledge index, `afterFileEdit` logs activity, `stop` nudges you to record (off by default) |
-| **1 subagent** | `knowledge-curator` audits the knowledge base in an isolated, read-only context |
+| **3 hooks (Cursor)** | `sessionStart` injects the knowledge index, `afterFileEdit` logs activity, `stop` nudges you to record (off by default) |
+| **3 hooks (Claude Code)** | Same behavior, native schema: `SessionStart`, `PostToolUse` (matcher `Edit\|Write`), `Stop` (block+reason instead of `followup_message`) |
+| **1 subagent** | `knowledge-curator` audits the knowledge base in an isolated, read-only context (Cursor only) |
 | **Plugin manifest** | [.cursor-plugin/plugin.json](.cursor-plugin/plugin.json) |
 | **APM manifest** | [apm.yml](apm.yml) |
 
-Hooks and subagents are Cursor-specific; skills work everywhere and the system is fully functional without them.
+Subagents are Cursor-specific; hooks now ship for both Cursor and Claude Code (different schemas, see [hooks guide](docs/advanced/hooks-guide.md)). Skills work everywhere and the system is fully functional without hooks or the subagent.
 
 ## After install
 
@@ -90,7 +92,8 @@ Skipping these leaves the skills pointing at empty templates.
 ## Requirements
 
 - **Cursor** 3.0+ recommended for `.agents/skills/`, hooks, and subagents. Older versions can use `.cursor/skills/` for skills only.
-- **Git** 2.0+
+- **Claude Code**: any version that reads `.claude/skills/`. The `.claude/settings.json` hooks schema (e.g. `hookSpecificOutput`) can vary by version — verify with the smoke commands in the [hooks guide](docs/advanced/hooks-guide.md) after installing.
+- **Git** 2.0+ (creating the `.claude/skills` symlink may require `core.symlinks` enabled; on Windows, admin rights or Developer Mode)
 - **Shell scripts**: Bash on Mac/Linux; on Windows prefer **Git Bash** or **WSL** for `init.sh` / `release.sh`.
 - **Optional**: GitHub CLI (`gh`) 2.90.0+ for `gh skill`; [Microsoft APM](https://github.com/microsoft/apm) for `apm install`.
 

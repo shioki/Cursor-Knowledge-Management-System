@@ -11,7 +11,14 @@ import { parse as parseYaml } from 'yaml';
 
 const ROOT = process.cwd();
 const HOOKS_DIR = path.join(ROOT, 'hooks');
+const CLAUDE_HOOKS_DIR = path.join(HOOKS_DIR, 'claude-code');
 const AGENTS_DIR = path.join(ROOT, 'agents');
+const CLAUDE_SETTINGS_TEMPLATE = path.join(ROOT, 'templates', '.claude', 'settings.json.template');
+
+// Claude Code の hooks で本プロジェクトが使用するイベント名
+// （settings.json.template で実際に使われているものだけを検証する。
+//   Claude Code の全イベント一覧は公式ドキュメント参照）
+const CLAUDE_CODE_EVENTS = new Set(['SessionStart', 'PreToolUse', 'PostToolUse', 'Stop', 'UserPromptSubmit']);
 
 // Cursor が受け付ける hook イベント名
 const VALID_EVENTS = new Set([
@@ -136,6 +143,82 @@ async function checkHooks(problems, warnings) {
   return count;
 }
 
+async function checkClaudeCodeHooks(problems, warnings) {
+  let entries;
+  try {
+    entries = await readdir(CLAUDE_HOOKS_DIR, { withFileTypes: true });
+  } catch {
+    warnings.push('hooks/claude-code/ not found — no native Claude Code hooks shipped');
+    return 0;
+  }
+
+  if (!(await exists(path.join(CLAUDE_HOOKS_DIR, '_hook-lib.sh')))) {
+    problems.push('hooks/claude-code/_hook-lib.sh: not found (should be a symlink to ../_hook-lib.sh)');
+  }
+
+  const scripts = entries.filter(
+    (e) => (e.isFile() || e.isSymbolicLink()) && e.name.endsWith('.sh') && !e.name.startsWith('_')
+  );
+  if (scripts.length === 0) {
+    warnings.push('hooks/claude-code/ contains no .sh files');
+  }
+
+  for (const script of scripts) {
+    const scriptPath = path.join(CLAUDE_HOOKS_DIR, script.name);
+    if (!(await exists(scriptPath, constants.X_OK))) {
+      problems.push(`hooks/claude-code/${script.name}: missing execute permission`);
+    }
+  }
+
+  if (!(await exists(CLAUDE_SETTINGS_TEMPLATE))) {
+    problems.push('templates/.claude/settings.json.template: not found');
+    return scripts.length;
+  }
+
+  let settings;
+  try {
+    settings = JSON.parse(await readFile(CLAUDE_SETTINGS_TEMPLATE, 'utf8'));
+  } catch (e) {
+    problems.push(`templates/.claude/settings.json.template: invalid JSON — ${e.message}`);
+    return scripts.length;
+  }
+
+  if (!settings.hooks || typeof settings.hooks !== 'object') {
+    problems.push('templates/.claude/settings.json.template: missing "hooks" object');
+  } else {
+    for (const [event, definitions] of Object.entries(settings.hooks)) {
+      if (!CLAUDE_CODE_EVENTS.has(event)) {
+        warnings.push(`templates/.claude/settings.json.template: unexpected hook event "${event}"`);
+      }
+      if (!Array.isArray(definitions)) {
+        problems.push(`templates/.claude/settings.json.template: "${event}" must be an array`);
+        continue;
+      }
+      for (const group of definitions) {
+        for (const hook of group?.hooks ?? []) {
+          const command = hook?.command;
+          if (typeof command !== 'string' || command.length === 0) {
+            problems.push(`templates/.claude/settings.json.template: "${event}" entry is missing "command"`);
+            continue;
+          }
+          const scriptName = path.basename(command);
+          if (!scripts.some((s) => s.name === scriptName)) {
+            problems.push(
+              `templates/.claude/settings.json.template: "${event}" references missing script hooks/claude-code/${scriptName}`
+            );
+          }
+        }
+      }
+    }
+  }
+
+  if (!settings.permissions || typeof settings.permissions !== 'object') {
+    warnings.push('templates/.claude/settings.json.template: missing "permissions" object');
+  }
+
+  return scripts.length;
+}
+
 async function checkAgents(problems, warnings) {
   let entries;
   try {
@@ -207,6 +290,7 @@ async function main() {
   const warnings = [];
 
   const hookCount = await checkHooks(problems, warnings);
+  const claudeHookCount = await checkClaudeCodeHooks(problems, warnings);
   const agentCount = await checkAgents(problems, warnings);
 
   for (const w of warnings) console.warn(`[components-check] WARN: ${w}`);
@@ -217,7 +301,9 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`[components-check] OK (${hookCount} hooks, ${agentCount} subagents)`);
+  console.log(
+    `[components-check] OK (${hookCount} cursor hooks, ${claudeHookCount} claude-code hooks, ${agentCount} subagents)`
+  );
 }
 
 main().catch((e) => {

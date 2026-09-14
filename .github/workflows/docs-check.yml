@@ -61,6 +61,22 @@ jobs:
         working-directory: /tmp/ckms-target
         run: bash .agents/skills/project-setup/scripts/validate.sh
 
+      - name: Verify the Claude Code skills bridge resolves
+        # .agents/skills が Claude Code から直接は探索されないため、init.sh が作る
+        # .claude/skills シンボリックリンクが実際に 13 スキルを解決できるか確認する。
+        working-directory: /tmp/ckms-target
+        run: |
+          if [ ! -L ".claude/skills" ]; then
+            echo "::error::.claude/skills is not a symlink"
+            exit 1
+          fi
+          count=$(find -L .claude/skills -maxdepth 1 -mindepth 1 -type d | wc -l | tr -d ' ')
+          if [ "$count" -lt 1 ]; then
+            echo "::error::.claude/skills resolved to 0 skill directories"
+            exit 1
+          fi
+          echo "resolved $count skill directories via .claude/skills"
+
       - name: Exercise the knowledge scripts
         working-directory: /tmp/ckms-target
         run: |
@@ -134,3 +150,12 @@ jobs:
           node -e "JSON.parse(require('fs').readFileSync('/tmp/hook-out.json','utf8'))"
           echo "{\"file_path\":\"$PWD/src/app.ts\"}" | .cursor/hooks/log-activity.sh
           echo '{"status":"completed","loop_count":0}' | .cursor/hooks/suggest-record.sh
+
+      - name: Run Claude Code hooks against the generated project
+        working-directory: /tmp/ckms-target
+        run: |
+          echo '{"session_id":"ci"}' | .claude/hooks/session-start.sh | tee /tmp/claude-hook-out.json
+          node -e "JSON.parse(require('fs').readFileSync('/tmp/claude-hook-out.json','utf8'))"
+          echo "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$PWD/src/app.ts\"}}" | .claude/hooks/post-tool-use-log-activity.sh
+          echo '{"status":"completed"}' | .claude/hooks/stop-suggest-record.sh
+          node -e "JSON.parse(require('fs').readFileSync('.claude/settings.json','utf8'))"

@@ -13,7 +13,9 @@
 | **hooks** | 会話開始時の索引注入、編集ログ | `.cursor/hooks/` と `.cursor/hooks.json` |
 | **`.cursor/rules/*.mdc`** | 条件付き適用（globs, alwaysApply）の細かい制御 | `.cursor/rules/` |
 
-AGENTS.md は常に読み込まれます。分量が増えるほど毎リクエストのトークンが増えるため、条件付きで十分な内容はスキルの `description` と `paths` に寄せるのが基本方針です。
+AGENTS.md は Cursor と Codex では常に読み込まれます。**Claude Code は AGENTS.md を自動では読みません**（読むのは `CLAUDE.md` だけです）。そのため CKMS では `CLAUDE.md` に `@AGENTS.md` の import 一行だけを置いて橋渡しします（本文は複製しません）。`init.sh --with-agents-md` を使うと両方が自動で作成されます。
+
+分量が増えるほど毎リクエストのトークンが増えるため、条件付きで十分な内容はスキルの `description` と `paths` に寄せるのが基本方針です。
 
 ## セットアップ
 
@@ -55,12 +57,17 @@ project/
 ```
 project/
 ├── AGENTS.md                    # 全体のポリシー（テンプレートから作成）
+├── CLAUDE.md                    # @AGENTS.md の import のみ（Claude Code 用）
 ├── .agents/
-│   ├── skills/                  # スキル 13 種（本システム提供）
+│   ├── skills/                  # スキル 13 種（唯一の実体）
 │   └── debug-sessions/          # デバッグ記録
+├── .claude/
+│   ├── skills/                  # .agents/skills へのシンボリックリンク
+│   ├── hooks/                   # hook スクリプト（Claude Code 用）
+│   └── settings.json            # hook 設定 + permissions
 ├── .cursor/
 │   ├── agents/                  # subagent（knowledge-curator）
-│   ├── hooks/                   # hook スクリプト
+│   ├── hooks/                   # hook スクリプト（Cursor 用）
 │   ├── hooks.json               # hook 設定
 │   └── rules/                   # 任意: 条件付きの追加ルール
 ├── frontend/
@@ -69,7 +76,7 @@ project/
     └── AGENTS.md                # API 固有のルール（任意）
 ```
 
-スキルは `.agents/skills/` に置くため、Cursor だけでなく Claude Code や Codex からも同じものが読まれます。`.cursor/` 配下に入るのは Cursor 固有の拡張である subagent と hooks だけです。
+スキルの実体は `.agents/skills/` です。Cursor と Codex はこれを直接読みますが、Claude Code は `.agents/skills/` を標準では探索しないため、`.claude/skills` にシンボリックリンクを張って橋渡しします（`init.sh` が自動生成、`--no-claude-bridge` で無効化可）。`.cursor/` 配下に入るのは Cursor 固有の拡張である subagent と Cursor 版 hooks です。
 
 ## ベストプラクティス
 
