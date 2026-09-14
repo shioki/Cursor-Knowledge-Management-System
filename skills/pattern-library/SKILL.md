@@ -40,8 +40,8 @@ metadata:
 
 ```markdown
 ---
-title: パターン名
-description: 1 行サマリ
+title: "パターン名"
+description: "" # 1 行サマリを記入
 tags: [pattern]
 updated: YYYY-MM-DD
 ---

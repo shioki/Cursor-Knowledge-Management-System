@@ -81,6 +81,52 @@ jobs:
             exit 1
           fi
 
+      - name: Escape special characters in titles
+        # | : " 改行を含むタイトルで frontmatter と索引表が壊れないことを確認する
+        working-directory: /tmp/ckms-target
+        run: |
+          S=.agents/skills
+          TITLE=$(printf 'Use cache | fallback: sync "mode"\nline2')
+          bash $S/knowledge-management/scripts/add-entry.sh "$TITLE"
+          bash $S/pattern-library/scripts/add-pattern.sh "$TITLE"
+          bash $S/improvement-tracking/scripts/add-improvement.sh "$TITLE"
+
+          fail=0
+          for f in \
+            "$S/knowledge-management/references/decisions/"*-use-cache-fallback-sync-mode-line2.md \
+            "$S/pattern-library/references/patterns/use-cache-fallback-sync-mode-line2.md" \
+            "$S/improvement-tracking/references/improvements/"*-use-cache-fallback-sync-mode-line2.md
+          do
+            if ! grep -q '^title: "Use cache | fallback: sync \\"mode\\" line2"$' "$f"; then
+              echo "::error::broken frontmatter title in $f"
+              sed -n '1,10p' "$f"
+              fail=1
+            fi
+          done
+
+          for idx in \
+            "$S/knowledge-management/references/decisions/README.md" \
+            "$S/pattern-library/references/patterns/README.md" \
+            "$S/improvement-tracking/references/improvements/README.md"
+          do
+            # 表の行は 3 列（先頭・末尾の | を除きセルが 3 つ）。\| は列区切りに数えない
+            bad=$(grep -E '^\| .* \| .* \| .* \|' "$idx" | while IFS= read -r line; do
+              cells=$(printf '%s' "$line" | sed 's/\\|/<PIPE>/g' | awk -F'|' '{print NF-2}')
+              [ "$cells" = "3" ] || echo "$line"
+            done)
+            if [ -n "$bad" ]; then
+              echo "::error::malformed table row(s) in $idx:"
+              printf '%s\n' "$bad"
+              fail=1
+            fi
+            if ! grep -q 'Use cache \\| fallback: sync "mode" line2' "$idx"; then
+              echo "::error::escaped title not found in index $idx"
+              fail=1
+            fi
+          done
+
+          [ "$fail" -eq 0 ]
+
       - name: Run hooks against the generated project
         working-directory: /tmp/ckms-target
         run: |

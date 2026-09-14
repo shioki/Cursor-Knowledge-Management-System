@@ -36,6 +36,9 @@ ckms_read_title() {
     in_fm && /^title:[[:space:]]*/ {
       sub(/^title:[[:space:]]*/, "")
       gsub(/^["'"'"']|["'"'"']$/, "")
+      # ダブルクォート YAML の \" と \\ を元に戻す（順序: \" を先に）
+      gsub(/\\"/, "\"")
+      gsub(/\\\\/, "\\")
       if (length($0) > 0) { print; exit }
     }
     !in_fm && /^# / {

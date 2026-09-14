@@ -33,8 +33,8 @@ metadata:
 
 ```markdown
 ---
-title: 改善タイトル
-description: 1 行サマリ
+title: "改善タイトル"
+description: "" # 1 行サマリを記入
 tags: [improvement]
 status: 提案
 updated: YYYY-MM-DD

@@ -33,7 +33,7 @@ fi
 
 cat > "$TARGET" << EOF
 ---
-title: ${NAME}
+title: $(ckms_yaml_escape "$NAME")
 description: "" # 1 行サマリを記入
 tags: [pattern]
 updated: ${DATE}

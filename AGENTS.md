@@ -33,15 +33,21 @@ Cursor Knowledge Management System（CKMS）そのもののリポジトリです
 
 技術判断・パターン・改善記録は 1 概念 1 ファイルです。単一の大きなファイルに追記していく方式には戻さないでください。オンデマンド読み込みでトークンを節約するという設計の前提が崩れます。
 
+利用者向けの配置（配布テンプレート）:
+
 - 技術判断: `skills/knowledge-management/references/decisions/YYYY-MM-DD-スラッグ.md`
 - パターン: `skills/pattern-library/references/patterns/スラッグ.md`
 - 改善: `skills/improvement-tracking/references/improvements/YYYY-MM-DD-スラッグ.md`
+
+**このリポジトリ自身の開発記録**は `skills/*/references/` に書かず、dogfooding 用の `.agents/skills/*/references/` に置きます（`.gitignore` 済み）。`skills/` 配下は配布物なので、CKMS 内部の ADR を混ぜると利用者のプロジェクトに混入します。手順は `docs/advanced/plugin-development.md` の dogfooding を参照。
 
 各ディレクトリの `README.md` が索引です。ファイルを追加したら索引にも 1 行追加します。
 
 ### スクリプトの制約
 
 hook スクリプトと知識管理スクリプトは、`jq` / `python` / `node` に依存させないでください。利用者の環境にあるとは限りません。POSIX シェルと `sed` / `awk` / `find` の範囲で書きます。
+
+ユーザー入力を YAML frontmatter や Markdown 表へ埋め込むときは、必ず `_skill-base.sh` の `ckms_yaml_escape` / `ckms_table_escape`（または同等の処理）を通してください。`awk -v` はバックスラッシュを解釈するため、`\|` を含む行の受け渡しには `ENVIRON` を使います。
 
 `*.sh` には実行権限を付けてコミットしてください。CI が検証します。
 

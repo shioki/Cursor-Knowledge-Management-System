@@ -24,6 +24,8 @@ Thank you for improving Cursor Knowledge Management System. This document descri
 
 4. **Never duplicate `skills/` elsewhere.** It is the single source of truth. v5 maintained parallel copies under `templates/`, and all seven `SKILL.md` files drifted apart. See [AGENTS.md](AGENTS.md) for the repository's own development guidelines.
 
+5. **When embedding user strings into YAML or Markdown tables in shell scripts**, use `ckms_yaml_escape` / `ckms_table_escape` from `_skill-base.sh`. Do not pass rows containing `\|` through `awk -v` (use `ENVIRON` instead). See [AGENTS.md](AGENTS.md)「スクリプトの制約」。
+
 ## Version alignment (releases)
 
 When you prepare a **versioned release** (not every PR), these must stay in sync:

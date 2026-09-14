@@ -30,7 +30,9 @@ DATA_BASE="$(dirname "$SKILL_BASE")"
 # Usage: ckms_slugify "タイトル" "フォールバック"
 ckms_slugify() {
   local input="$1" fallback="${2:-entry}" slug
+  # 改行は sed が行分割するため、先にスペースへ畳む（ファイル名への混入を防ぐ）
   slug=$(printf '%s' "$input" \
+    | tr '\n\r' '  ' \
     | tr '[:upper:]' '[:lower:]' \
     | tr ' _/\\' '-' \
     | sed -e 's/[^a-z0-9-]//g' -e 's/--*/-/g' -e 's/^-//' -e 's/-$//')
@@ -41,6 +43,27 @@ ckms_slugify() {
   fi
 }
 
+# YAML frontmatter のスカラー用に、ダブルクォートで囲んでエスケープする。
+# 改行はタイトルに不要なのでスペースへ畳む。呼び出し側は
+#   title: $(ckms_yaml_escape "$TITLE")
+# のように使う（本関数がクォートを付与する）。
+#
+# Usage: ckms_yaml_escape "文字列"
+ckms_yaml_escape() {
+  printf '%s' "$1" \
+    | tr '\n\r' '  ' \
+    | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e 's/^/"/' -e 's/$/"/'
+}
+
+# Markdown 表セル用に、| と改行を無害化する。
+#
+# Usage: ckms_table_escape "文字列"
+ckms_table_escape() {
+  printf '%s' "$1" \
+    | tr '\n\r' '  ' \
+    | sed 's/|/\\|/g'
+}
+
 # 索引 README.md に 1 行追加する。README が無ければ見出しと表ごと作成する。
 # 新しいエントリが上に来るよう、表ヘッダの直後に挿入する。
 #
@@ -48,6 +71,9 @@ ckms_slugify() {
 ckms_index_upsert() {
   local index="$1" heading="$2" intro="$3" col1="$4" title="$5" filename="$6"
   local row tmp
+
+  col1=$(ckms_table_escape "$col1")
+  title=$(ckms_table_escape "$title")
 
   if [ ! -f "$index" ]; then
     cat > "$index" << EOF
@@ -66,9 +92,10 @@ EOF
 
   if grep -q '^|------' "$index"; then
     tmp="${index}.tmp.$$"
-    awk -v row="$row" '
+    # awk -v はバックスラッシュを解釈するため、\| を保つには ENVIRON を使う
+    CKMS_INDEX_ROW="$row" awk '
       { print }
-      !inserted && /^\|------/ { print row; inserted = 1 }
+      !inserted && /^\|------/ { print ENVIRON["CKMS_INDEX_ROW"]; inserted = 1 }
     ' "$index" > "$tmp" && mv "$tmp" "$index"
   else
     printf '%s\n' "$row" >> "$index"

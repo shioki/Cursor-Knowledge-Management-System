@@ -32,8 +32,8 @@ metadata:
 
 ```markdown
 ---
-title: 判断タイトル
-description: 1 行サマリ
+title: "判断タイトル"
+description: "" # 1 行サマリを記入
 tags: [adr]
 updated: YYYY-MM-DD
 ---
@@ -46,6 +46,8 @@ updated: YYYY-MM-DD
 
 # 影響範囲
 ```
+
+`title` に `|` や `:` や `"` が含まれる場合はダブルクォートで囲みます。`scripts/add-entry.sh` は `ckms_yaml_escape` で自動処理します。
 
 ファイルを作成したら、`references/decisions/README.md` の一覧表にも 1 行追加してください。
 

@@ -2,6 +2,15 @@
 
 このプロジェクトの重要な変更履歴を記録します。
 
+## [Unreleased]
+
+### Fixed
+
+- **記録スクリプトのタイトルエスケープ**: `|` / `:` / `"` / 改行を含むタイトルで YAML frontmatter と索引 `README.md` の表が壊れていた。`_skill-base.sh` に `ckms_yaml_escape` / `ckms_table_escape` を追加し、`add-entry.sh` / `add-pattern.sh` / `add-improvement.sh` と `ckms_index_upsert` で適用する
+- **スラッグ化の改行混入**: タイトル内の改行が `sed` の行分割でファイル名に残る問題を、`ckms_slugify` で改行を先に畳むことで修正
+- **`ckms_read_title`**: ダブルクォートで囲まれた `title` の `\"` / `\\` を復元するよう更新
+- **CI**: setup-smoke-test に特殊文字タイトルの回帰チェックを追加
+
 ## [6.0.0] - 2026-08-01
 
 ### 🎉 Major Release - Agent Skills への統一と記録の習慣化
