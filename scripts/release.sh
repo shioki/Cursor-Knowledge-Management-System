@@ -59,9 +59,12 @@ fi
 # 未 push の変更があると「検証した内容と実際にリリースされる内容が別物」
 # になりうる。それを防ぐため、対象コミットを明示的に --target で渡し、
 # 事前に作業ツリーの状態も確認する。
-if [[ -n "$(git status --porcelain)" ]]; then
+
+# 未追跡ファイル（.cursorignore など、意図的にコミットしないローカル生成物）は
+# タグに含まれないため対象外とし、追跡対象ファイルの変更だけを確認する。
+if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
   echo "エラー: 作業ツリーに未コミットの変更があります。コミットしてから再実行してください。"
-  git status --short
+  git status --short --untracked-files=no
   exit 1
 fi
 
