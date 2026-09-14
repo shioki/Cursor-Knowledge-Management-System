@@ -152,13 +152,14 @@ async function checkClaudeCodeHooks(problems, warnings) {
     return 0;
   }
 
-  if (!(await exists(path.join(CLAUDE_HOOKS_DIR, '_hook-lib.sh')))) {
-    problems.push('hooks/claude-code/_hook-lib.sh: not found (should be a symlink to ../_hook-lib.sh)');
+  // claude-code/*.sh は ../_hook-lib.sh（hooks/_hook-lib.sh）を参照する。symlink は
+  // 使わない方針（Windows で symlink checkout が無効だと壊れるため）なので、
+  // hooks/_hook-lib.sh 自体の存在は checkHooks 側で保証される。
+  if (!(await exists(path.join(HOOKS_DIR, '_hook-lib.sh')))) {
+    problems.push('hooks/_hook-lib.sh: not found (required by hooks/claude-code/*.sh)');
   }
 
-  const scripts = entries.filter(
-    (e) => (e.isFile() || e.isSymbolicLink()) && e.name.endsWith('.sh') && !e.name.startsWith('_')
-  );
+  const scripts = entries.filter((e) => e.isFile() && e.name.endsWith('.sh') && !e.name.startsWith('_'));
   if (scripts.length === 0) {
     warnings.push('hooks/claude-code/ contains no .sh files');
   }

@@ -76,9 +76,10 @@ find /path/to/your-project/.agents/skills -name "*.sh" -exec chmod +x {} \;
 # Claude Code にも読ませる場合
 mkdir -p /path/to/your-project/.claude
 ln -s ../.agents/skills /path/to/your-project/.claude/skills
-mkdir -p /path/to/your-project/.claude/hooks
-cp hooks/claude-code/*.sh /path/to/your-project/.claude/hooks/
-chmod +x /path/to/your-project/.claude/hooks/*.sh
+mkdir -p /path/to/your-project/.claude/hooks/claude-code
+cp hooks/_hook-lib.sh /path/to/your-project/.claude/hooks/
+cp hooks/claude-code/*.sh /path/to/your-project/.claude/hooks/claude-code/
+chmod +x /path/to/your-project/.claude/hooks/_hook-lib.sh /path/to/your-project/.claude/hooks/claude-code/*.sh
 cp templates/.claude/settings.json.template /path/to/your-project/.claude/settings.json
 printf '@AGENTS.md\n' > /path/to/your-project/CLAUDE.md
 ```

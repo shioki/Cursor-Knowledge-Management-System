@@ -177,7 +177,7 @@ your-project/
 │   └── knowledge-hooks.conf                     # hooks の設定（任意）
 ├── .claude/
 │   ├── skills/                                   # .agents/skills へのシンボリックリンク
-│   ├── hooks/
+│   ├── hooks/                                    # _hook-lib.sh + claude-code/*.sh
 │   └── settings.json
 ├── .cursor/
 │   ├── agents/knowledge-curator.md

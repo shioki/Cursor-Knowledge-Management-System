@@ -5,11 +5,15 @@
 # 事前に gh auth login または GH_TOKEN の設定が必要です。
 #
 # 主な機能:
-#   1. .cursor-plugin/plugin.json / apm.yml のバージョン一致検証
-#   2. docs:check (skills/components/plugin/links) と gh skill publish --dry-run の実行
-#   3. immutable release の推奨アナウンス
-#   4. gh release create 実行
-#   5. 任意で `gh skill publish` 連携（--skip-skill-publish で無効化）
+#   1. 作業ツリーがクリーンで、現在のブランチが upstream と一致していることの確認
+#      （gh release create はタグ未作成時、既定で GitHub 上のデフォルトブランチの
+#      最新状態からタグを作る。ローカルで検証した内容とズレないよう、対象コミットを
+#      --target で明示する）
+#   2. .cursor-plugin/plugin.json / apm.yml のバージョン一致検証
+#   3. docs:check (skills/components/plugin/links) と gh skill publish --dry-run の実行
+#   4. immutable release の推奨アナウンス
+#   5. 実行前の確認プロンプト（対話環境のみ）のうえ gh release create --target 実行
+#   6. 任意で `gh skill publish` 連携（--skip-skill-publish で無効化）
 
 set -euo pipefail
 
@@ -47,6 +51,36 @@ if ! gh auth status &>/dev/null; then
   echo "詳しくは: docs/reference/github-release.md"
   exit 1
 fi
+
+# --- Git 状態チェック ---
+# gh release create はタグが未作成の場合、既定では GitHub 上のデフォルト
+# ブランチの最新状態からタグを作成する（--target 未指定時の公式挙動）。
+# このスクリプトが検証するのはローカルの作業ツリーなので、未コミット・
+# 未 push の変更があると「検証した内容と実際にリリースされる内容が別物」
+# になりうる。それを防ぐため、対象コミットを明示的に --target で渡し、
+# 事前に作業ツリーの状態も確認する。
+if [[ -n "$(git status --porcelain)" ]]; then
+  echo "エラー: 作業ツリーに未コミットの変更があります。コミットしてから再実行してください。"
+  git status --short
+  exit 1
+fi
+
+TARGET_COMMIT="$(git rev-parse HEAD)"
+CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+
+if git rev-parse --symbolic-full-name '@{u}' &>/dev/null; then
+  UPSTREAM_COMMIT="$(git rev-parse '@{u}')"
+  if [[ "$TARGET_COMMIT" != "$UPSTREAM_COMMIT" ]]; then
+    echo "エラー: ローカルの $CURRENT_BRANCH ($TARGET_COMMIT) が upstream ($UPSTREAM_COMMIT) と一致しません。"
+    echo "  push し忘れた変更があると、ここで検証した内容とは別のコミットがリリースされる恐れがあります。"
+    echo "  git push で揃えてから再実行してください。"
+    exit 1
+  fi
+else
+  echo "警告: 現在のブランチ ($CURRENT_BRANCH) に upstream が設定されていません。push 済みかどうか確認できません。"
+fi
+
+echo "[ok] リリース対象コミット: $TARGET_COMMIT ($CURRENT_BRANCH)"
 
 # --- バージョン整合性チェック ---
 VERSION_NUM="${VERSION#v}"
@@ -123,11 +157,19 @@ EOF
 echo ""
 
 if [[ "$DRY_RUN" == true ]]; then
-  echo "[DRY RUN] gh release create \"$VERSION\" --title \"$TITLE\" --notes-file \"$NOTES_FILE\""
+  echo "[DRY RUN] gh release create \"$VERSION\" --title \"$TITLE\" --notes-file \"$NOTES_FILE\" --target \"$TARGET_COMMIT\""
 else
+  if [[ -t 0 ]]; then
+    read -r -p "  $VERSION を $TARGET_COMMIT ($CURRENT_BRANCH) からリリースします。よろしいですか？ (y/N): " CONFIRM
+    if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
+      echo "中止しました。"
+      exit 1
+    fi
+  fi
   gh release create "$VERSION" \
     --title "$TITLE" \
-    --notes-file "$NOTES_FILE"
+    --notes-file "$NOTES_FILE" \
+    --target "$TARGET_COMMIT"
   echo "完了: $VERSION をリリースしました。"
 fi
 

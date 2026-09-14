@@ -152,22 +152,22 @@ Claude Code は Cursor と異なるスキーマを使うため、`hooks/claude-c
 {
   "hooks": {
     "SessionStart": [
-      { "hooks": [{ "type": "command", "command": ".claude/hooks/session-start.sh" }] }
+      { "hooks": [{ "type": "command", "command": ".claude/hooks/claude-code/session-start.sh" }] }
     ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
-        "hooks": [{ "type": "command", "command": ".claude/hooks/post-tool-use-log-activity.sh" }]
+        "hooks": [{ "type": "command", "command": ".claude/hooks/claude-code/post-tool-use-log-activity.sh" }]
       }
     ],
     "Stop": [
-      { "hooks": [{ "type": "command", "command": ".claude/hooks/stop-suggest-record.sh" }] }
+      { "hooks": [{ "type": "command", "command": ".claude/hooks/claude-code/stop-suggest-record.sh" }] }
     ]
   }
 }
 ```
 
-`init.sh` を使えば、`.agents/skills` 配置（既定）かつ `--no-claude-bridge` を付けなかった場合に自動で配置されます。
+`init.sh` を使えば、`.agents/skills` 配置（既定）かつ `--no-claude-bridge` を付けなかった場合に自動で配置されます。配置先は `.claude/hooks/_hook-lib.sh` + `.claude/hooks/claude-code/*.sh` というソースと同じ階層構造です。共通ライブラリを symlink ではなく実体としてコピーしているのは、Windows で git の symlink サポートが無効な checkout だと壊れた参照ファイルになってしまうためです。
 
 ### followup_message との違い
 
@@ -178,9 +178,9 @@ Cursor 版の `stop` フックは `followup_message` を返し、次のユーザ
 ### 動作確認
 
 ```bash
-echo '{"session_id":"test"}' | .claude/hooks/session-start.sh
-echo '{"tool_name":"Edit","tool_input":{"file_path":"'"$PWD"'/src/app.ts"}}' | .claude/hooks/post-tool-use-log-activity.sh
-echo '{"status":"completed"}' | .claude/hooks/stop-suggest-record.sh
+echo '{"session_id":"test"}' | .claude/hooks/claude-code/session-start.sh
+echo '{"tool_name":"Edit","tool_input":{"file_path":"'"$PWD"'/src/app.ts"}}' | .claude/hooks/claude-code/post-tool-use-log-activity.sh
+echo '{"status":"completed"}' | .claude/hooks/claude-code/stop-suggest-record.sh
 ```
 
 `hookSpecificOutput` のキー名（`additionalContext` など）は Claude Code のバージョンによって変わりうる仕様です。導入したバージョンで実際に会話へ反映されるか確認してください。
@@ -213,10 +213,14 @@ echo '{"session_id":"test"}' | .cursor/hooks/inject-knowledge-index.sh
 実行権限を確認してください。
 
 ```bash
+# Cursor
 chmod +x .cursor/hooks/*.sh
+
+# Claude Code
+chmod +x .claude/hooks/_hook-lib.sh .claude/hooks/claude-code/*.sh
 ```
 
-`bash .agents/skills/project-setup/scripts/validate.sh` でも権限をチェックできます。
+`bash .agents/skills/project-setup/scripts/validate.sh` でも権限をチェックできます。`init.ps1` はスクリプトに実行権限を設定しないため、Windows では初回導入後に Git Bash で上記を実行してください。
 
 ### 記録提案が出ない
 

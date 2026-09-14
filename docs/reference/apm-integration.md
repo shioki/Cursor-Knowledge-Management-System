@@ -33,6 +33,8 @@ v5 では `commands` も宣言していましたが、7 つのスラッシュコ
 
 パスがすべて非隠しディレクトリなのは意図的です。Cursor Plugin のデフォルト探索、`gh skill` の探索（`--allow-hidden-dirs` 不要）、APM の三者が同じ配置をそのまま読めるようにしてあります。
 
+`hooks: hooks` は `hooks/` ディレクトリ全体を指すため、Cursor 用（`hooks/*.sh`）と Claude Code 用（`hooks/claude-code/*.sh` + `hooks/_hook-lib.sh`）の hooks はどちらも `apm install` で導入されます。一方で `paths` に `templates` は含まれないため、`.claude/skills` のシンボリックリンク作成・`CLAUDE.md` の生成・`templates/.claude/settings.json.template` の配置は **`apm install` だけでは行われません**。`init.sh` が行うこの橋渡し処理は `paths` 宣言だけでは再現できないためです。APM 経由で Claude Code にも使わせたい場合は、[README.md の「手動コピー」](../../README.md#手動コピー) にある Claude Code 橋渡しの手順を別途実行してください。
+
 ## 本パッケージの利用例
 
 ### 1. パッケージ全体を取り込む

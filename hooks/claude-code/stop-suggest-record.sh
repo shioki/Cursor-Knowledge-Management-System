@@ -17,8 +17,8 @@
 set -u
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-# shellcheck source=_hook-lib.sh
-. "${SCRIPT_DIR}/_hook-lib.sh"
+# shellcheck source=../_hook-lib.sh
+. "${SCRIPT_DIR}/../_hook-lib.sh"
 
 INPUT="$(cat 2>/dev/null || true)"
 

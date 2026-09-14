@@ -23,6 +23,11 @@ FILE_PATH="$(printf '%s' "$INPUT" \
   | head -n 1)"
 [ -n "$FILE_PATH" ] || ckms_noop_exit
 
+# バックスラッシュ区切りのパス（Windows ネイティブな渡され方をした場合）を
+# 正規化する。通常は Git Bash / WSL の POSIX パスが渡ってくるはずだが、
+# 念のための防御。
+FILE_PATH="${FILE_PATH//\\//}"
+
 # 知識ベース自身の編集は記録しない（記録行為でログが埋まるのを避ける）
 case "$FILE_PATH" in
   *"/${BASE}/"*|"${BASE}/"*) ckms_noop_exit ;;
@@ -37,14 +42,7 @@ case "$MAX_LINES" in
   ''|*[!0-9]*) MAX_LINES=500 ;;
 esac
 
-{
-  printf '%s\t%s\n' "$(date +%Y-%m-%dT%H:%M:%S)" "$REL_PATH" >> "$LOG"
-
-  # ログが膨らみすぎないよう末尾だけ残す
-  line_count=$(wc -l < "$LOG" 2>/dev/null | tr -d ' ')
-  if [ -n "$line_count" ] && [ "$line_count" -gt "$MAX_LINES" ]; then
-    tail -n "$MAX_LINES" "$LOG" > "${LOG}.tmp" && mv "${LOG}.tmp" "$LOG"
-  fi
-} 2>/dev/null || true
+LINE="$(printf '%s\t%s' "$(date +%Y-%m-%dT%H:%M:%S)" "$REL_PATH")"
+ckms_append_and_trim_log "$LOG" "$LINE" "$MAX_LINES" 2>/dev/null || true
 
 printf '{}'

@@ -154,8 +154,59 @@ jobs:
       - name: Run Claude Code hooks against the generated project
         working-directory: /tmp/ckms-target
         run: |
-          echo '{"session_id":"ci"}' | .claude/hooks/session-start.sh | tee /tmp/claude-hook-out.json
+          echo '{"session_id":"ci"}' | .claude/hooks/claude-code/session-start.sh | tee /tmp/claude-hook-out.json
           node -e "JSON.parse(require('fs').readFileSync('/tmp/claude-hook-out.json','utf8'))"
-          echo "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$PWD/src/app.ts\"}}" | .claude/hooks/post-tool-use-log-activity.sh
-          echo '{"status":"completed"}' | .claude/hooks/stop-suggest-record.sh
+          echo "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$PWD/src/app.ts\"}}" | .claude/hooks/claude-code/post-tool-use-log-activity.sh
+          echo '{"status":"completed"}' | .claude/hooks/claude-code/stop-suggest-record.sh
+          node -e "JSON.parse(require('fs').readFileSync('.claude/settings.json','utf8'))"
+
+  windows-setup-smoke-test:
+    # init.ps1 は setup-smoke-test（ubuntu-latest）では一度も実行されない。
+    # Windows 固有の不具合（symlink 権限、Copy-Item が実行ビットを引き継がない等）は
+    # ここでしか検知できないため、windows-latest 上で実際に実行して検証する。
+    # windows-latest ランナーは Git Bash（C:\Program Files\Git\bin\bash.exe）を標準搭載。
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run init.ps1 into a fresh directory
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path C:\ckms-target | Out-Null
+          .\skills\project-setup\scripts\init.ps1 -TargetPath C:\ckms-target -Yes
+
+      - name: Validate the generated structure (Git Bash)
+        shell: bash
+        working-directory: /c/ckms-target
+        run: bash .agents/skills/project-setup/scripts/validate.sh
+
+      - name: Verify the Claude Code skills bridge resolves
+        shell: bash
+        working-directory: /c/ckms-target
+        run: |
+          if [ ! -e ".claude/skills" ]; then
+            echo "::error::.claude/skills was not created"
+            exit 1
+          fi
+          count=$(find -L .claude/skills -maxdepth 1 -mindepth 1 -type d | wc -l | tr -d ' ')
+          if [ "$count" -lt 1 ]; then
+            echo "::error::.claude/skills resolved to 0 skill directories"
+            exit 1
+          fi
+          echo "resolved $count skill directories via .claude/skills (symlink or copy fallback)"
+
+      - name: Run hooks directly (verifies Copy-Item + chmod preserved executability)
+        # bash script.sh ではなく直接実行することで、init.ps1 が実行権限を
+        # 正しく付与できているかも同時に検証する。
+        shell: bash
+        working-directory: /c/ckms-target
+        run: |
+          echo '{"session_id":"ci"}' | ./.cursor/hooks/inject-knowledge-index.sh | node -e "JSON.parse(require('fs').readFileSync(0,'utf8'))"
+          echo '{"session_id":"ci"}' | ./.claude/hooks/claude-code/session-start.sh | node -e "JSON.parse(require('fs').readFileSync(0,'utf8'))"
+          echo "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$PWD/src/app.ts\"}}" | ./.claude/hooks/claude-code/post-tool-use-log-activity.sh
           node -e "JSON.parse(require('fs').readFileSync('.claude/settings.json','utf8'))"

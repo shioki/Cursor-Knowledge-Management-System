@@ -65,6 +65,53 @@ ckms_noop_exit() {
   exit 0
 }
 
+# ディレクトリ作成（mkdir はアトミック）でロックを取り、コマンドを実行する。
+# Cursor と Claude Code の hooks を同一プロジェクトで並行利用すると、同じ
+# ログファイルへ同時に追記・トリムしうるため、共有ファイルを書き換える処理は
+# これで囲む。ロックが取れなくても記録を諦めるよりましなので、一定時間待って
+# 取れなければロックせずに続行する（fail-open）。
+#
+# Usage: ckms_with_lock <対象ファイルパス> <コマンド...>
+ckms_with_lock() {
+  local target="$1" lockdir waited=0 max_wait=5
+  shift
+  lockdir="${target}.lock"
+  while ! mkdir "$lockdir" 2>/dev/null; do
+    if [ "$waited" -ge "$max_wait" ]; then
+      "$@"
+      return $?
+    fi
+    sleep 1
+    waited=$((waited + 1))
+  done
+  "$@"
+  local status=$?
+  rmdir "$lockdir" 2>/dev/null || true
+  return $status
+}
+
+# ログに 1 行追記し、上限行数を超えていれば末尾だけ残す。
+# 追記からトリムまでを ckms_with_lock で囲み、並行フック実行時の破損を防ぐ。
+# 一時ファイル名には PID を付けて、ロック待ちがタイムアウトした場合の
+# 衝突も避ける。
+#
+# Usage: ckms_append_and_trim_log <ログファイル> <追記する1行> <最大行数>
+ckms_append_and_trim_log() {
+  local log="$1" line="$2" max_lines="$3"
+  ckms_with_lock "$log" _ckms_append_and_trim_log_body "$log" "$line" "$max_lines"
+}
+
+_ckms_append_and_trim_log_body() {
+  local log="$1" line="$2" max_lines="$3" tmp line_count
+  printf '%s\n' "$line" >> "$log"
+
+  line_count=$(wc -l < "$log" 2>/dev/null | tr -d ' ')
+  if [ -n "$line_count" ] && [ "$line_count" -gt "$max_lines" ]; then
+    tmp="${log}.tmp.$$"
+    tail -n "$max_lines" "$log" > "$tmp" && mv "$tmp" "$log"
+  fi
+}
+
 # 蓄積済み知識（技術判断・パターン・改善記録・デバッグセッション）の索引を
 # Markdown テキストとして組み立てる。中身は読み込まず、ファイル名とタイトルの
 # 一覧だけを返す。エージェント間で共通のロジックなので、sessionStart 系の

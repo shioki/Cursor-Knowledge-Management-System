@@ -43,7 +43,7 @@ your-project/
 │   └── debug-sessions/      # デバッグセッションの保存先
 ├── .claude/
 │   ├── skills/              # .agents/skills へのシンボリックリンク
-│   ├── hooks/               # 記録支援スクリプト（Claude Code 用）
+│   ├── hooks/               # 記録支援スクリプト（Claude Code 用。_hook-lib.sh + claude-code/）
 │   └── settings.json
 ├── .cursor/
 │   ├── agents/

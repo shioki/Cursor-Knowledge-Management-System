@@ -102,6 +102,30 @@ if (-not $CursorOnly -and -not $LegacyClaude) {
 }
 Write-Host ""
 
+# 既存 .claude/skills の検出と移行提案（v4.x 配置からの移行。デフォルトモードのみ）
+if (-not $CursorOnly -and -not $LegacyClaude) {
+    $LegacyClaudeSkills = Join-Path $TargetPath ".claude\skills"
+    if ((Test-Path $LegacyClaudeSkills) -and -not (Test-Path $SkillsDest)) {
+        Write-Host "検出: $LegacyClaudeSkills が存在します（v4.x 配置）"
+        Write-Host "v6 のデフォルト配置は .agents/skills です。"
+        if (Confirm-Overwrite ".claude/skills を .agents/skills へ移動しますか?") {
+            $AgentsDirForMove = Join-Path $TargetPath ".agents"
+            if (-not (Test-Path $AgentsDirForMove)) {
+                New-Item -ItemType Directory -Path $AgentsDirForMove -Force | Out-Null
+            }
+            Move-Item -Path $LegacyClaudeSkills -Destination $SkillsDest -Force
+            $LegacyDebugSessions = Join-Path $TargetPath ".claude\debug-sessions"
+            if (Test-Path $LegacyDebugSessions) {
+                Move-Item -Path $LegacyDebugSessions -Destination $SessionsDest -Force
+            }
+            Write-Host "  .claude/skills を .agents/skills に移動しました"
+        } else {
+            Write-Host "  両方の配置を維持します（.claude/skills と .agents/skills の両方が読み込まれます）"
+        }
+        Write-Host ""
+    }
+}
+
 # skills/
 $CopySkills = $true
 if (Test-Path $SkillsDest) {
@@ -231,11 +255,15 @@ if (-not $NoHooks) {
         # Claude Code 用 hooks（.agents 配置かつ橋渡しが有効な場合のみ）
         $SourceClaudeHooks = Join-Path $SourceHooks "claude-code"
         if (-not $CursorOnly -and -not $LegacyClaude -and -not $NoClaudeBridge -and (Test-Path $SourceClaudeHooks)) {
+            # ソースの構造（hooks/_hook-lib.sh を hooks/claude-code/*.sh が ../ で参照）を
+            # そのまま維持して配置する（symlink は使わない）。
             $ClaudeHooksDest = Join-Path $ClaudeDir "hooks"
-            if (-not (Test-Path $ClaudeHooksDest)) {
-                New-Item -ItemType Directory -Path $ClaudeHooksDest -Force | Out-Null
+            $ClaudeHooksClaudeCodeDest = Join-Path $ClaudeHooksDest "claude-code"
+            if (-not (Test-Path $ClaudeHooksClaudeCodeDest)) {
+                New-Item -ItemType Directory -Path $ClaudeHooksClaudeCodeDest -Force | Out-Null
             }
-            Copy-Item -Path (Join-Path $SourceClaudeHooks "*.sh") -Destination $ClaudeHooksDest -Force
+            Copy-Item -Path (Join-Path $SourceHooks "_hook-lib.sh") -Destination $ClaudeHooksDest -Force
+            Copy-Item -Path (Join-Path $SourceClaudeHooks "*.sh") -Destination $ClaudeHooksClaudeCodeDest -Force
             Write-Host "Claude Code 用 hooks スクリプトを配置しました: $ClaudeHooksDest"
 
             $ClaudeSettings = Join-Path $ClaudeDir "settings.json"
@@ -291,6 +319,26 @@ if ($WithAgentsMd) {
         Set-Content -Path $ClaudeMdDest -Value "@AGENTS.md" -Encoding UTF8
         Write-Host "CLAUDE.md を作成しました（@AGENTS.md を import）"
     }
+}
+
+# .sh スクリプトに実行権限を付与する。Copy-Item は git が記録している実行ビット
+# （100755）を引き継がないため、Git Bash があれば chmod で明示的に付与する。
+# 無ければ手動で実行する手順を案内する。
+$BashExe = $null
+$bashCmd = Get-Command bash.exe -ErrorAction SilentlyContinue
+if ($bashCmd) {
+    $BashExe = $bashCmd.Source
+} elseif (Test-Path "C:\Program Files\Git\bin\bash.exe") {
+    $BashExe = "C:\Program Files\Git\bin\bash.exe"
+}
+$PosixTarget = ($TargetPath -replace '\\', '/')
+if ($BashExe) {
+    & $BashExe -lc "find '$PosixTarget' -name '*.sh' -exec chmod +x {} \;" 2>$null
+    Write-Host "スクリプトに実行権限を付与しました（Git Bash 経由）"
+} else {
+    Write-Host "情報: Git Bash が見つからないため実行権限の自動付与をスキップしました"
+    Write-Host "      Git Bash または WSL で次を実行してください:"
+    Write-Host "        find '$PosixTarget' -name '*.sh' -exec chmod +x {} \;"
 }
 
 Write-Host ""

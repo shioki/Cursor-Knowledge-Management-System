@@ -2,7 +2,7 @@
 
 エージェントのライフサイクルに合わせて知識管理を補助する hooks です。このディレクトリ直下は **Cursor 用**で、Cursor Plugin として導入した場合は自動で読み込まれ、`init.sh` で導入した場合は `.cursor/hooks/` と `.cursor/hooks.json` に配置されます。
 
-**Claude Code 用**は `claude-code/` サブディレクトリです。スキーマが異なるため別スクリプトになっています（詳細は [hooks ガイド](../docs/advanced/hooks-guide.md)）。`init.sh` では `.claude/hooks/` と `.claude/settings.json` に配置されます。
+**Claude Code 用**は `claude-code/` サブディレクトリです。スキーマが異なるため別スクリプトになっています（詳細は [hooks ガイド](../docs/advanced/hooks-guide.md)）。`init.sh` では `_hook-lib.sh` を含めてこのディレクトリ構造ごと `.claude/hooks/` に配置され（`.claude/hooks/_hook-lib.sh` + `.claude/hooks/claude-code/*.sh`）、`.claude/settings.json` が作られます。symlink は使わず実体をコピーします。
 
 ## 提供する hooks（Cursor）
 

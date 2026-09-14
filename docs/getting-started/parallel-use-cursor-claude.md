@@ -28,7 +28,7 @@ bash path/to/Cursor-Knowledge-Management-System/skills/project-setup/scripts/ini
 │   └── debug-sessions/         # デバッグセッション記録
 ├── .claude/
 │   ├── skills/                 # .agents/skills へのシンボリックリンク（Claude Code 用）
-│   ├── hooks/                  # 記録支援スクリプト（Claude Code 用）
+│   ├── hooks/                  # 記録支援スクリプト（Claude Code 用。_hook-lib.sh + claude-code/）
 │   └── settings.json
 └── .cursor/
     ├── agents/                 # subagent（Cursor のみ）

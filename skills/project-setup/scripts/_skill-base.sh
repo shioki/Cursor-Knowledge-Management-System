@@ -64,16 +64,49 @@ ckms_table_escape() {
     | sed 's/|/\\|/g'
 }
 
+# ディレクトリ作成（mkdir はアトミック）でロックを取り、コマンドを実行する。
+# Cursor と Claude Code を同一プロジェクトで並行利用すると、索引ファイルや
+# ログファイルへの read-modify-write が競合しうるため、共有ファイルを書き
+# 換える処理はこれで囲む。ロックが取れなくても記録そのものを諦めるよりは
+# ましなので、一定時間待って取れなければ警告のうえ続行する（fail-open）。
+#
+# Usage: ckms_with_lock <対象ファイルパス> <コマンド...>
+ckms_with_lock() {
+  local target="$1" lockdir waited=0 max_wait=5
+  shift
+  lockdir="${target}.lock"
+  while ! mkdir "$lockdir" 2>/dev/null; do
+    if [ "$waited" -ge "$max_wait" ]; then
+      echo "警告: ロック取得がタイムアウトしました（${lockdir}）。ロックせずに続行します" >&2
+      "$@"
+      return $?
+    fi
+    sleep 1
+    waited=$((waited + 1))
+  done
+  "$@"
+  local status=$?
+  rmdir "$lockdir" 2>/dev/null || true
+  return $status
+}
+
 # 索引 README.md に 1 行追加する。README が無ければ見出しと表ごと作成する。
 # 新しいエントリが上に来るよう、表ヘッダの直後に挿入する。
+# read-modify-write 全体を ckms_with_lock で囲み、並行実行時の lost update を防ぐ。
 #
 # Usage: ckms_index_upsert <索引ファイル> <見出し> <説明> <第1列> <タイトル> <ファイル名>
 ckms_index_upsert() {
   local index="$1" heading="$2" intro="$3" col1="$4" title="$5" filename="$6"
-  local row tmp
 
   col1=$(ckms_table_escape "$col1")
   title=$(ckms_table_escape "$title")
+
+  ckms_with_lock "$index" _ckms_index_upsert_body "$index" "$heading" "$intro" "$col1" "$title" "$filename"
+}
+
+_ckms_index_upsert_body() {
+  local index="$1" heading="$2" intro="$3" col1="$4" title="$5" filename="$6"
+  local row tmp
 
   if [ ! -f "$index" ]; then
     cat > "$index" << EOF

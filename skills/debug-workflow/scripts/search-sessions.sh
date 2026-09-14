@@ -28,10 +28,10 @@ echo ""
 FOUND=0
 for file in "$SESSIONS_DIR"/*.md; do
   [ -f "$file" ] || continue
-  if grep -li "$KEYWORD" "$file" 2>/dev/null; then
+  if grep -qli -- "$KEYWORD" "$file" 2>/dev/null; then
     FOUND=$((FOUND + 1))
     echo "--- $(basename "$file") ---"
-    grep -n -i "$KEYWORD" "$file" | head -5
+    grep -n -i -- "$KEYWORD" "$file" | head -5
     echo ""
   fi
 done

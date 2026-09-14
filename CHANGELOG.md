@@ -18,11 +18,19 @@
 ### Fixed
 
 - **CKMS 自身の Claude Code 対応**: リポジトリ直下に `CLAUDE.md`（`@AGENTS.md` を import）と `.claude/skills`（`skills/` へのシンボリックリンク）を追加し、このリポジトリ自体を Claude Code から開いたときに AGENTS.md とスキルが読み込まれるようにした
-- **ドキュメントの是正**: 「`.agents/skills/` に置けば Claude Code からも自動で読み込まれる」という不正確な説明を、実際の橋渡しの仕組み（シンボリックリンク、CLAUDE.md import）に基づく説明へ修正（README、各種ガイド、`apm.yml`、`.cursor-plugin/plugin.json`）
+- **ドキュメントの是正**: 「`.agents/skills/` に置けば Claude Code からも自動で読み込まれる」という不正確な説明を、実際の橋渡しの仕組み（シンボリックリンク、CLAUDE.md import）に基づく説明へ修正（README、各種ガイド、`apm.yml`、`.cursor-plugin/plugin.json`、`apm-integration.md`、`gh-skill-integration.md`）
 - **記録スクリプトのタイトルエスケープ**: `|` / `:` / `"` / 改行を含むタイトルで YAML frontmatter と索引 `README.md` の表が壊れていた。`_skill-base.sh` に `ckms_yaml_escape` / `ckms_table_escape` を追加し、`add-entry.sh` / `add-pattern.sh` / `add-improvement.sh` と `ckms_index_upsert` で適用する
 - **スラッグ化の改行混入**: タイトル内の改行が `sed` の行分割でファイル名に残る問題を、`ckms_slugify` で改行を先に畳むことで修正
 - **`ckms_read_title`**: ダブルクォートで囲まれた `title` の `\"` / `\\` を復元するよう更新
 - **CI**: setup-smoke-test に特殊文字タイトルの回帰チェックを追加
+- **Windows での symlink checkout 破損**: `hooks/claude-code/_hook-lib.sh` を symlink で実装していたため、git の symlink サポートが無効な Windows checkout だと壊れたプレースホルダーファイルになり hooks が静かに壊れていた。symlink をやめ、`hooks/_hook-lib.sh` の実体コピー + `hooks/claude-code/` のディレクトリ構造をそのまま配置する方式に変更（`.claude/hooks/_hook-lib.sh` + `.claude/hooks/claude-code/*.sh`）
+- **索引 README 更新のレースコンディション**: `ckms_index_upsert`（`add-entry.sh` 等が使用）が read-modify-write にロックを取っておらず、Cursor と Claude Code の並行利用で同時に索引を更新すると記録が失われることがあった（40件中2件の欠損を実証）。`ckms_with_lock`（mkdir ベースの排他制御）を追加して修正
+- **活動ログのトリム時レースコンディション**: `log-activity.sh` / `post-tool-use-log-activity.sh` のログトリム処理が固定名の一時ファイルを使っており、並行実行で破損しうる状態だった。共通関数 `ckms_append_and_trim_log`（ロック + PID 付き一時ファイル）に統一
+- **`search-sessions.sh` のオプション誤解釈**: `-v` のように `-` で始まるキーワードが `grep` のオプションとして解釈され、無言で検索が失敗していた。`grep --` でオプション終端を明示
+- **`release.sh` のリリース対象コミットの不定性**: `gh release create` に `--target` を渡していなかったため、タグ未作成時は GitHub 上のデフォルトブランチの最新状態からタグが作られ、ローカルで検証した内容と一致しない恐れがあった。作業ツリーのクリーンさ・upstream との一致を確認し、`--target` に検証済みコミットを明示。実行前の確認プロンプトも追加
+- **`init.ps1` の機能不足**: `init.sh` にあった v4.x → v6 移行検出、実行権限の付与（Windows の `Copy-Item` は git の実行ビットを引き継がない）が `init.ps1` に無かった。両方とも追加（実行権限は Git Bash 経由の `chmod`）
+- **Windows 実行系が CI で未検証**: `setup-smoke-test` は `ubuntu-latest` 固定で `init.ps1` を一度も実行しておらず、上記のような Windows 固有のバグが検知できない構造だった。`windows-latest` 上で `init.ps1` を実行し、hooks を直接起動して検証する `windows-setup-smoke-test` ジョブを追加
+- **hooks のパス処理のバックスラッシュ非対応**: `log-activity.sh` / `post-tool-use-log-activity.sh` が `file_path` を `/` 区切り前提で処理しており、Windows ネイティブなバックスラッシュ区切りパスが渡った場合に自己編集の除外・相対パス化が効かない可能性があった。防御的にバックスラッシュを `/` へ正規化する処理を追加
 
 ## [6.0.0] - 2026-08-01
 

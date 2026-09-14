@@ -3,7 +3,7 @@
     "SessionStart": [
       {
         "hooks": [
-          { "type": "command", "command": ".claude/hooks/session-start.sh" }
+          { "type": "command", "command": ".claude/hooks/claude-code/session-start.sh" }
         ]
       }
     ],
@@ -11,14 +11,14 @@
       {
         "matcher": "Edit|Write",
         "hooks": [
-          { "type": "command", "command": ".claude/hooks/post-tool-use-log-activity.sh" }
+          { "type": "command", "command": ".claude/hooks/claude-code/post-tool-use-log-activity.sh" }
         ]
       }
     ],
     "Stop": [
       {
         "hooks": [
-          { "type": "command", "command": ".claude/hooks/stop-suggest-record.sh" }
+          { "type": "command", "command": ".claude/hooks/claude-code/stop-suggest-record.sh" }
         ]
       }
     ]

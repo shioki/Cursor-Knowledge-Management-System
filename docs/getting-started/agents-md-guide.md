@@ -63,7 +63,7 @@ project/
 │   └── debug-sessions/          # デバッグ記録
 ├── .claude/
 │   ├── skills/                  # .agents/skills へのシンボリックリンク
-│   ├── hooks/                   # hook スクリプト（Claude Code 用）
+│   ├── hooks/                   # hook スクリプト（Claude Code 用。_hook-lib.sh + claude-code/）
 │   └── settings.json            # hook 設定 + permissions
 ├── .cursor/
 │   ├── agents/                  # subagent（knowledge-curator）

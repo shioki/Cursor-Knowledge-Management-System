@@ -123,9 +123,10 @@ find "$TARGET/.agents/skills" -name "*.sh" -exec chmod +x {} \;
 # Claude Code にも読ませる場合（.agents/skills を複製せず橋渡しする）
 mkdir -p "$TARGET/.claude"
 ln -s "../.agents/skills" "$TARGET/.claude/skills"
-mkdir -p "$TARGET/.claude/hooks"
-cp "$CKMS/hooks/claude-code"/*.sh "$TARGET/.claude/hooks/"
-chmod +x "$TARGET/.claude/hooks"/*.sh
+mkdir -p "$TARGET/.claude/hooks/claude-code"
+cp "$CKMS/hooks/_hook-lib.sh" "$TARGET/.claude/hooks/"
+cp "$CKMS/hooks/claude-code"/*.sh "$TARGET/.claude/hooks/claude-code/"
+chmod +x "$TARGET/.claude/hooks/_hook-lib.sh" "$TARGET/.claude/hooks/claude-code"/*.sh
 cp "$CKMS/templates/.claude/settings.json.template" "$TARGET/.claude/settings.json"
 printf '@AGENTS.md\n' > "$TARGET/CLAUDE.md"
 ```

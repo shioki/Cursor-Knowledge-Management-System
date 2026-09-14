@@ -230,10 +230,14 @@ EOF
 
     # Claude Code 用 hooks（.agents 配置かつ橋渡しが有効な場合のみ）
     if [ "$MODE" = "agents" ] && [ "$WITH_CLAUDE_BRIDGE" = true ] && [ -d "${SOURCE_HOOKS}/claude-code" ]; then
+      # ソースの構造（hooks/_hook-lib.sh を hooks/claude-code/*.sh が ../ で参照）を
+      # そのまま維持して配置する。symlink は使わない（Windows で git の symlink
+      # サポートが無効な checkout だと壊れた参照ファイルになるため）。
       CLAUDE_HOOKS_DEST="$TARGET/.claude/hooks"
-      mkdir -p "$CLAUDE_HOOKS_DEST"
-      cp "${SOURCE_HOOKS}/claude-code"/*.sh "$CLAUDE_HOOKS_DEST/"
-      chmod +x "$CLAUDE_HOOKS_DEST"/*.sh
+      mkdir -p "$CLAUDE_HOOKS_DEST/claude-code"
+      cp "${SOURCE_HOOKS}/_hook-lib.sh" "$CLAUDE_HOOKS_DEST/"
+      cp "${SOURCE_HOOKS}/claude-code"/*.sh "$CLAUDE_HOOKS_DEST/claude-code/"
+      chmod +x "$CLAUDE_HOOKS_DEST/_hook-lib.sh" "$CLAUDE_HOOKS_DEST/claude-code"/*.sh
       echo "Claude Code 用 hooks スクリプトを配置しました: $CLAUDE_HOOKS_DEST"
 
       CLAUDE_SETTINGS="$TARGET/.claude/settings.json"
