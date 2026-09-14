@@ -33,6 +33,7 @@
 - **hooks のパス処理のバックスラッシュ非対応**: `log-activity.sh` / `post-tool-use-log-activity.sh` が `file_path` を `/` 区切り前提で処理しており、Windows ネイティブなバックスラッシュ区切りパスが渡った場合に自己編集の除外・相対パス化が効かない可能性があった。防御的にバックスラッシュを `/` へ正規化する処理を追加
 - **`windows-setup-smoke-test` の working-directory**: Git Bash 形式の `/c/ckms-target` を指定していたため、Windows ランナーがプロセス起動時にディレクトリ不正で失敗した。`C:\ckms-target` に変更
 - **スキーマ取得 URL**: `github.com/cursor/plugins/blob/HEAD/...` が 404 になり、`blob/main` も Windows の `links:check` で dead になるため、公式 `$id`（`https://cursor.com/schemas/cursor-plugin/plugin.json`）とリポジトリトップへ差し替え
+- **OKF 仕様リンク**: GitHub の blob URL が `links:check` で不安定なため、[open-knowledge-format](https://github.com/GoogleCloudPlatform/open-knowledge-format) リポジトリトップへ変更
 
 ## [6.0.0] - 2026-08-01
 

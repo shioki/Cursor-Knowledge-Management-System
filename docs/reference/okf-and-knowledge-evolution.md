@@ -13,7 +13,7 @@
 | 必須フィールド | `type`（1 概念 = 1 ファイル） |
 | 推奨フィールド | `title`, `description`, `resource`, `tags`, `timestamp` |
 | 予約ファイル名 | `index.md`（目次）, `log.md`（変更履歴） |
-| 仕様 | [GoogleCloudPlatform/knowledge-catalog/okf/SPEC.md](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) |
+| 仕様 | [GoogleCloudPlatform/open-knowledge-format](https://github.com/GoogleCloudPlatform/open-knowledge-format)（`SPEC.md`） |
 | 解説 | [Google Cloud ブログ（2026-06-12）](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing) |
 
 Google は OKF を **Obsidian、Karpathy の LLM Wiki、AGENTS.md / CLAUDE.md 系** と同系統の「LLM Wiki パターン」の標準化として位置づけています。CKMS も同じ思想（Markdown 知識ベース + エージェントによる段階的読込）を採用しているため、将来的な親和性は高いです。
