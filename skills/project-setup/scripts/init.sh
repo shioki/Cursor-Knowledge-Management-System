@@ -29,12 +29,14 @@ WITH_AGENTS_MD=false
 WITH_HOOKS=true
 WITH_AGENTS=true
 WITH_CLAUDE_BRIDGE=true
+LEGACY_CLAUDE=false
+CURSOR_ONLY=false
 
 for arg in "$@"; do
   case "$arg" in
     --yes|-y)             ASSUME_YES=true ;;
-    --legacy-claude)      MODE="claude" ;;
-    --cursor-only)        MODE="cursor" ;;
+    --legacy-claude)      MODE="claude" ; LEGACY_CLAUDE=true ;;
+    --cursor-only)        MODE="cursor" ; CURSOR_ONLY=true ;;
     --with-agents-md)     WITH_AGENTS_MD=true ;;
     --no-hooks)           WITH_HOOKS=false ;;
     --no-agents)          WITH_AGENTS=false ;;
@@ -46,6 +48,11 @@ for arg in "$@"; do
     *) if [ -z "$TARGET" ]; then TARGET="$arg"; fi ;;
   esac
 done
+
+if [ "$LEGACY_CLAUDE" = true ] && [ "$CURSOR_ONLY" = true ]; then
+  echo "エラー: --legacy-claude と --cursor-only は同時に指定できません" >&2
+  exit 1
+fi
 
 if [ -z "$TARGET" ]; then
   echo "エラー: ターゲットプロジェクトのパスを指定してください" >&2
