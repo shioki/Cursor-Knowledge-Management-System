@@ -181,13 +181,14 @@ jobs:
           .\skills\project-setup\scripts\init.ps1 -TargetPath C:\ckms-target -Yes
 
       - name: Validate the generated structure (Git Bash)
+        # working-directory は Windows パス。Git Bash の /c/... は CreateProcess に渡せない
         shell: bash
-        working-directory: /c/ckms-target
+        working-directory: C:\ckms-target
         run: bash .agents/skills/project-setup/scripts/validate.sh
 
       - name: Verify the Claude Code skills bridge resolves
         shell: bash
-        working-directory: /c/ckms-target
+        working-directory: C:\ckms-target
         run: |
           if [ ! -e ".claude/skills" ]; then
             echo "::error::.claude/skills was not created"
@@ -204,7 +205,7 @@ jobs:
         # bash script.sh ではなく直接実行することで、init.ps1 が実行権限を
         # 正しく付与できているかも同時に検証する。
         shell: bash
-        working-directory: /c/ckms-target
+        working-directory: C:\ckms-target
         run: |
           echo '{"session_id":"ci"}' | ./.cursor/hooks/inject-knowledge-index.sh | node -e "JSON.parse(require('fs').readFileSync(0,'utf8'))"
           echo '{"session_id":"ci"}' | ./.claude/hooks/claude-code/session-start.sh | node -e "JSON.parse(require('fs').readFileSync(0,'utf8'))"

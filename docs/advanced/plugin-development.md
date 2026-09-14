@@ -114,7 +114,7 @@ npm run plugin:check
 - `plugin.json` と `apm.yml` のバージョンが一致するか
 - 既定の探索先にコンポーネントが実在するか（スキーマは通るのに 0 件、という事故の防止）
 
-スキーマを更新する場合は、[cursor/plugins](https://github.com/cursor/plugins/blob/HEAD/schemas/plugin.schema.json) から取得し直してコミットしてください。
+スキーマを更新する場合は、[cursor/plugins](https://github.com/cursor/plugins/blob/main/schemas/plugin.schema.json) から取得し直してコミットしてください。
 
 ## 全体の検証
 

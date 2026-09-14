@@ -2,7 +2,7 @@
 // .cursor-plugin/plugin.json を公式スキーマで検証する。
 //
 // スキーマは schemas/cursor-plugin.schema.json にベンダリングしている
-// （https://github.com/cursor/plugins/blob/HEAD/schemas/plugin.schema.json）。
+// （https://github.com/cursor/plugins/blob/main/schemas/plugin.schema.json）。
 // additionalProperties: false のため、仕様外のキーは Cursor 側で拒否される。
 // 自前の緩い検証ではそれを見逃すため、ajv で厳密に検証する。
 
@@ -46,7 +46,7 @@ async function main() {
 
   if (!(await exists(SCHEMA_PATH))) {
     console.error(`[plugin-check] ERROR: vendored schema not found: ${SCHEMA_PATH}`);
-    console.error('  Fetch it from https://github.com/cursor/plugins/blob/HEAD/schemas/plugin.schema.json');
+    console.error('  Fetch it from https://github.com/cursor/plugins/blob/main/schemas/plugin.schema.json');
     process.exit(1);
   }
 
