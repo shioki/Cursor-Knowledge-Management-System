@@ -19,6 +19,8 @@
 - `ckms_read_title` はクォート付き YAML の `\"` / `\\` を復元
 - CI の setup-smoke-test に特殊文字タイトルの回帰チェックを追加
 
+この修正は、ターミナルの Claude Code が切り出し、Cursor Agent が実装する初の分担で進めた。Claude Code 側の導入参照は [Claude Code入門](https://zenn.dev/hampen2929/articles/20260814-claude-code-getting-started)。引き継ぎに再現・対象ファイル・方針・テスト観点が揃っていたため、実装中の二次障害も方針の枠内で処理できた。形式は [並行利用ガイドの引き継ぎ節](../getting-started/parallel-use-cursor-claude.md#タスクの引き継ぎ) に残した。
+
 詳細は [CHANGELOG.md の Unreleased](../../CHANGELOG.md) と、dogfooding 知識ベース（`.agents/skills/*/references/`）の該当 ADR / パターン / 改善記録を参照。
 
 ---

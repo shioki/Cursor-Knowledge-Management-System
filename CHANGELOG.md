@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **並行利用ガイド**: Cursor と Claude Code で調査と実装を分けるときの引き継ぎ形式（再現・対象・方針・テスト・完了報告）を追記
+
 ### Fixed
 
 - **記録スクリプトのタイトルエスケープ**: `|` / `:` / `"` / 改行を含むタイトルで YAML frontmatter と索引 `README.md` の表が壊れていた。`_skill-base.sh` に `ckms_yaml_escape` / `ckms_table_escape` を追加し、`add-entry.sh` / `add-pattern.sh` / `add-improvement.sh` と `ckms_index_upsert` で適用する

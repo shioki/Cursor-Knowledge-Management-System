@@ -63,6 +63,27 @@ subagent と hooks は Cursor 固有の仕組みなので共有できません�
 
 知識層が 1 概念 1 ファイルになったため、Cursor と Claude Code で同時に別々の記録を追加してもコンフリクトしません。競合しうるのは索引 `README.md` の 1 行だけです。
 
+## タスクの引き継ぎ
+
+同じリポジトリを開いたまま、**切り出しは Claude Code、実装は Cursor** と分ける使い方があります。スキルと記録は `.agents/` で共有できますが、会話の文脈はツールをまたがないため、依頼は要約ではなく引き継ぎ文にします。
+
+含めるもの:
+
+| 節 | 書くこと |
+|----|----------|
+| 背景 | 何が壊れるか |
+| 再現手順 | コピーして実行できるコマンド |
+| 対象ファイル | パス（行や関数名があるとよい） |
+| 修正方針 | 採用する手段、依存を増やさない制約、意図的にやらないこと |
+| テスト観点 | 手動確認と、CI に足すならその内容 |
+| 付随課題 | 本筋と分ける。必須にしない |
+
+実装側は方針と矛盾しない二次障害（例: 同じ入力でファイル名が壊れる）を直して構いません。完了したら、変更ファイル・検証結果・未実施の付随課題をコードブロックで返すと、切り出し側の会話を続けられます。
+
+チャットは媒体であり、正典ではありません。残す知見は `/record-decision` やパターン・改善記録へ移してください。
+
+Claude Code 自体の導入（インストール、最初のひと仕事、`CLAUDE.md`）は [Claude Code入門](https://zenn.dev/hampen2929/articles/20260814-claude-code-getting-started) を参照しました。プロジェクト共通の恒久指示は CKMS では `AGENTS.md` と `.agents/skills/` に置くので、`CLAUDE.md` と役割が重なる内容はここに集約してください。
+
 ## 特定のツールだけで使う場合
 
 Claude Code を導入していない場合も既定のままで構いませんが、明示的に配置先を変えることもできます。
@@ -79,5 +100,6 @@ bash path/to/.../init.sh /path/to/your-project --cursor-only
 
 ## 参考リンク
 
+- [Claude Code入門 — インストールから最初のひと仕事まで](https://zenn.dev/hampen2929/articles/20260814-claude-code-getting-started)
 - [Agent Skills 標準仕様](https://agentskills.io)
 - [Cursor エージェントスキル](https://cursor.com/ja/docs/context/skills)
