@@ -3,6 +3,8 @@
 **Release Date**: 2026-09-14
 **Codename**: Bridge
 
+> **注**: `v6.1.0` は欠番です。このリリースを一度 `v6.1.0` として公開した直後、`gh release create`（本リリースの作成に使用）と `gh skill publish` が同じタグの作成を取り合う設計上の問題が発覚しました。既存の `v6.1.0` リリースを削除して `gh skill publish` に作り直させたところ、GitHub の immutable release 保護により同名タグの再作成そのものが恒久的に拒否され、`v6.1.0` は二度と使えなくなりました。内容は本リリース（`v6.1.1`）と同一です。詳細は [CHANGELOG.md](CHANGELOG.md) を参照してください。
+
 ## 概要
 
 v6.1.1 は、CKMS の中核主張だった「`.agents/skills/` に置けば Cursor・Claude Code・Codex すべてが同じスキルを読む」が **Claude Code には成立していなかった**問題を修正するマイナーリリースです。Claude Code は `.claude/skills/` しか標準では探索しないため、`init.sh` / `init.ps1` が `.claude/skills` へのシンボリックリンクで橋渡しし、`CLAUDE.md`（`@AGENTS.md` の import）と Claude Code ネイティブの hooks を新たに提供します。
