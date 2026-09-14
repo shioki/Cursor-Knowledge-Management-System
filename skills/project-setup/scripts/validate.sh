@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# project-setup: 知識管理システムの構造を検証するスクリプト (v6.0.0)
+# project-setup: 知識管理システムの構造を検証するスクリプト (v6.1.0)
 #
 # Usage: bash .agents/skills/project-setup/scripts/validate.sh
 #        （.claude/skills / .cursor/skills も検出対象）
@@ -25,7 +25,7 @@ fi
 
 DATA_BASE="$(dirname "$SKILLS_BASE")"
 
-echo "=== Cursor Knowledge Management System 構造検証 (v6.0.0) ==="
+echo "=== Cursor Knowledge Management System 構造検証 (v6.1.0) ==="
 echo "スキル配置: ${SKILLS_BASE}"
 echo ""
 

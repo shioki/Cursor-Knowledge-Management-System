@@ -2,7 +2,7 @@
 
 A knowledge-management template for AI-assisted development. It accumulates technical decisions, implementation patterns, debug sessions, and improvements inside your project so the agent can reuse them later. The skill set lives in `.agents/skills/`, which **Cursor** and **Codex** read directly; **Claude Code** only looks under `.claude/skills/`, so `init.sh` bridges it there with a symlink (no duplication).
 
-> **v6.0.0** unifies everything into **Agent Skills** (7 domain skills + 6 action skills), adds **hooks** and a **subagent**, and splits the knowledge layer into **one concept per file**. Slash commands are gone as a separate concept — they are now action skills, so they work outside Cursor too.
+> **v6.1.0** makes Claude Code support actually work: since Claude Code doesn't discover `.agents/skills/` on its own, `init.sh`/`init.ps1` now create a `.claude/skills` symlink bridge and a `CLAUDE.md` that imports `AGENTS.md`, plus native Claude Code hooks alongside the Cursor ones. This release also hardens Windows compatibility (a symlink that broke on checkouts without symlink support, race conditions under concurrent Cursor/Claude Code use, and a CI blind spot where `init.ps1` was never actually executed).
 >
 > For the full narrative and the complete doc index, see the Japanese **[README.md](README.md)**.
 
@@ -52,7 +52,7 @@ Install from the Cursor Marketplace. See [plugin development](docs/advanced/plug
 gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor
 
 # Pin a tag for supply-chain stability
-gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.0.0
+gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.1.0
 ```
 
 Skills now live in the non-hidden `skills/` directory, so `--allow-hidden-dirs` is no longer needed. Details: [gh skill integration](docs/reference/gh-skill-integration.md).
@@ -62,7 +62,7 @@ Skills now live in the non-hidden `skills/` directory, so `--allow-hidden-dirs` 
 ```yaml
 dependencies:
   apm:
-    - shioki/Cursor-Knowledge-Management-System#v6.0.0
+    - shioki/Cursor-Knowledge-Management-System#v6.1.0
 ```
 
 Then `apm install`. Details: [APM integration](docs/reference/apm-integration.md).
@@ -122,5 +122,5 @@ Runs skill structure validation against the Agent Skills spec, hooks/subagent co
 
 ---
 
-**Last updated**: 2026-08-01  
-**Version**: 6.0.0 ([CHANGELOG](CHANGELOG.md) · [release notes v6.0.0](RELEASE_NOTES_v6.0.0.md))
+**Last updated**: 2026-09-14  
+**Version**: 6.1.0 ([CHANGELOG](CHANGELOG.md) · [release notes v6.1.0](RELEASE_NOTES_v6.1.0.md))

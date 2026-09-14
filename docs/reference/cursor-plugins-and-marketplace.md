@@ -23,13 +23,13 @@ Cursor はプラグインによって拡張でき、エージェントが外部�
 
 ## 本システムが提供するコンポーネント
 
-v6.0.0 時点で、本プラグインは次のコンポーネントを同梱しています。
+v6.1.0 時点で、本プラグインは次のコンポーネントを同梱しています。
 
 | 要素 | 提供 | 実体 |
 |------|------|------|
 | **Skills** | 13 種 | リポジトリ直下の `skills/`。ドメインスキル 7 種とアクションスキル 6 種 |
-| **Subagents** | 1 件 | [`agents/knowledge-curator.md`](../../agents/knowledge-curator.md)。知識ベースの棚卸しを行う読み取り専用エージェント |
-| **Hooks** | 3 イベント | [`hooks/hooks.json`](../../hooks/README.md)。`sessionStart` / `afterFileEdit` / `stop` |
+| **Subagents** | 1 件 | [`agents/knowledge-curator.md`](../../agents/knowledge-curator.md)。知識ベースの棚卸しを行う読み取り専用エージェント（Cursor のみ） |
+| **Hooks** | 3 イベント × 2 系統 | Cursor は [`hooks/hooks.json`](../../hooks/README.md)（`sessionStart` / `afterFileEdit` / `stop`）、Claude Code は `hooks/claude-code/` + `.claude/settings.json`（`SessionStart` / `PostToolUse` / `Stop`） |
 | **Rules / AGENTS.md** | テンプレート同梱 | `templates/AGENTS.md.template` と `templates/AGENTS.md.nested-example.md`（[詳細](../getting-started/agents-md-guide.md)） |
 | **Commands** | 提供しない | v5 までの 7 コマンドはアクションスキルへ統合されました（後述） |
 | **MCP servers** | 提供しない | 日時処理などで必要な場合は [MCP サーバ日時処理設定ガイド](mcp-datetime-setup.md) を参照して個別に設定してください |
@@ -58,7 +58,7 @@ hooks はエージェントのライフサイクルに介入する仕組みで�
   "name": "cursor-knowledge-management-system",
   "displayName": "Cursor Knowledge Management System",
   "description": "...",
-  "version": "6.0.0",
+  "version": "6.1.0",
   "author": { "name": "shioki" },
   "license": "MIT",
   "homepage": "https://github.com/shioki/Cursor-Knowledge-Management-System",

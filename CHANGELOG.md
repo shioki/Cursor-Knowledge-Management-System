@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [6.1.0] - 2026-09-14
+
 ### Added
 
 - **Claude Code ネイティブ対応**: `.agents/skills` を Claude Code が標準では探索しない問題を修正するため、`init.sh` / `init.ps1` が `.claude/skills` へのシンボリックリンク（またはフォールバックのコピー）を自動作成するようにした（`--no-claude-bridge` で無効化可）

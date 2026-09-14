@@ -10,7 +10,7 @@
 {
   "$schema": "https://cursor.com/schemas/cursor-plugin/plugin.json",
   "name": "cursor-knowledge-management-system",
-  "version": "6.0.0",
+  "version": "6.1.0",
   "author": { "name": "shioki" },
   "license": "MIT",
   "repository": "https://github.com/shioki/Cursor-Knowledge-Management-System"

@@ -4,11 +4,11 @@
 
 英語の短い導入は [README.en.md](README.en.md) を参照してください。
 
-> **v6.0.0**: **すべての機能を Agent Skills に統一**し、配布物をリポジトリ直下へ集約しました。コマンドはアクションスキルへ統合され、Cursor 以外のエージェントからも使えます。加えて **hooks** と **subagent** を新規提供し、知識層を **1 概念 1 ファイル**に分割しました。
-> - 新規: [hooks ガイド](docs/advanced/hooks-guide.md) — 記録を習慣にする仕組み
-> - 新規: [subagents ガイド](docs/advanced/subagents-guide.md) — 知識ベースの棚卸し
-> - 新規: [アクションスキルガイド](docs/templates/action-skills-guide.md)
-> - 破壊的変更と移行手順: [v5 からの移行ガイド](docs/getting-started/migration-from-v5.md)
+> **v6.1.0**: **Claude Code 対応を実質化**しました。`.agents/skills/` は Claude Code が標準では探索しないため、`.claude/skills` へのシンボリックリンク橋渡しと `CLAUDE.md`（`@AGENTS.md` import）を自動生成し、hooks も Cursor 版・Claude Code 版の両方を提供します。あわせて Windows 互換性（symlink checkout 破損、並行実行のレースコンディション、CI の Windows 実行系未検証など）を横断的に見直しました。
+> - 詳細: [リリースノート v6.1.0](RELEASE_NOTES_v6.1.0.md)
+> - 更新: [hooks ガイド](docs/advanced/hooks-guide.md) — Claude Code 版 hooks の節を追加
+> - 更新: [Cursor + Claude Code 並行利用ガイド](docs/getting-started/parallel-use-cursor-claude.md)
+> - v6.0.0 の内容（Agent Skills への統一）は [リリースノート v6.0.0](RELEASE_NOTES_v6.0.0.md) を参照
 
 ## なぜ Agent Skills なのか
 
@@ -85,7 +85,7 @@ Marketplace からプラグインとしてインストールできます。提�
 gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor
 
 # タグ固定版（サプライチェーン保全）
-gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.0.0
+gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.1.0
 ```
 
 v6 でスキルを非隠しディレクトリ `skills/` に移したため、`--allow-hidden-dirs` は不要になりました。詳細は [gh skill 連携](docs/reference/gh-skill-integration.md) を参照してください。
@@ -95,7 +95,7 @@ v6 でスキルを非隠しディレクトリ `skills/` に移したため、`--
 ```yaml
 dependencies:
   apm:
-    - shioki/Cursor-Knowledge-Management-System#v6.0.0
+    - shioki/Cursor-Knowledge-Management-System#v6.1.0
 ```
 
 ```bash
@@ -328,7 +328,7 @@ bash .agents/skills/project-setup/scripts/validate.sh
 `gh` の認証が必要です。未設定の場合は [GitHub リリース手順](docs/reference/github-release.md) を参照してください。
 
 ```bash
-npm run release -- v6.0.0
+npm run release -- v6.1.0
 ```
 
 **Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、Git Bash または WSL で実行してください。
@@ -345,6 +345,6 @@ MIT License — 詳細は [LICENSE](LICENSE) ファイルを参照
 
 ---
 
-**最終更新**: 2026-08-01
-**バージョン**: 6.0.0（[リリースノート](RELEASE_NOTES_v6.0.0.md)）
+**最終更新**: 2026-09-14
+**バージョン**: 6.1.0（[リリースノート](RELEASE_NOTES_v6.1.0.md)）
 **変更履歴**: [CHANGELOG.md](CHANGELOG.md) を参照

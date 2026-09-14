@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# project-setup: プロジェクトに知識管理システムを初期セットアップするスクリプト (v6.0.0)
+# project-setup: プロジェクトに知識管理システムを初期セットアップするスクリプト (v6.1.0)
 #
 # Usage: bash init.sh /path/to/target-project [オプション]
 #
@@ -86,7 +86,7 @@ confirm() {
   [[ "$reply" =~ ^[Yy]$ ]]
 }
 
-echo "=== Cursor Knowledge Management System セットアップ (v6.0.0) ==="
+echo "=== Cursor Knowledge Management System セットアップ (v6.1.0) ==="
 echo "ターゲット: $TARGET"
 echo "モード:     $LABEL"
 echo "hooks:      $([ "$WITH_HOOKS" = true ] && echo '配置する' || echo '配置しない')"
