@@ -3,7 +3,7 @@
   "name": "cursor-knowledge-management-system",
   "displayName": "Cursor Knowledge Management System",
   "description": "技術判断・実装パターン・デバッグ記録・改善活動をプロジェクト内に蓄積する知識管理システム。Agent Skills 13 種、知識キュレーター subagent、記録を促す hooks（Cursor 版・Claude Code 版）を同梱。Claude Code / Codex との共用は init.sh の橋渡し、または手動セットアップが必要です。",
-  "version": "6.1.0",
+  "version": "6.1.1",
   "author": {
     "name": "shioki"
   },

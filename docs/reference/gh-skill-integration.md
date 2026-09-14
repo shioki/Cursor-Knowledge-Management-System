@@ -25,10 +25,10 @@ v5 までは `templates/.agents/skills/` に置いていましたが、`gh skill
 gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor
 
 # タグ指定
-gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management@v6.1.0 --agent cursor
+gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management@v6.1.1 --agent cursor
 
 # タグ固定（以降 gh skill update でも更新されない）
-gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.1.0
+gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.1.1
 ```
 
 インストール先は `--agent cursor` の場合、自動的に `.cursor/skills/` または `~/.cursor/skills/` になります。`--scope user` を付けるとユーザーグローバルにインストールされます。
@@ -113,12 +113,17 @@ gh skill search knowledge-management
 ```bash
 # 公開せずに検証だけ行う
 npm run skill:check
-
-# 実際に公開する
-gh skill publish
 ```
 
-`npm run skill:check` は `gh skill publish --dry-run` のエイリアスです。`npm run release -- vX.Y.Z` も内部で同じ dry-run を実行するため、リリース手順に沿っていれば個別に叩く必要はありません。問題があれば `gh skill publish --fix` で frontmatter を自動補修できます。
+`npm run skill:check` は `gh skill publish --dry-run` のエイリアスです。`npm run release -- vX.Y.Z`（`scripts/release.sh`）も内部で同じ dry-run を実行するため、リリース手順に沿っていれば個別に叩く必要はありません。問題があれば `gh skill publish --fix` で frontmatter を自動補修できます。
+
+**`gh skill publish`（`--dry-run` を付けない実際の公開）と `npm run release -- vX.Y.Z` は同じタグに対して併用できません。** どちらも自分自身がリリース作成の主体になろうとするため、片方が作ったタグをもう片方が再利用しようとして `tag_name already exists` で失敗します。`v6.1.0` はこれを実際に踏み、リリースを削除して作り直そうとした結果、GitHub の immutable release 保護によりタグの再作成自体が恒久的に拒否されました（欠番になった経緯は [CHANGELOG.md](../../CHANGELOG.md) の v6.1.1 の注記を参照）。
+
+Marketplace / `gh skill` での配布を主にしたい場合は、`scripts/release.sh` を使わず `gh skill publish --tag vX.Y.Z` を唯一のリリース作成手段にしてください:
+
+```bash
+gh skill publish --tag vX.Y.Z
+```
 
 ### Immutable release の有効化
 

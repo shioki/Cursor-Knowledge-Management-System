@@ -39,7 +39,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh skill --version >/dev/null 2>&1; then
+          if gh skill --help >/dev/null 2>&1; then
             gh skill publish --dry-run
           else
             echo "::warning::gh skill サブコマンドが利用できないためスキップしました"

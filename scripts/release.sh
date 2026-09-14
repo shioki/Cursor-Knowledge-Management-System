@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # GitHub Release 作成スクリプト（immutable release 対応）
 #
-# 用法: ./scripts/release.sh v6.0.0 [--dry-run] [--skip-skill-publish]
+# 用法: ./scripts/release.sh v6.0.0 [--dry-run]
 # 事前に gh auth login または GH_TOKEN の設定が必要です。
 #
 # 主な機能:
@@ -13,24 +13,31 @@
 #   3. docs:check (skills/components/plugin/links) と gh skill publish --dry-run の実行
 #   4. immutable release の推奨アナウンス
 #   5. 実行前の確認プロンプト（対話環境のみ）のうえ gh release create --target 実行
-#   6. 任意で `gh skill publish` 連携（--skip-skill-publish で無効化）
+#
+# 注意: 本スクリプトの gh release create と `gh skill publish`（--dry-run 以外）は
+# 同じタグの作成を取り合うため併用できない。`gh skill publish` は自分自身が
+# リリース作成の主体になろうとし、既存タグを再利用できずに失敗する
+# （tag_name already exists; choose a different version）。v6.1.0 で実際にこれを
+# 行い、削除して gh skill publish に作り直させたところ、GitHub の immutable
+# release 保護によりタグの再作成そのものが恒久的に拒否された（詳細は
+# CHANGELOG.md の v6.1.1 の注記）。Marketplace 経由でも配布したい場合は、
+# このスクリプトを使わず `gh skill publish --tag vX.Y.Z` を唯一のリリース
+# 作成手段として使うこと。
 
 set -euo pipefail
 
 VERSION="${1:-}"
 DRY_RUN=false
-SKIP_SKILL_PUBLISH=false
 shift || true
 
 for arg in "$@"; do
   case "$arg" in
-    --dry-run)             DRY_RUN=true ;;
-    --skip-skill-publish)  SKIP_SKILL_PUBLISH=true ;;
+    --dry-run) DRY_RUN=true ;;
   esac
 done
 
 if [[ -z "$VERSION" ]]; then
-  echo "用法: $0 <バージョンタグ> [--dry-run] [--skip-skill-publish]"
+  echo "用法: $0 <バージョンタグ> [--dry-run]"
   echo "例:   $0 v5.0.0"
   exit 1
 fi
@@ -122,7 +129,7 @@ echo ""
 echo "==> docs:check を実行中 (skills / components / plugin / links)..."
 npm run --silent docs:check
 
-if gh skill --version &>/dev/null; then
+if gh skill --help &>/dev/null; then
   echo ""
   echo "==> gh skill publish --dry-run を実行中..."
   gh skill publish --dry-run
@@ -174,23 +181,8 @@ else
     --notes-file "$NOTES_FILE" \
     --target "$TARGET_COMMIT"
   echo "完了: $VERSION をリリースしました。"
-fi
-
-# --- gh skill publish 連携 ---
-if [[ "$SKIP_SKILL_PUBLISH" == false ]]; then
   echo ""
-  echo "==> gh skill publish を試行中..."
-  if gh skill --version &>/dev/null; then
-    if [[ "$DRY_RUN" == true ]]; then
-      echo "[DRY RUN] gh skill publish"
-    else
-      gh skill publish || {
-        echo "警告: gh skill publish に失敗しました。frontmatter を確認してください。"
-        echo "      修正の自動化は \`gh skill publish --fix\` で試せます。"
-      }
-    fi
-  else
-    echo "情報: gh skill サブコマンドが利用できません（GitHub CLI のバージョンを確認してください）。"
-    echo "      スキルを Marketplace / gh skill で公開する場合は、gh v2.90.0 以上にアップグレードしてください。"
-  fi
+  echo "情報: Marketplace / gh skill での配布を更新したい場合、別途 \`gh skill install\` の"
+  echo "      provenance 更新は自動では行われません。gh skill でも公開したい場合は、この"
+  echo "      スクリプトとは別に（同じタグに対しては行わず）運用を検討してください。"
 fi

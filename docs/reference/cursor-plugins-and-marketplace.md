@@ -23,7 +23,7 @@ Cursor はプラグインによって拡張でき、エージェントが外部�
 
 ## 本システムが提供するコンポーネント
 
-v6.1.0 時点で、本プラグインは次のコンポーネントを同梱しています。
+v6.1.1 時点で、本プラグインは次のコンポーネントを同梱しています。
 
 | 要素 | 提供 | 実体 |
 |------|------|------|
@@ -58,7 +58,7 @@ hooks はエージェントのライフサイクルに介入する仕組みで�
   "name": "cursor-knowledge-management-system",
   "displayName": "Cursor Knowledge Management System",
   "description": "...",
-  "version": "6.1.0",
+  "version": "6.1.1",
   "author": { "name": "shioki" },
   "license": "MIT",
   "homepage": "https://github.com/shioki/Cursor-Knowledge-Management-System",

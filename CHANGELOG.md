@@ -4,7 +4,9 @@
 
 ## [Unreleased]
 
-## [6.1.0] - 2026-09-14
+## [6.1.1] - 2026-09-14
+
+> **注**: `v6.1.0` は欠番です。リリース直後に `gh release create` と `gh skill publish` の両方が同じタグを取り合う設計上の問題があり、既存の v6.1.0 リリースを削除して `gh skill publish` に作り直させたところ、GitHub の immutable release 保護により同名タグの再作成が恒久的に拒否されました。内容は本セクション（v6.1.1）と同一です。`gh skill publish`（実際の publish）との共存については後述の Fixed を参照してください。
 
 ### Added
 

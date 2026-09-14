@@ -66,7 +66,7 @@ gh auth status
    揃っていない場合、`scripts/release.sh` は release を作成せずに終了します。README や `init.sh` などの表示文字列も併せて更新してください（一覧は [AGENTS.md](../../AGENTS.md) の「ドキュメントの版数」）。
 
 3. **リリースノートの準備**  
-   ルートに `RELEASE_NOTES_vX.Y.Z.md` を用意する（例: `RELEASE_NOTES_v6.1.0.md`）。  
+   ルートに `RELEASE_NOTES_vX.Y.Z.md` を用意する（例: `RELEASE_NOTES_v6.1.1.md`）。  
    既に同じ名前のファイルがある場合はそのまま利用してよい。ファイルが無い場合、スクリプトはその時点で停止します。
 
 4. **push（まだの場合）**
@@ -79,23 +79,23 @@ gh auth status
 
    **オプション 1: npm スクリプト（推奨）**
    ```bash
-   npm run release -- v6.1.0
+   npm run release -- v6.1.1
    ```
    未認証の場合は日本語でエラー案内を表示して終了します。
 
    本番実行前に、副作用なしで一連の検証だけを走らせることもできます。
 
    ```bash
-   npm run release -- v6.1.0 --dry-run
+   npm run release -- v6.1.1 --dry-run
    ```
 
-   **Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、**Git Bash** または **WSL** で `npm run release -- v6.1.0` を実行してください。
+   **Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、**Git Bash** または **WSL** で `npm run release -- v6.1.1` を実行してください。
 
    **オプション 2: gh を直接使う**
    ```bash
-   gh release create v6.1.0 \
-     --title "v6.1.0 - タイトル" \
-     --notes-file RELEASE_NOTES_v6.1.0.md
+   gh release create v6.1.1 \
+     --title "v6.1.1 - タイトル" \
+     --notes-file RELEASE_NOTES_v6.1.1.md
    ```
 
    この場合は後述の事前検証が走りません。検証を省略したくない場合はオプション 1 を使ってください。
@@ -112,7 +112,9 @@ gh auth status
 
 3 について、v5 までは `npm` が見つからない環境では検証をスキップしてリリースを続行していました。検証を飛ばせてしまうと検証を組み込んだ意味がないため、v6 からは `npm` が無い場合にエラーで停止します。Node.js を用意してから再実行してください。
 
-release 作成後は、`--skip-skill-publish` を付けない限り `gh skill publish` も試行します。ここで失敗しても release 自体は成功しているため、警告を表示するだけで終了します。
+**`release.sh` は `gh release create` の後に実際の `gh skill publish` を実行しません。** `gh skill publish`（`--dry-run` を付けない場合）は自分自身がリリース作成の主体になろうとし、`gh release create` が既に作った同じタグを再利用できずに失敗します（`tag_name already exists; choose a different version`）。v6.1.0 でこれを実際に試し、失敗したリリースを削除して `gh skill publish` に作り直させたところ、GitHub の immutable release 保護によって同じタグの再作成そのものが恒久的に拒否されました（結果、`v6.1.0` は欠番です。詳細は [CHANGELOG.md](../../CHANGELOG.md) の v6.1.1 の注記）。
+
+Marketplace / `gh skill` 経由でも配布したい場合は、`gh skill publish --tag vX.Y.Z` を**唯一の**リリース作成手段として使ってください。`release.sh`（`gh release create` ベース）と同じタグに対して両方を実行しないでください。
 
 ## トラブルシューティング
 

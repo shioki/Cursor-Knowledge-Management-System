@@ -1,11 +1,11 @@
-# Release Notes — v6.1.0
+# Release Notes — v6.1.1
 
 **Release Date**: 2026-09-14
 **Codename**: Bridge
 
 ## 概要
 
-v6.1.0 は、CKMS の中核主張だった「`.agents/skills/` に置けば Cursor・Claude Code・Codex すべてが同じスキルを読む」が **Claude Code には成立していなかった**問題を修正するマイナーリリースです。Claude Code は `.claude/skills/` しか標準では探索しないため、`init.sh` / `init.ps1` が `.claude/skills` へのシンボリックリンクで橋渡しし、`CLAUDE.md`（`@AGENTS.md` の import）と Claude Code ネイティブの hooks を新たに提供します。
+v6.1.1 は、CKMS の中核主張だった「`.agents/skills/` に置けば Cursor・Claude Code・Codex すべてが同じスキルを読む」が **Claude Code には成立していなかった**問題を修正するマイナーリリースです。Claude Code は `.claude/skills/` しか標準では探索しないため、`init.sh` / `init.ps1` が `.claude/skills` へのシンボリックリンクで橋渡しし、`CLAUDE.md`（`@AGENTS.md` の import）と Claude Code ネイティブの hooks を新たに提供します。
 
 あわせて、この修正作業そのものを検証する過程で見つかった Windows 互換性の問題（symlink checkout 破損、並行実行時のレースコンディション、Windows 実行系が CI で一度も検証されていなかった構造的な盲点）も解消しました。破壊的変更はありません。
 

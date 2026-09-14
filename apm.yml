@@ -4,14 +4,14 @@
 # This repository itself is publishable as an APM package. Other projects can
 # install the entire skill set with:
 #
-#   apm install shioki/Cursor-Knowledge-Management-System#v6.1.0
+#   apm install shioki/Cursor-Knowledge-Management-System#v6.1.1
 #
 # Or pick individual skills:
 #
 #   apm install shioki/Cursor-Knowledge-Management-System/skills/knowledge-management
 #
 name: cursor-knowledge-management-system
-version: 6.1.0
+version: 6.1.1
 description: "Agent Skills 13 種で技術判断・パターン・デバッグ・改善活動を蓄積。Cursor / Codex は skills/ を直接読み込み、Claude Code は .claude/skills への手動または init.sh 橋渡しで利用（下記 paths コメント参照）。知識キュレーター subagent と記録支援 hooks（Cursor 版・Claude Code 版）を同梱。"
 author: shioki
 license: MIT
