@@ -7,6 +7,9 @@
 ### Fixed
 
 - **`init.sh` の相互排他フラグ検証**: `--legacy-claude` と `--cursor-only` を同時に指定すると、`init.ps1` はエラーにするのに `init.sh` は後勝ちで `--cursor-only` を黙って採用していた。`init.sh` にも同じ相互排他チェックを追加
+- **`init.ps1` の壊れた symlink 判定**: `Test-Path` はリンク先が存在しない symlink に対して `False` を返すため、既存の `.claude/skills` が壊れたリンクの場合に判定が `init.sh`（`[ -e X ] || [ -L X ]`）と食い違っていた。`Get-Item -Force` でエントリ自体の有無を見るよう修正
+- **`create-session.sh` の見出しエスケープ**: `SUMMARY` を Markdown 見出しに埋め込む前に改行を畳むようにした（現状は表に入らないため実害はなかったが、将来デバッグセッションが索引化された場合への安全策）
+- **Windows での dogfooding symlink**: リポジトリ自身が使う `.claude/skills` は `init.sh`/`init.ps1` のようなコピー・フォールバックを持たない直接コミットされた symlink であるため、Git の symlink サポートが無効な Windows checkout だと壊れる旨を `AGENTS.md` / `CONTRIBUTING.md` に明記
 
 ## [6.1.1] - 2026-09-14
 

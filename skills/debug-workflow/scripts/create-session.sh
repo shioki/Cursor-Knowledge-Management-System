@@ -28,8 +28,12 @@ if [ -e "${SESSIONS_DIR}/${FILENAME}" ]; then
   exit 1
 fi
 
+# 見出しに埋め込む前に改行を畳んでおく（現状は表に入らないため実害はないが、
+# 将来デバッグセッションも索引表を持つようになった場合に備えた安全策）。
+SAFE_SUMMARY=$(ckms_table_escape "$SUMMARY")
+
 cat > "${SESSIONS_DIR}/${FILENAME}" << EOF
-# デバッグセッション: ${SUMMARY}
+# デバッグセッション: ${SAFE_SUMMARY}
 
 ## 基本情報
 

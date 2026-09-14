@@ -26,6 +26,8 @@ Cursor Knowledge Management System（CKMS）そのもののリポジトリです
 
 同じ理由で、`.claude/skills` は `skills/` のシンボリックリンクとして扱い、複製しないでください（`init.sh` の配布先でも同様。シンボリックリンクが張れない環境のみ、警告を出した上でコピーにフォールバックします）。
 
+**Windows でこのリポジトリ自身を開発する場合の注意**: `.claude/skills` はリポジトリ直下に直接コミットされたシンボリックリンクです（`init.sh`/`init.ps1` が生成する配布先のリンクとは違い、フォールバック処理が挟まりません）。`git clone` 時に Git の symlink サポートが無効だと、壊れたプレースホルダーファイル（リンク先パス文字列だけを含むテキストファイル）として checkout され、Claude Code がこのリポジトリ自身のスキルを読み込めなくなります。事前に `git config --global core.symlinks true` を設定し、Developer Mode（Windows 10 1703+）または管理者権限で clone してください。配布物（利用者プロジェクトへの `init.sh`/`init.ps1` 出力）には影響しません。
+
 ### スキルの規約
 
 - ドメインスキル（自動選択）: `description` に「どんなときに使うか」を書く。エージェントはこれだけを見て読み込みを判断します

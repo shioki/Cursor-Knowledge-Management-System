@@ -158,7 +158,10 @@ if (-not (Test-Path $SessionsDest)) {
 $ClaudeDir = Join-Path $TargetPath ".claude"
 if (-not $CursorOnly -and -not $LegacyClaude -and -not $NoClaudeBridge) {
     $ClaudeSkillsDest = Join-Path $ClaudeDir "skills"
-    if (Test-Path $ClaudeSkillsDest) {
+    # Test-Path はリンク先が存在しない（壊れた）シンボリックリンクに対して False を
+    # 返すため、Get-Item -Force でエントリ自体の有無を見る（init.sh の
+    # `[ -e X ] || [ -L X ]` と同じ判定にする）。
+    if (Get-Item -Path $ClaudeSkillsDest -Force -ErrorAction SilentlyContinue) {
         Write-Host "情報: $ClaudeSkillsDest は既に存在します（変更しません）"
     } else {
         if (-not (Test-Path $ClaudeDir)) {

@@ -26,6 +26,8 @@ Thank you for improving Cursor Knowledge Management System. This document descri
 
 5. **When embedding user strings into YAML or Markdown tables in shell scripts**, use `ckms_yaml_escape` / `ckms_table_escape` from `_skill-base.sh`. Do not pass rows containing `\|` through `awk -v` (use `ENVIRON` instead). See [AGENTS.md](AGENTS.md)「スクリプトの制約」。
 
+6. **On Windows**, enable symlink support before cloning (`git config --global core.symlinks true`, plus Developer Mode or an elevated shell) — this repository commits `.claude/skills` as a real symlink for its own Claude Code dogfooding, and a checkout without symlink support turns it into a broken placeholder file. See [AGENTS.md](AGENTS.md) for details. This does not affect what `init.sh`/`init.ps1` generate for consumer projects, which fall back to a copy when symlinks aren't available.
+
 ## Version alignment (releases)
 
 When you prepare a **versioned release** (not every PR), these must stay in sync:
