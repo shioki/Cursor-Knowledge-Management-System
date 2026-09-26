@@ -142,6 +142,9 @@ jobs:
         working-directory: /tmp/ckms-target
         run: bash .agents/skills/project-setup/scripts/validate.sh
 
+      - name: Run the installed hooks and session search
+        run: bash scripts/smoke-hooks.sh /tmp/ckms-target
+
       - name: Verify the Claude Code skills bridge resolves
         # .agents/skills が Claude Code から直接は探索されないため、init.sh が作る
         # .claude/skills シンボリックリンクが実際に 13 スキルを解決できるか確認する。
@@ -351,6 +354,11 @@ jobs:
         shell: bash
         working-directory: C:\ckms-target
         run: bash .agents/skills/project-setup/scripts/validate.sh
+
+      - name: Run the installed hooks and session search (Git Bash)
+        # $PWD が /c/ckms-target になるので、C:\... 形式のパスの変換も確かめる
+        shell: bash
+        run: bash scripts/smoke-hooks.sh C:/ckms-target
 
       - name: Verify the Claude Code skills bridge resolves
         shell: bash
