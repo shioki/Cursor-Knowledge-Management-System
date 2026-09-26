@@ -1,6 +1,6 @@
 ---
 name: project-setup
-description: 新しいプロジェクトに Cursor Knowledge Management System を導入する際に使用。初期セットアップ、構造検証、カスタマイズガイドを提供する。
+description: 新しいプロジェクトに Cursor Knowledge Management System を導入する際、または導入済みプロジェクトの CKMS を新しい版へ更新する際に使用。初期セットアップ、更新（再実行）、構造検証、カスタマイズガイドを提供する。
 license: MIT
 compatibility: Cursor 3.x, Claude Code, Codex
 metadata:
@@ -15,6 +15,7 @@ metadata:
 
 - 新しいプロジェクトに知識管理システムを導入したいとき
 - 既存プロジェクトにスキル・hooks・subagent を追加したいとき
+- 導入済みプロジェクトの CKMS を新しい版へ更新したいとき
 - セットアップの正しさを検証したいとき
 
 ## Instructions
@@ -120,6 +121,16 @@ Windows では Git Bash で実行してください。
 - チャットで `/` を入力し、`/record-decision` などのアクションスキルが表示されることを確認
 - エージェントとの対話でドメインスキルが自動適用されることを確認
 - hooks を有効にした場合、新しい会話の冒頭で知識の索引が読み込まれることを確認
+
+### 6. 導入済みプロジェクトの更新
+
+配布元（CKMS リポジトリ）を最新にしてから、最初と同じコマンドで `init.sh` / `init.ps1` を再実行します。配布元のスクリプトを使ってください。導入先に入っているスクリプトを、その導入先自身へ向けて実行するとエラーで止まります。
+
+- 置き換わるのは、配布元にある CKMS のスキルだけです
+- 残るもの: `decisions/`・`patterns/`・`improvements/` の記録、`references/*_TEMPLATE.md`、プロジェクト固有のスキル、ほかの配布元のスキル。記録ディレクトリがシンボリックリンクなら、リンクのまま残ります
+- 置き換える前に、`skills/` を隣の `skills.backup-YYYYmmdd-HHMMSS/` へ退避します（`--no-backup` / `-NoBackup` で省略）
+- `SKILL.md` は配布元の内容になります。カスタマイズしていた場合（`team-standards` など）は、警告に出る退避先から戻してください
+- 失敗したときは、利用者データの退避先と戻し方を表示します。`validate.sh` は、失敗で残った一時ディレクトリを警告します
 
 ## v5 以前からの移行
 

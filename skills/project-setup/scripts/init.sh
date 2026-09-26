@@ -133,6 +133,8 @@ fi
 SKILLS_DEST="$TARGET/$BASE_DIR/skills"
 SESSIONS_DEST="$TARGET/$BASE_DIR/debug-sessions"
 SKILLS_BACKUP=""
+# 最後の案内を分けるため、skills/ をどう扱ったかを残す（new / updated / skipped / link）
+SKILLS_STATE=new
 
 # スキル内の利用者データをコピーする。rel は skills/ からの相対パス。
 # 第4引数が overlay のとき、ディレクトリは消さずに利用者のファイルを重ねる。
@@ -290,6 +292,7 @@ fi
 if [ -d "$SKILLS_DEST" ]; then
   if [ -L "$SKILLS_DEST" ]; then
     echo "情報: $SKILLS_DEST はシンボリックリンクです（変更しません）"
+    SKILLS_STATE=link
   else
     source_real=$(cd -P "$SOURCE_SKILLS" && pwd)
     dest_real=$(cd -P "$SKILLS_DEST" && pwd)
@@ -333,8 +336,10 @@ if [ -d "$SKILLS_DEST" ]; then
         fi
       done
       echo "skills/ を更新しました"
+      SKILLS_STATE=updated
     else
       echo "  skills/ の更新をスキップしました"
+      SKILLS_STATE=skipped
     fi
   fi
 else
@@ -402,10 +407,22 @@ if [ "$WITH_HOOKS" = true ]; then
 
     HOOKS_JSON="$TARGET/.cursor/hooks.json"
     if [ -f "$HOOKS_JSON" ]; then
-      echo "情報: $HOOKS_JSON は既に存在します（上書きしません）"
-      echo "      次のエントリを手動で追記してください:"
-      echo '        "sessionStart": [{ "command": ".cursor/hooks/inject-knowledge-index.sh" }]'
-      echo '        "afterFileEdit": [{ "command": ".cursor/hooks/log-activity.sh" }]'
+      # 登録済みのエントリまで追記を促すと、再実行のたびに hooks が二重になる。
+      # 無いものだけ案内する。
+      has_session_hook=false
+      has_edit_hook=false
+      grep -qF '.cursor/hooks/inject-knowledge-index.sh' "$HOOKS_JSON" && has_session_hook=true
+      grep -qF '.cursor/hooks/log-activity.sh' "$HOOKS_JSON" && has_edit_hook=true
+      if [ "$has_session_hook" = true ] && [ "$has_edit_hook" = true ]; then
+        echo "情報: $HOOKS_JSON は既に存在し、CKMS の hooks は登録済みです（上書きしません）"
+      else
+        echo "情報: $HOOKS_JSON は既に存在します（上書きしません）"
+        echo "      次のエントリを手動で追記してください:"
+        [ "$has_session_hook" = true ] \
+          || echo '        "sessionStart": [{ "command": ".cursor/hooks/inject-knowledge-index.sh" }]'
+        [ "$has_edit_hook" = true ] \
+          || echo '        "afterFileEdit": [{ "command": ".cursor/hooks/log-activity.sh" }]'
+      fi
     else
       cat > "$HOOKS_JSON" << 'EOF'
 {
@@ -451,8 +468,18 @@ EOF
       CLAUDE_SETTINGS="$TARGET/.claude/settings.json"
       CLAUDE_SETTINGS_SRC="${SOURCE_TEMPLATES}/.claude/settings.json.template"
       if [ -f "$CLAUDE_SETTINGS" ]; then
-        echo "情報: $CLAUDE_SETTINGS は既に存在します（上書きしません）"
-        echo "      hooks / permissions を手動で統合してください: $CLAUDE_SETTINGS_SRC"
+        settings_missing=""
+        for hook_cmd in session-start.sh post-tool-use-log-activity.sh stop-suggest-record.sh; do
+          grep -qF ".claude/hooks/claude-code/$hook_cmd" "$CLAUDE_SETTINGS" \
+            || settings_missing="${settings_missing} $hook_cmd"
+        done
+        if [ -z "$settings_missing" ]; then
+          echo "情報: $CLAUDE_SETTINGS は既に存在し、CKMS の hooks は登録済みです（上書きしません）"
+        else
+          echo "情報: $CLAUDE_SETTINGS は既に存在します（上書きしません）"
+          echo "      未登録の hooks:${settings_missing}"
+          echo "      hooks / permissions を手動で統合してください: $CLAUDE_SETTINGS_SRC"
+        fi
       elif [ -f "$CLAUDE_SETTINGS_SRC" ]; then
         cp "$CLAUDE_SETTINGS_SRC" "$CLAUDE_SETTINGS"
         echo "settings.json を作成しました: $CLAUDE_SETTINGS"
@@ -515,11 +542,20 @@ fi
 echo ""
 echo "=== セットアップ完了 ==="
 echo ""
-echo "次のステップ:"
-echo "  1. /update-context でプロジェクト基本情報を記入"
-echo "  2. /record-decision で最初の技術判断を記録"
-echo "  3. team-standards スキルをプロジェクトの規約に更新"
-echo ""
+if [ "$SKILLS_STATE" = new ]; then
+  echo "次のステップ:"
+  echo "  1. /update-context でプロジェクト基本情報を記入"
+  echo "  2. /record-decision で最初の技術判断を記録"
+  echo "  3. team-standards スキルをプロジェクトの規約に更新"
+  echo ""
+elif [ "$SKILLS_STATE" = updated ]; then
+  echo "CKMS のスキルを更新しました。記録とプロジェクト固有のスキルは残しています。"
+  if [ -n "$SKILLS_BACKUP" ]; then
+    echo "  更新前の skills/: $SKILLS_BACKUP"
+    echo "  SKILL.md の警告が出たスキルをカスタマイズしていた場合は、ここから戻してください。不要になったら削除してかまいません。"
+  fi
+  echo ""
+fi
 echo "構造検証: bash $BASE_DIR/skills/project-setup/scripts/validate.sh"
 echo ""
 if [ "$WITH_HOOKS" = true ] && [ -d "$SOURCE_HOOKS" ]; then

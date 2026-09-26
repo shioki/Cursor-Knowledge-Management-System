@@ -215,6 +215,10 @@ v6 では技術判断・パターン・改善が 1 概念 1 ファイルにな�
 .agents/skills.backup-*/
 .claude/skills.backup-*/
 .cursor/skills.backup-*/
+# init 再実行が失敗・中断したときの一時ディレクトリ（validate.sh が警告する）
+.agents/.ckms-*/
+.claude/.ckms-*/
+.cursor/.ckms-*/
 
 # 個人メモ
 .agents/personal-notes.md

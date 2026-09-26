@@ -152,6 +152,29 @@ ckms_check_knowledge_dir "${DATA_BASE}/debug-sessions" "デバッグセッショ
 
 echo ""
 
+# init の再実行が失敗・中断したときの残骸。skills/ 内の *.replacing.* は
+# エージェントが同じ name のスキルとして読み込むことがある。
+echo "--- 再実行の残骸 ---"
+LEFTOVER_COUNT=0
+while IFS= read -r leftover; do
+  echo "  [WARN] init の再実行で残った一時ディレクトリです: ${leftover}"
+  echo "         中の利用者データを確認してから削除してください"
+  WARNINGS=$((WARNINGS + 1))
+  LEFTOVER_COUNT=$((LEFTOVER_COUNT + 1))
+done < <(
+  find "$DATA_BASE" -mindepth 1 -maxdepth 1 -type d \( -name '.ckms-incoming*' -o -name '.ckms-replaced*' \) 2>/dev/null
+  find "$SKILLS_BASE/" -mindepth 1 -maxdepth 1 -name '*.replacing.*' 2>/dev/null
+)
+BACKUP_COUNT=$(find "$DATA_BASE" -mindepth 1 -maxdepth 1 -type d -name 'skills.backup-*' 2>/dev/null | wc -l | tr -d ' ')
+if [ "$BACKUP_COUNT" -gt 0 ]; then
+  echo "  [INFO] 再実行前の退避が ${BACKUP_COUNT} 件あります: ${DATA_BASE}/skills.backup-*（不要なら削除できます）"
+fi
+if [ "$LEFTOVER_COUNT" -eq 0 ] && [ "$BACKUP_COUNT" -eq 0 ]; then
+  echo "  [OK] 残骸はありません"
+fi
+
+echo ""
+
 # スクリプトの実行権限チェック
 echo "--- スクリプト権限検証 ---"
 SCRIPT_COUNT=0

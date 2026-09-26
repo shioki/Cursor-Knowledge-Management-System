@@ -293,7 +293,11 @@ function Update-CkmsSkill([System.IO.DirectoryInfo]$SrcDir) {
         $assembled = Join-Path $incoming $name
         Copy-Item -LiteralPath $SrcDir.FullName -Destination $assembled -Recurse -Force
         Copy-CkmsPreserved $name $stage $assembled -Overlay
-        $replacedOld = "$dest.replacing." + [guid]::NewGuid().ToString("N")
+        # どかし先は skills/ の外に作る。中に残ると、失敗したとき同じ name の
+        # スキルとして読み込まれる。
+        $replacedBox = Join-Path (Split-Path -Parent $SkillsDest) (".ckms-replaced-" + [guid]::NewGuid().ToString("N"))
+        New-Item -ItemType Directory -Path $replacedBox -Force | Out-Null
+        $replacedOld = Join-Path $replacedBox $name
         $swapped = $false
         try {
             Move-Item -LiteralPath $dest -Destination $replacedOld
@@ -311,8 +315,13 @@ function Update-CkmsSkill([System.IO.DirectoryInfo]$SrcDir) {
                     Write-Host "エラー: 入れ替え前のスキルを戻せません: $replacedOld"
                 }
             }
+            # 戻せたとき、または最初の Move-Item が失敗したときは空で残る
+            if (-not $swapped -and (Test-Path -LiteralPath $replacedBox) -and
+                -not (Get-ChildItem -LiteralPath $replacedBox -Force)) {
+                Remove-Item -LiteralPath $replacedBox -Force
+            }
         }
-        Remove-CkmsTree $replacedOld
+        Remove-CkmsTree $replacedBox
         Remove-CkmsTree $stage
         Remove-CkmsTree $incoming
         Write-Host "  更新: $name"
@@ -370,6 +379,8 @@ function ConvertTo-CkmsPhysicalPath([string]$Path) {
 # 初回は配布元をそのまま置く。再実行は配布元にあるスキルだけを置き換え、
 # 記録・テンプレート・配布元に無いスキルは残す。
 $script:SkillsBackup = $null
+# 最後の案内を分けるため、skills/ をどう扱ったかを残す（new / updated / skipped / link）
+$SkillsState = 'new'
 $pluginManifest = Join-Path $SourceRoot ".cursor-plugin\plugin.json"
 if (-not (Test-Path -LiteralPath $pluginManifest)) {
     Write-Host "警告: 配布元が CKMS リポジトリではありません: $SourceRoot"
@@ -380,6 +391,7 @@ $skillsItem = Get-Item -LiteralPath $SkillsDest -Force -ErrorAction SilentlyCont
 if ($skillsItem) {
     if ($skillsItem.Attributes -band [IO.FileAttributes]::ReparsePoint) {
         Write-Host "情報: $SkillsDest はシンボリックリンクです（変更しません）"
+        $SkillsState = 'link'
     } else {
         $sourceReal = (ConvertTo-CkmsPhysicalPath ([string]$SourceSkills)).TrimEnd('\', '/')
         $destReal = (ConvertTo-CkmsPhysicalPath $SkillsDest).TrimEnd('\', '/')
@@ -425,8 +437,10 @@ if ($skillsItem) {
                 }
             }
             Write-Host "skills/ を更新しました"
+            $SkillsState = 'updated'
         } else {
             Write-Host "  skills/ の更新をスキップしました"
+            $SkillsState = 'skipped'
         }
     }
 } else {
@@ -511,10 +525,18 @@ if (-not $NoHooks) {
 
         $HooksJson = Join-Path $CursorDir "hooks.json"
         if (Test-Path $HooksJson) {
-            Write-Host "情報: $HooksJson は既に存在します（上書きしません）"
-            Write-Host "      次のエントリを手動で追記してください:"
-            Write-Host '        "sessionStart": [{ "command": ".cursor/hooks/inject-knowledge-index.sh" }]'
-            Write-Host '        "afterFileEdit": [{ "command": ".cursor/hooks/log-activity.sh" }]'
+            # 登録済みのエントリまで追記を促すと、再実行のたびに hooks が二重になる。
+            # 無いものだけ案内する。
+            $hasSessionHook = Select-String -LiteralPath $HooksJson -SimpleMatch '.cursor/hooks/inject-knowledge-index.sh' -Quiet
+            $hasEditHook = Select-String -LiteralPath $HooksJson -SimpleMatch '.cursor/hooks/log-activity.sh' -Quiet
+            if ($hasSessionHook -and $hasEditHook) {
+                Write-Host "情報: $HooksJson は既に存在し、CKMS の hooks は登録済みです（上書きしません）"
+            } else {
+                Write-Host "情報: $HooksJson は既に存在します（上書きしません）"
+                Write-Host "      次のエントリを手動で追記してください:"
+                if (-not $hasSessionHook) { Write-Host '        "sessionStart": [{ "command": ".cursor/hooks/inject-knowledge-index.sh" }]' }
+                if (-not $hasEditHook) { Write-Host '        "afterFileEdit": [{ "command": ".cursor/hooks/log-activity.sh" }]' }
+            }
         } else {
             $HooksConfig = @'
 {
@@ -564,8 +586,17 @@ if (-not $NoHooks) {
             $ClaudeSettings = Join-Path $ClaudeDir "settings.json"
             $ClaudeSettingsSrc = Join-Path $SourceTemplates ".claude\settings.json.template"
             if (Test-Path $ClaudeSettings) {
-                Write-Host "情報: $ClaudeSettings は既に存在します（上書きしません）"
-                Write-Host "      hooks / permissions を手動で統合してください: $ClaudeSettingsSrc"
+                $settingsMissing = @(
+                    'session-start.sh', 'post-tool-use-log-activity.sh', 'stop-suggest-record.sh' |
+                        Where-Object { -not (Select-String -LiteralPath $ClaudeSettings -SimpleMatch ".claude/hooks/claude-code/$_" -Quiet) }
+                )
+                if ($settingsMissing.Count -eq 0) {
+                    Write-Host "情報: $ClaudeSettings は既に存在し、CKMS の hooks は登録済みです（上書きしません）"
+                } else {
+                    Write-Host "情報: $ClaudeSettings は既に存在します（上書きしません）"
+                    Write-Host ("      未登録の hooks: " + ($settingsMissing -join ' '))
+                    Write-Host "      hooks / permissions を手動で統合してください: $ClaudeSettingsSrc"
+                }
             } elseif (Test-Path $ClaudeSettingsSrc) {
                 Copy-Item -Path $ClaudeSettingsSrc -Destination $ClaudeSettings -Force
                 Write-Host "settings.json を作成しました: $ClaudeSettings"
@@ -646,11 +677,20 @@ if ($BashExe) {
 Write-Host ""
 Write-Host "=== セットアップ完了 ==="
 Write-Host ""
-Write-Host "次のステップ:"
-Write-Host "  1. /update-context でプロジェクト基本情報を記入"
-Write-Host "  2. /record-decision で最初の技術判断を記録"
-Write-Host "  3. team-standards スキルをプロジェクトの規約に更新"
-Write-Host ""
+if ($SkillsState -eq 'new') {
+    Write-Host "次のステップ:"
+    Write-Host "  1. /update-context でプロジェクト基本情報を記入"
+    Write-Host "  2. /record-decision で最初の技術判断を記録"
+    Write-Host "  3. team-standards スキルをプロジェクトの規約に更新"
+    Write-Host ""
+} elseif ($SkillsState -eq 'updated') {
+    Write-Host "CKMS のスキルを更新しました。記録とプロジェクト固有のスキルは残しています。"
+    if ($script:SkillsBackup) {
+        Write-Host "  更新前の skills/: $script:SkillsBackup"
+        Write-Host "  SKILL.md の警告が出たスキルをカスタマイズしていた場合は、ここから戻してください。不要になったら削除してかまいません。"
+    }
+    Write-Host ""
+}
 Write-Host "構造検証: Git Bash で bash $ValidatePath を実行"
 Write-Host ""
 if ($CursorOnly) {

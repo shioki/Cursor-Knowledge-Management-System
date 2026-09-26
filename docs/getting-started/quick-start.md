@@ -66,6 +66,7 @@ your-project/
 | `--no-hooks` | hooks を配置しない |
 | `--no-agents` | subagent を配置しない |
 | `--no-claude-bridge` | `.claude/skills` への橋渡しを作らない |
+| `--no-backup` / `-NoBackup` | 再実行時に `skills/` の退避（`skills.backup-*`）を作らない |
 
 ### 手動でコピーする場合
 

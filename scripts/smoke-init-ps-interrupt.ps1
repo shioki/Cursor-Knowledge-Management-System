@@ -81,6 +81,8 @@ Remove-Item -LiteralPath $paused -Force -ErrorAction SilentlyContinue
 if ($state -ne "Stopped" -and -not $stopped) { throw "init.ps1 was not stopped (state: $state)" }
 if (-not (Test-Path -LiteralPath (Join-Path $skillDir "SKILL.md"))) { throw "$skillName was not restored after the interrupt" }
 if (-not (Test-Path -LiteralPath $marker)) { throw "user record was lost after the interrupt" }
-$leftover = @(Get-ChildItem -LiteralPath (Split-Path -Parent $skillDir) -Directory -Filter "$skillName.replacing.*")
+$skillsDir = Split-Path -Parent $skillDir
+$leftover = @(Get-ChildItem -LiteralPath $skillsDir -Directory -Filter "$skillName.replacing.*") +
+    @(Get-ChildItem -LiteralPath (Split-Path -Parent $skillsDir) -Directory -Force -Filter ".ckms-replaced-*")
 if ($leftover.Count -gt 0) { throw "pre-swap copy was left behind: $($leftover[0].FullName)" }
 Write-Host "ok: interrupted swap restored $skillName (state: $state)"
