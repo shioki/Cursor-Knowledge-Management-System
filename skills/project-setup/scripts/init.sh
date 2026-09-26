@@ -150,7 +150,14 @@ ckms_copy_preserved() {
       *) continue ;;
     esac
     inner=${rel#"$skill_name"/}
-    if [ -d "$from/$inner" ]; then
+    # シンボリックリンクはリンクのまま置く。overlay で中身をたどると、
+    # 共有先へのリンクが実ディレクトリのコピーに変わる。
+    if [ -L "$from/$inner" ]; then
+      parent=$(dirname "$inner")
+      mkdir -p "$to/$parent" || return 1
+      rm -rf "$to/$inner" || return 1
+      cp -a "$from/$inner" "$to/$inner" || return 1
+    elif [ -d "$from/$inner" ]; then
       if [ "$mode" = overlay ]; then
         mkdir -p "$to/$inner" || return 1
         cp -a "$from/$inner/." "$to/$inner/" || return 1
@@ -160,7 +167,7 @@ ckms_copy_preserved() {
         rm -rf "$to/$inner" || return 1
         cp -a "$from/$inner" "$to/$inner" || return 1
       fi
-    elif [ -e "$from/$inner" ] || [ -L "$from/$inner" ]; then
+    elif [ -e "$from/$inner" ]; then
       parent=$(dirname "$inner")
       mkdir -p "$to/$parent" || return 1
       rm -f "$to/$inner" || return 1
@@ -198,12 +205,23 @@ ckms_replace_skill() {
     || ckms_preserve_fail "$name" "$stage" "$incoming" "" "$dest"
   ckms_copy_preserved "$name" "$stage" "$incoming/$name" overlay \
     || ckms_preserve_fail "$name" "$stage" "$incoming" "" "$dest"
-  # 同じディレクトリ内の rename にして、別ボリュームの mv 失敗を避ける。
+  # 同じボリューム内の rename にして、別ボリュームの mv 失敗を避ける。
   # 先に導入先をどかし、新しい方を置いてから古い方を消す。
-  replaced_old="${dest}.replacing.$$"
-  mv "$dest" "$replaced_old" \
+  # どかし先は mktemp で作った空のディレクトリの中にする。既存の名前と
+  # ぶつかると mv はその中へ入れてしまい、後の rm -rf で巻き込む。
+  replaced_box=$(mktemp -d "$(dirname "$SKILLS_DEST")/.ckms-replaced.XXXXXX") \
     || ckms_preserve_fail "$name" "$stage" "$incoming" "" "$dest"
+  replaced_old="$replaced_box/$name"
+  swapped=""
+  # 2 つの mv の間で中断されると、配置先が空になる。元に戻してから終える。
+  trap ckms_swap_interrupted INT TERM
+  if ! mv "$dest" "$replaced_old"; then
+    trap - INT TERM
+    rmdir "$replaced_box" 2>/dev/null || true
+    ckms_preserve_fail "$name" "$stage" "$incoming" "" "$dest"
+  fi
   if ! mv "$incoming/$name" "$dest"; then
+    trap - INT TERM
     if [ -e "$dest" ]; then
       echo "エラー: 新しいスキルを置けませんでした。元のスキルは ${replaced_old} に残しています" >&2
     else
@@ -212,8 +230,30 @@ ckms_replace_skill() {
     fi
     ckms_preserve_fail "$name" "$stage" "$incoming" "$replaced_old" "$dest"
   fi
-  rm -rf "$replaced_old" "$stage" "$incoming"
+  swapped=1
+  trap - INT TERM
+  rm -rf "$replaced_box" "$stage" "$incoming"
   echo "  更新: $name"
+}
+
+# ckms_replace_skill の入れ替え中に INT / TERM を受けたときの後始末。
+# 変数は呼び出し中の ckms_replace_skill のローカル（動的スコープ）を読む。
+ckms_swap_interrupted() {
+  trap - INT TERM
+  echo "" >&2
+  echo "中断しました。" >&2
+  if [ -z "${swapped:-}" ] && [ ! -e "$dest" ] && [ -e "$replaced_old" ]; then
+    if mv "$replaced_old" "$dest"; then
+      rmdir "$replaced_box" 2>/dev/null || true
+    else
+      echo "エラー: 入れ替え前のスキルを戻せません: $replaced_old" >&2
+    fi
+  fi
+  if [ -n "${swapped:-}" ]; then
+    echo "  $name は更新済みです。一時ディレクトリが残っています: $stage $replaced_box" >&2
+    exit 130
+  fi
+  ckms_preserve_fail "$name" "$stage" "$incoming" "$replaced_old" "$dest"
 }
 
 ckms_preserve_fail() {
@@ -429,6 +469,12 @@ if [ -f "$CURSORIGNORE_SRC" ]; then
       echo "情報: $TARGET/.cursorignore は既に存在します（上書きしません）"
     else
       echo "情報: $TARGET/.cursorignore は既に存在し、配布元と差分があります（上書きしません）"
+    fi
+    # v6.1.1 以前の .cursorignore には退避先の除外が無い。再実行で作る
+    # skills.backup-*/ が索引に入り、古い記録が検索に混じる。
+    if ! grep -q 'skills\.backup-' "$TARGET/.cursorignore"; then
+      echo "  再実行の退避先を索引から外すため、次の行を $TARGET/.cursorignore に追加してください:"
+      grep 'skills\.backup-' "$CURSORIGNORE_SRC" | sed 's/^/    /'
     fi
   else
     cp "$CURSORIGNORE_SRC" "$TARGET/.cursorignore"

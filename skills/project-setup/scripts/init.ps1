@@ -152,16 +152,72 @@ function Join-CkmsRel([string]$Base, [string]$Rel) {
     return $path
 }
 
+# シンボリックリンクかジャンクションか。OneDrive のクラウドファイルなども
+# 再解析点の属性を持つため、属性だけでは判定しない。
+function Test-CkmsLink($Item) {
+    if (-not ($Item.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) { return $false }
+    return @('SymbolicLink', 'Junction') -contains [string]$Item.LinkType
+}
+
+# リンク先のパス。相対パスはリンクのあるディレクトリから解決する。
+function Get-CkmsLinkTarget($Item) {
+    foreach ($prop in @('LinkTarget', 'Target')) {
+        $member = $Item.PSObject.Properties[$prop]
+        if ($null -eq $member) { continue }
+        $value = $member.Value
+        if ($value -is [array]) { $value = $value | Select-Object -First 1 }
+        if (-not $value) { continue }
+        $target = ([string]$value) -replace '^\\\?\?\\', ''
+        if (-not [System.IO.Path]::IsPathRooted($target)) {
+            $target = [System.IO.Path]::GetFullPath((Join-Path (Split-Path -Parent $Item.FullName) $target))
+        }
+        return $target
+    }
+    return $null
+}
+
+# シンボリックリンク / ジャンクションを、同じ種類・同じリンク先で作り直す。
+# Copy-Item はリンクをたどって中身をコピーするため、共有先へのリンクが
+# 実ディレクトリに変わってしまう。
+function Copy-CkmsLink($Item, [string]$To) {
+    $target = Get-CkmsLinkTarget $Item
+    if (-not $target) { throw "リンク先を読めません: $($Item.FullName)" }
+    $type = if ([string]$Item.LinkType -eq 'Junction') { 'Junction' } else { 'SymbolicLink' }
+    New-Item -ItemType $type -Path $To -Target $target | Out-Null
+}
+
+# リンクをたどらずに削除する。Windows PowerShell 5.1 の Remove-Item -Recurse は、
+# 中にあるジャンクションやシンボリックリンクの先まで消すことがある。
+function Remove-CkmsTree([string]$Path) {
+    if (-not $Path) { return }
+    $item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+    if (-not $item) { return }
+    if (Test-CkmsLink $item) {
+        $item.Delete()
+        return
+    }
+    if ($item.PSIsContainer) {
+        foreach ($child in @(Get-ChildItem -LiteralPath $Path -Force)) {
+            Remove-CkmsTree $child.FullName
+        }
+    }
+    Remove-Item -LiteralPath $Path -Recurse -Force
+}
+
+# From の中身を To に重ねる。同じパスは From が優先。リンクはリンクのまま置く。
 function Copy-CkmsOverlay([string]$From, [string]$To) {
     if (-not (Test-Path -LiteralPath $To)) {
         New-Item -ItemType Directory -Path $To -Force | Out-Null
     }
-    Get-ChildItem -LiteralPath $From -Force | ForEach-Object {
-        $target = Join-Path $To $_.Name
-        if ($_.PSIsContainer) {
-            Copy-CkmsOverlay $_.FullName $target
+    foreach ($child in @(Get-ChildItem -LiteralPath $From -Force)) {
+        $target = Join-Path $To $child.Name
+        if (Test-CkmsLink $child) {
+            Remove-CkmsTree $target
+            Copy-CkmsLink $child $target
+        } elseif ($child.PSIsContainer) {
+            Copy-CkmsOverlay $child.FullName $target
         } else {
-            Copy-Item -LiteralPath $_.FullName -Destination $target -Force
+            Copy-Item -LiteralPath $child.FullName -Destination $target -Force
         }
     }
 }
@@ -172,10 +228,12 @@ function Copy-CkmsPreserved([string]$SkillName, [string]$FromRoot, [string]$ToRo
         if (-not $rel.StartsWith($prefix)) { continue }
         $inner = $rel.Substring($prefix.Length)
         $from = Join-CkmsRel $FromRoot $inner
-        if (-not (Test-Path -LiteralPath $from)) { continue }
+        # Test-Path はリンク切れを False にするため、Get-Item で存在を見る。
+        $fromItem = Get-Item -LiteralPath $from -Force -ErrorAction SilentlyContinue
+        if (-not $fromItem) { continue }
         $to = Join-CkmsRel $ToRoot $inner
-        $fromItem = Get-Item -LiteralPath $from -Force
-        if ($Overlay -and $fromItem.PSIsContainer) {
+        $isLink = Test-CkmsLink $fromItem
+        if ($Overlay -and $fromItem.PSIsContainer -and -not $isLink) {
             Copy-CkmsOverlay $from $to
             continue
         }
@@ -183,10 +241,14 @@ function Copy-CkmsPreserved([string]$SkillName, [string]$FromRoot, [string]$ToRo
         if ($parent -and -not (Test-Path -LiteralPath $parent)) {
             New-Item -ItemType Directory -Path $parent -Force | Out-Null
         }
-        if (Test-Path -LiteralPath $to) {
-            Remove-Item -LiteralPath $to -Recurse -Force
+        Remove-CkmsTree $to
+        if ($isLink) {
+            Copy-CkmsLink $fromItem $to
+        } elseif ($fromItem.PSIsContainer) {
+            Copy-CkmsOverlay $from $to
+        } else {
+            Copy-Item -LiteralPath $from -Destination $to -Force
         }
-        Copy-Item -LiteralPath $from -Destination $to -Recurse -Force
     }
 }
 
@@ -225,24 +287,27 @@ function Update-CkmsSkill([System.IO.DirectoryInfo]$SrcDir) {
         Copy-Item -LiteralPath $SrcDir.FullName -Destination $assembled -Recurse -Force
         Copy-CkmsPreserved $name $stage $assembled -Overlay
         $replacedOld = "$dest.replacing." + [guid]::NewGuid().ToString("N")
-        Move-Item -LiteralPath $dest -Destination $replacedOld
+        $swapped = $false
         try {
+            Move-Item -LiteralPath $dest -Destination $replacedOld
             Move-Item -LiteralPath $assembled -Destination $dest
-        } catch {
-            $placeFailed = $_
-            if (-not (Test-Path -LiteralPath $dest) -and (Test-Path -LiteralPath $replacedOld)) {
+            $swapped = $true
+        } finally {
+            # 失敗でも Ctrl+C でも通る（Ctrl+C では catch は走らない）。
+            # 配置先が空なら、入れ替え前のスキルを戻す。
+            if (-not $swapped -and -not (Test-Path -LiteralPath $dest) -and (Test-Path -LiteralPath $replacedOld)) {
                 try {
                     Move-Item -LiteralPath $replacedOld -Destination $dest
                     $replacedOld = $null
+                    Write-Host "  $name を入れ替え前に戻しました"
                 } catch {
                     Write-Host "エラー: 入れ替え前のスキルを戻せません: $replacedOld"
                 }
             }
-            throw $placeFailed
         }
-        Remove-Item -LiteralPath $replacedOld -Recurse -Force
-        Remove-Item -LiteralPath $stage -Recurse -Force
-        Remove-Item -LiteralPath $incoming -Recurse -Force
+        Remove-CkmsTree $replacedOld
+        Remove-CkmsTree $stage
+        Remove-CkmsTree $incoming
         Write-Host "  更新: $name"
     } catch {
         Write-Host "エラー: $name の置き換えに失敗しました。利用者データの退避先: $stage"
@@ -334,7 +399,7 @@ if ($skillsItem) {
                     Write-Host "      作りかけのため削除します。"
                     if (Test-Path -LiteralPath $script:SkillsBackup) {
                         try {
-                            Remove-Item -LiteralPath $script:SkillsBackup -Recurse -Force
+                            Remove-CkmsTree $script:SkillsBackup
                         } catch {
                             Write-Host "      削除できませんでした: $script:SkillsBackup"
                         }
@@ -513,6 +578,12 @@ if (Test-Path $CursorignoreSrc) {
             Write-Host "情報: $CursorignoreDest は既に存在します（上書きしません）"
         } else {
             Write-Host "情報: $CursorignoreDest は既に存在し、配布元と差分があります（上書きしません）"
+        }
+        # v6.1.1 以前の .cursorignore には退避先の除外が無い。再実行で作る
+        # skills.backup-*/ が索引に入り、古い記録が検索に混じる。
+        if (-not (Select-String -LiteralPath $CursorignoreDest -Pattern 'skills\.backup-' -Quiet)) {
+            Write-Host "  再実行の退避先を索引から外すため、次の行を $CursorignoreDest に追加してください:"
+            Select-String -LiteralPath $CursorignoreSrc -Pattern 'skills\.backup-' | ForEach-Object { Write-Host "    $($_.Line)" }
         }
     } else {
         Copy-Item -Path $CursorignoreSrc -Destination $CursorignoreDest -Force

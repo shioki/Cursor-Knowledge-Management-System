@@ -20,13 +20,21 @@ Windows では同じディレクトリの `init.ps1` を使います。確認な
 - プロジェクト固有のスキルと、ほかの配布元が `.agents/skills/` に置いたスキル
 - 配布元から無くなったスキル（削除せず、残した旨を表示します）
 
-`decisions/` などの記録ディレクトリでは、同じパスのファイルは利用者の内容が優先されます。配布元がそのディレクトリに新しく足したファイルは残ります。
+`decisions/` などの記録ディレクトリでは、同じパスのファイルは利用者の内容が優先されます。配布元がそのディレクトリに新しく足したファイルは残ります。記録ディレクトリをシンボリックリンク（Windows ではジャンクションも）にしている場合は、リンクのまま残します。リンク先には配布元のファイルを足しません。
 
 置き換える前に、導入先の `skills/` を隣の `skills.backup-YYYYmmdd-HHMMSS/` へ退避します。退避が不要なときは `--no-backup`（PowerShell では `-NoBackup`）を付けます。退避先を Git に含めない例は [チーム導入ガイド](../advanced/team-implementation.md) にあります。
 
 `SKILL.md` は再実行で配布元の内容になります。配布元と違っていれば警告します。版を上げただけで、手元で書き換えていなくても出ます。カスタマイズしていた場合はバックアップから戻してください。`SKILL.md` 以外の配布ファイル（`scripts/*.sh` など）は、警告なしで置き換わります。
 
-`.cursorignore` は既にある場合は上書きしません。配布元と内容が違うときだけ、その旨を表示します。`.cursor/hooks.json` も既にあれば上書きしません。`.cursor/agents/*.md` は、確認に yes と答えたとき（`--yes` / `-Yes` を含む）に配布元の内容で上書きされます。
+`.cursorignore` は既にある場合は上書きしません。配布元と内容が違うときだけ、その旨を表示します。v6.1.1 以前に導入した `.cursorignore` には退避先の除外が無く、`skills.backup-*/` の古い記録が Cursor の索引に入ります。その場合は追加する行を表示するので、`.cursorignore` に足してください。
+
+```gitignore
+.agents/skills.backup-*/
+.claude/skills.backup-*/
+.cursor/skills.backup-*/
+```
+
+`.cursor/hooks.json` も、既にあれば `.cursorignore` と同じく上書きしません。`.cursor/agents/*.md` は、確認に yes と答えたとき（`--yes` / `-Yes` を含む）に配布元の内容で上書きされます。
 
 `.claude/skills` が `.agents/skills` へのシンボリックリンクなら、再実行の結果はそのまま見えます。リンクを作れずにコピーした場合は、再実行しても「既に存在します」となり、コピー側は古いままです。Claude Code がそのコピー側に記録を書いていることがあるので、コピーを消す前に `decisions/`、`patterns/`、`improvements/`、`references/*_TEMPLATE.md` を `.agents/skills` の同じ位置へ移してください。同じファイルが両方にあるときは、残すほうを確認してから移します。移したあとでコピーを削除し、再実行するとリンクを作り直します。
 

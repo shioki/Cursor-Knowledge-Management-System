@@ -113,6 +113,30 @@ jobs:
             exit 1
           fi
           test -f "$secret"
+          # 記録ディレクトリがシンボリックリンクなら、リンクのまま残す
+          linked=$(mktemp -d)
+          shared=$(mktemp -d)
+          bash skills/project-setup/scripts/init.sh "$linked" --yes --no-hooks --no-agents
+          decisions="$linked/.agents/skills/knowledge-management/references/decisions"
+          cp -a "$decisions/." "$shared/"
+          rm -rf "$decisions"
+          ln -s "$shared" "$decisions"
+          echo kept-shared > "$shared/shared-only.md"
+          bash skills/project-setup/scripts/init.sh "$linked" --yes --no-hooks --no-agents
+          if [ ! -L "$decisions" ]; then
+            echo "::error::symlinked decisions/ was replaced by a directory"
+            exit 1
+          fi
+          grep -q kept-shared "$shared/shared-only.md"
+          # 退避先の除外が無い古い .cursorignore には、追加する行を案内する
+          grep -v 'skills\.backup-' "$linked/.cursorignore" > "$linked/.cursorignore.old"
+          mv "$linked/.cursorignore.old" "$linked/.cursorignore"
+          out=$(bash skills/project-setup/scripts/init.sh "$linked" --yes --no-backup --no-hooks --no-agents)
+          if ! printf '%s\n' "$out" | grep -q '^    \.agents/skills\.backup-\*/$'; then
+            echo "::error::init.sh did not suggest the skills.backup-* ignore lines"
+            printf '%s\n' "$out"
+            exit 1
+          fi
 
       - name: Validate the generated structure
         working-directory: /tmp/ckms-target
@@ -242,6 +266,26 @@ jobs:
         run: |
           bash scripts/smoke-init-rerun.sh "C:/ckms-target" .agents -- \
             pwsh -NoProfile -File "$GITHUB_WORKSPACE/skills/project-setup/scripts/init.ps1" -TargetPath 'C:\ckms-target' -Yes
+
+      - name: Keep a junctioned records directory on re-run
+        shell: pwsh
+        run: |
+          $target = 'C:\ckms-junction'
+          $shared = 'C:\ckms-shared'
+          New-Item -ItemType Directory -Force -Path $target, $shared | Out-Null
+          .\skills\project-setup\scripts\init.ps1 -TargetPath $target -Yes -NoHooks -NoAgents
+          $decisions = Join-Path $target '.agents\skills\knowledge-management\references\decisions'
+          Copy-Item -Path (Join-Path $decisions '*') -Destination $shared -Recurse -Force
+          Remove-Item -LiteralPath $decisions -Recurse -Force
+          New-Item -ItemType Junction -Path $decisions -Target $shared | Out-Null
+          Set-Content -LiteralPath (Join-Path $shared 'shared-only.md') -Value 'kept-shared'
+          .\skills\project-setup\scripts\init.ps1 -TargetPath $target -Yes -NoHooks -NoAgents
+          $item = Get-Item -LiteralPath $decisions -Force
+          if ([string]$item.LinkType -ne 'Junction') { throw "junctioned decisions/ was replaced: $($item.LinkType)" }
+          if (-not (Test-Path -LiteralPath (Join-Path $shared 'shared-only.md'))) { throw "shared records were deleted" }
+          if (-not (Test-Path -LiteralPath (Join-Path $shared 'README.md'))) { throw "shared README.md was deleted" }
+          $backup = @(Get-ChildItem -LiteralPath (Join-Path $target '.agents') -Directory -Filter 'skills.backup-*')
+          if ($backup.Count -lt 1) { throw "backup was not created" }
 
       - name: Reject self-targeted init.ps1
         shell: pwsh
