@@ -3,5 +3,8 @@
   "retryOn429": true,
   "retryCount": 2,
   "fallbackRetryDelay": "5s",
-  "aliveStatusCodes": [200, 206, 301, 302, 307, 308, 429]
+  "aliveStatusCodes": [200, 206, 301, 302, 307, 308, 429],
+  "ignorePatterns": [
+    { "pattern": "^https://cursor\\.com/dashboard" }
+  ]
 }

@@ -28,7 +28,8 @@ async function runOne(filePath, configPath) {
         return reject(e);
       }
 
-      const dead = results.filter((r) => r.status !== 'alive');
+      // ignored は .mlc.config.json の ignorePatterns で意図して外したもの
+      const dead = results.filter((r) => r.status !== 'alive' && r.status !== 'ignored');
       if (dead.length === 0) return resolve();
 
       const lines = dead.map((r) => `  [✖] ${r.link} → Status: ${r.status}`);
