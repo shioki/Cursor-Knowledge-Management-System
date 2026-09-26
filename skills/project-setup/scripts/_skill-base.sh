@@ -21,7 +21,8 @@ ckms_preserved_files() {
     "pattern-library/references/PATTERNS_TEMPLATE.md" \
     "improvement-tracking/references/IMPROVEMENTS_TEMPLATE.md" \
     "project-context/references/CONTEXT_TEMPLATE.md" \
-    "debug-workflow/references/DEBUG_TEMPLATE.md"
+    "debug-workflow/references/DEBUG_TEMPLATE.md" \
+    "team-standards/references/STANDARDS_TEMPLATE.md"
 }
 
 # init.sh / validate.sh は、配置先の検出より前に上の関数だけ欲しいことがある。

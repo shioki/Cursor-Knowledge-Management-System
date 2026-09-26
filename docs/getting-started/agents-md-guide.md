@@ -85,7 +85,7 @@ project/
 - AGENTS.md はプロジェクト全員が読める分量（概ね 200 行以内）に収める
 - コードの複製ではなく、ルール・ポリシーに絞る
 - サブディレクトリ固有の事情はネスト AGENTS.md に分離する
-- チーム標準規約は `.agents/skills/team-standards/SKILL.md` と住み分けを意識する。あちらは `paths` でソースコードを扱うときだけ読み込まれるので、コーディング規約の本体はスキル側に置くほうが軽く済む
+- チーム標準規約は `team-standards` スキル（規約の本体は `.agents/skills/team-standards/references/STANDARDS_TEMPLATE.md`）と住み分けを意識する。あちらは `paths` でソースコードを扱うときだけ読み込まれるので、コーディング規約の本体はスキル側に置くほうが軽く済む
 - 記録の残し方を徹底したい場合は、AGENTS.md に「技術判断をしたら `/record-decision` を使う」のような一文だけ置き、手順自体はアクションスキルに任せる
 
 ### DON'T

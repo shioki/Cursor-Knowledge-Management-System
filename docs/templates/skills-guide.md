@@ -97,10 +97,10 @@ paths:
 
 #### カスタマイズ方法
 
-`skills/team-standards/SKILL.md` の各セクションをチームの規約に合わせて書き換えます。既定値は一般的な JavaScript / TypeScript プロジェクトを想定した内容なので、そのまま使えるチームは多くありません。導入直後に必ず調整してください。
+規約は `skills/team-standards/references/STANDARDS_TEMPLATE.md` に書きます。各セクションをチームの規約に合わせて書き換えてください。既定値は一般的な JavaScript / TypeScript プロジェクトを想定した内容なので、そのまま使えるチームは多くありません。導入直後に必ず調整してください。このファイルは `init.sh` / `init.ps1` を再実行しても残ります。
 
 ```markdown
-#### 命名規則
+### 命名規則
 
 - **変数・関数**: snake_case（Python プロジェクトの場合）
 - **クラス**: PascalCase
@@ -108,7 +108,7 @@ paths:
 - **ファイル名**: snake_case.py
 ```
 
-`paths` もチームが実際に使う言語だけに絞ると、無関係な会話でのトークン消費を抑えられます。
+`SKILL.md` の `paths` もチームが実際に使う言語だけに絞ると、無関係な会話でのトークン消費を抑えられます。`paths` は `SKILL.md` にあるため、再実行すると初期値に戻ります。
 
 ---
 

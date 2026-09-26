@@ -27,7 +27,7 @@ metadata:
 
 `knowledge-management/references/decisions/README.md` を読み、同じテーマの判断が既にないか確認してください。既存判断を覆す決定であれば、その旨を新しいファイルに明記し、古い方にも追記します。
 
-スキルの配置先は `.agents/skills/` を優先し、`.claude/skills/` / `.cursor/skills/` も検出対象です。
+コマンド例は `.agents/skills/` に導入した場合のパスです。`.claude/skills/` や `.cursor/skills/` に導入した場合（`--legacy-claude`、`--cursor-only`、`gh skill install --agent` など）は、先頭をそのパスに読み替えてください。記録先はスクリプトが自動で検出します。
 
 ### 3. ファイルの作成
 

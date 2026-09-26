@@ -87,6 +87,8 @@ gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management 
 gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.2.3
 ```
 
+記録用のスクリプト（`add-entry.sh` など）は、`project-setup` スキルの共通処理を使います。スクリプトも使う場合は `project-setup` も同じ `--agent` で入れてください。
+
 v6 でスキルを非隠しディレクトリ `skills/` に移したため、`--allow-hidden-dirs` は不要になりました。詳細は [gh skill 連携](docs/reference/gh-skill-integration.md) を参照してください。
 
 ### 4. Microsoft APM（バンドル単位）
@@ -140,7 +142,7 @@ printf '@AGENTS.md\n' > "$TARGET/CLAUDE.md"
 
 1. `/update-context` — プロジェクト基本情報を記入
 2. `/record-decision` — 最初の技術判断を記録
-3. `team-standards` スキルの `SKILL.md` をプロジェクトの規約に更新
+3. `team-standards` スキルの `references/STANDARDS_TEMPLATE.md` をプロジェクトの規約に更新
 
 ## システム構成
 

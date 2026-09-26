@@ -55,6 +55,8 @@ gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management 
 gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.2.3
 ```
 
+The recording scripts (`add-entry.sh` and friends) use shared helpers from the `project-setup` skill, so install `project-setup` with the same `--agent` if you use them.
+
 Skills now live in the non-hidden `skills/` directory, so `--allow-hidden-dirs` is no longer needed. Details: [gh skill integration](docs/reference/gh-skill-integration.md).
 
 ### 4. Microsoft APM (bundle)
@@ -85,7 +87,7 @@ Subagents are Cursor-specific; hooks now ship for both Cursor and Claude Code (d
 
 1. Run `/update-context` to fill in project basics.
 2. Run `/record-decision` to log your first decision.
-3. Edit the `team-standards` `SKILL.md` to match your conventions.
+3. Edit `team-standards/references/STANDARDS_TEMPLATE.md` to match your conventions (it survives re-runs; `SKILL.md` does not).
 
 Skipping these leaves the skills pointing at empty templates.
 

@@ -41,6 +41,7 @@ printf -- '%s\n' "---" "name: requirements-spec" "description: ほかの配布�
 MARKER="CKMS_RERUN_MARKER_$$"
 printf '\n%s\n' "$MARKER" >> "$SKILLS/knowledge-management/SKILL.md"
 printf '\n%s\n' "USER_CONTEXT_MARKER" >> "$SKILLS/project-context/references/CONTEXT_TEMPLATE.md"
+printf '\n%s\n' "USER_STANDARDS_MARKER" >> "$SKILLS/team-standards/references/STANDARDS_TEMPLATE.md"
 
 "$@"
 
@@ -62,6 +63,10 @@ if grep -q "$MARKER" "$SKILLS/knowledge-management/SKILL.md"; then
 fi
 if ! grep -q "USER_CONTEXT_MARKER" "$SKILLS/project-context/references/CONTEXT_TEMPLATE.md"; then
   echo "error: CONTEXT_TEMPLATE.md was overwritten" >&2
+  exit 1
+fi
+if ! grep -q "USER_STANDARDS_MARKER" "$SKILLS/team-standards/references/STANDARDS_TEMPLATE.md"; then
+  echo "error: team-standards STANDARDS_TEMPLATE.md was overwritten" >&2
   exit 1
 fi
 if ! cmp -s "$REPO_ROOT/skills/knowledge-management/SKILL.md" "$SKILLS/knowledge-management/SKILL.md"; then

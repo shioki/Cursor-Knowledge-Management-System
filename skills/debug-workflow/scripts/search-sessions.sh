@@ -10,8 +10,17 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-# shellcheck source=../project-setup/scripts/_skill-base.sh
-source "${SCRIPT_DIR}/../../project-setup/scripts/_skill-base.sh"
+# スキル配置の検出とエスケープ処理は project-setup の _skill-base.sh にある。
+# gh skill / apm でスキルを個別に入れると、project-setup が無いことがある。
+CKMS_SKILL_BASE="${SCRIPT_DIR}/../../project-setup/scripts/_skill-base.sh"
+if [ ! -f "$CKMS_SKILL_BASE" ]; then
+  echo "エラー: project-setup スキルが見つかりません: ${CKMS_SKILL_BASE}" >&2
+  echo "      このスクリプトは project-setup の _skill-base.sh を使います。" >&2
+  echo "      スキルを個別に入れた場合は、project-setup も同じ場所に入れてください。" >&2
+  exit 1
+fi
+# shellcheck source=../../project-setup/scripts/_skill-base.sh
+source "$CKMS_SKILL_BASE"
 
 SESSIONS_DIR="${DATA_BASE}/debug-sessions"
 KEYWORD="${1:?エラー: 検索キーワードを指定してください}"

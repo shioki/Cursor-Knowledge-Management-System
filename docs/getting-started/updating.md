@@ -16,7 +16,7 @@ Windows では同じディレクトリの `init.ps1` を使います。確認な
 再実行で置き換わるのは、配布元にある CKMS のスキルです。次は残ります。
 
 - 判断記録・パターン・改善記録（`decisions/`、`patterns/`、`improvements/`）
-- 各スキルの `references/*_TEMPLATE.md`（v5 以前の記録と、`project-context` の文脈）
+- 各スキルの `references/*_TEMPLATE.md`（v5 以前の記録、`project-context` の文脈、`team-standards` の規約）
 - プロジェクト固有のスキルと、ほかの配布元が `.agents/skills/` に置いたスキル
 - 配布元から無くなったスキル（削除せず、残した旨を表示します）
 
@@ -25,6 +25,8 @@ Windows では同じディレクトリの `init.ps1` を使います。確認な
 置き換える前に、導入先の `skills/` を隣の `skills.backup-YYYYmmdd-HHMMSS/` へ退避します。退避が不要なときは `--no-backup`（PowerShell では `-NoBackup`）を付けます。退避先を Git に含めない例は [チーム導入ガイド](../advanced/team-implementation.md) にあります。
 
 `SKILL.md` は再実行で配布元の内容になります。配布元と違っていれば警告します。版を上げただけで、手元で書き換えていなくても出ます。カスタマイズしていた場合はバックアップから戻してください。`SKILL.md` 以外の配布ファイル（`scripts/*.sh` など）は、警告なしで置き換わります。
+
+`team-standards` の規約は、v6.2.4 から `team-standards/references/STANDARDS_TEMPLATE.md` に書きます。このファイルは再実行で残ります。v6.2.3 以前に規約を `team-standards/SKILL.md` へ直接書いていた場合は、再実行のときに案内が出るので、退避先（`skills.backup-*/team-standards/SKILL.md`）から規約部分を `STANDARDS_TEMPLATE.md` へ移してください。frontmatter の `paths` は `SKILL.md` にあるため、変えていた場合は再実行のたびに入れ直します。
 
 `.cursorignore` は既にある場合は上書きしません。配布元と内容が違うときだけ、その旨を表示します。v6.1.1 以前に導入した `.cursorignore` には退避先の除外が無く、`skills.backup-*/` の古い記録が Cursor の索引に入ります。その場合は追加する行を表示するので、`.cursorignore` に足してください。
 

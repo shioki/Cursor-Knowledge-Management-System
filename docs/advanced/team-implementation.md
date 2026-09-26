@@ -29,12 +29,12 @@ v5 から更新する場合は [v5 からの移行ガイド](../getting-started/
 
 #### team-standards のカスタマイズ
 
-`.agents/skills/team-standards/SKILL.md` をチームの規約に合わせて編集します。
+`.agents/skills/team-standards/references/STANDARDS_TEMPLATE.md` をチームの規約に合わせて編集します。このファイルは `init.sh` / `init.ps1` を再実行しても残ります。規約を `SKILL.md` に書くと、再実行で配布元の内容に置き換わるので注意してください。
 
 - 命名規則をプロジェクトに合わせる
 - ブランチ戦略を実際のフローに合わせる
 - コミットメッセージ規約を統一する
-- frontmatter の `paths` をチームが実際に使う言語に絞る
+- `SKILL.md` の frontmatter にある `paths` を、チームが実際に使う言語に絞る（`paths` は再実行で初期値に戻るため、そのたびに入れ直す）
 
 `paths` はこのスキルが surface する条件です。既定では主要な言語のソースファイルを列挙してありますが、単一言語のプロジェクトなら該当する行だけ残したほうが、無関係な会話でのトークン消費を抑えられます。
 

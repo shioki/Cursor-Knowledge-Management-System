@@ -31,7 +31,7 @@ metadata:
 bash .agents/skills/debug-workflow/scripts/search-sessions.sh "キーワード"
 ```
 
-スキルの配置先は `.agents/skills/` を優先し、`.claude/skills/` / `.cursor/skills/` も検出対象です。セッションの保存先は検出されたベースディレクトリ配下の `debug-sessions/` です。
+コマンド例は `.agents/skills/` に導入した場合のパスです。`.claude/skills/` や `.cursor/skills/` に導入した場合（`--legacy-claude`、`--cursor-only`、`gh skill install --agent` など）は、先頭をそのパスに読み替えてください。記録先はスクリプトが自動で検出します。セッションの保存先は検出されたベースディレクトリ配下の `debug-sessions/` です。
 
 ### 3. セッションファイルの作成
 

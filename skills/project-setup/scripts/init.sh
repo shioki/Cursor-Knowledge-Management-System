@@ -178,6 +178,23 @@ ckms_copy_preserved() {
   done < <(ckms_preserved_dirs; ckms_preserved_files)
 }
 
+# v6.2.3 までは規約を team-standards/SKILL.md に直接書いていた。v6.2.4 から
+# references/STANDARDS_TEMPLATE.md に移し、再実行で残すようにした。まだ移して
+# いない導入先では、SKILL.md が置き換わる前に移し方を案内する。
+ckms_standards_move_hint() {
+  local name="$1" src="$2" dest="$3"
+  [ "$name" = team-standards ] || return 0
+  [ -f "$dest/references/STANDARDS_TEMPLATE.md" ] && return 0
+  [ -f "$dest/SKILL.md" ] && [ -f "$src/SKILL.md" ] || return 0
+  cmp -s "$dest/SKILL.md" "$src/SKILL.md" && return 0
+  echo "  案内: team-standards の規約は、この版から references/STANDARDS_TEMPLATE.md に書きます（再実行で残ります）。"
+  if [ -n "$SKILLS_BACKUP" ]; then
+    echo "        SKILL.md の規約を書き換えていた場合は、${SKILLS_BACKUP}/${name}/SKILL.md の規約部分を ${dest}/references/STANDARDS_TEMPLATE.md へ移してください。"
+  else
+    echo "        SKILL.md の規約を書き換えていた場合、--no-backup のため退避していません。Git の履歴から ${dest}/references/STANDARDS_TEMPLATE.md へ移してください。"
+  fi
+}
+
 ckms_replace_skill() {
   local name="$1"
   local src="$SOURCE_SKILLS/$name"
@@ -195,6 +212,7 @@ ckms_replace_skill() {
       echo "  警告: $name/SKILL.md は配布元と異なります。新しい内容で置き換えます（--no-backup のため退避していません）"
     fi
   fi
+  ckms_standards_move_hint "$name" "$src" "$dest"
   stage=$(mktemp -d)
   incoming=""
   replaced_old=""
@@ -546,7 +564,7 @@ if [ "$SKILLS_STATE" = new ]; then
   echo "次のステップ:"
   echo "  1. /update-context でプロジェクト基本情報を記入"
   echo "  2. /record-decision で最初の技術判断を記録"
-  echo "  3. team-standards スキルをプロジェクトの規約に更新"
+  echo "  3. team-standards の references/STANDARDS_TEMPLATE.md をプロジェクトの規約に更新"
   echo ""
 elif [ "$SKILLS_STATE" = updated ]; then
   echo "CKMS のスキルを更新しました。記録とプロジェクト固有のスキルは残しています。"

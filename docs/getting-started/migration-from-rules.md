@@ -122,7 +122,7 @@ graph LR
 | 旧ルール（.mdc） | 新スキル | 備考 |
 |-----------------|---------|------|
 | `project-context.mdc` | `skills/project-context/` | alwaysApply → エージェント自動判断 |
-| `team-standards.mdc` | `skills/team-standards/` | 規約内容を SKILL.md に統合 |
+| `team-standards.mdc` | `skills/team-standards/` | 規約内容を `references/STANDARDS_TEMPLATE.md` に統合 |
 | `knowledge-management.mdc` | `skills/knowledge-management/` | scripts/ で記録自動化を追加 |
 | `patterns-library.mdc` | `skills/pattern-library/` | scripts/ でパターン追加を自動化 |
 | `debug-workflow.mdc` | `skills/debug-workflow/` | debug-support.mdc と統合 |
@@ -203,7 +203,7 @@ REST vs GraphQL の選択
 
 #### Step 2: カスタマイズしたルール内容を保存
 
-`team-standards.mdc` にプロジェクト固有の規約を書いていた場合は、その内容を `.agents/skills/team-standards/SKILL.md` の該当セクションに反映してください。
+`team-standards.mdc` にプロジェクト固有の規約を書いていた場合は、その内容を `.agents/skills/team-standards/references/STANDARDS_TEMPLATE.md` の該当セクションに反映してください。
 
 #### Step 3: 旧ファイルを削除
 

@@ -2,6 +2,17 @@
 
 このプロジェクトの重要な変更履歴を記録します。
 
+## [Unreleased]
+
+### Changed
+
+- **`team-standards` の規約を `references/STANDARDS_TEMPLATE.md` に移した**: これまでは規約を `team-standards/SKILL.md` に直接書く案内だったが、再実行は `SKILL.md` を配布元の内容で置き換えるため、更新のたびに規約が初期値へ戻っていた。規約の本体を `references/STANDARDS_TEMPLATE.md` に移し、再実行で残すファイルに加えた。`SKILL.md` はこのファイルを読むよう指示するだけになる。規約を `SKILL.md` に書いていた導入先では、再実行のときに退避先から移すよう案内する。frontmatter の `paths` は `SKILL.md` に残るため、変えていた場合は再実行のたびに入れ直す
+
+### Fixed
+
+- **スキルを個別に入れると記録用スクリプトが動かない**: `add-entry.sh` などは `project-setup` の `_skill-base.sh` を使うが、`gh skill install` / `apm install` で個別に入れる例ではそれを案内していなかった。README・gh skill 連携・APM 連携に `project-setup` も入れるよう明記し、見つからないときはスクリプトがその旨を表示して止まるようにした
+- **アクションスキルのコマンド例が `.agents/` 決め打ち**: `.claude/skills/` や `.cursor/skills/` に導入した場合（`--legacy-claude`、`--cursor-only`、`gh skill install --agent` など）の読み替えを明記した
+
 ## [6.2.3] - 2026-09-26
 
 ### Fixed

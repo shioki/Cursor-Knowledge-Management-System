@@ -107,7 +107,7 @@ Windows では Git Bash で実行してください。
 #### 推奨更新（20 分）
 
 3. `/add-pattern` で初期パターンを登録
-4. `team-standards` スキルの `SKILL.md` をプロジェクトの規約に更新（frontmatter の `paths` も使用言語に合わせる）
+4. `team-standards` スキルの `references/STANDARDS_TEMPLATE.md` をプロジェクトの規約に更新（`SKILL.md` の frontmatter にある `paths` も使用言語に合わせる）
 
 #### フル活用（30 分）
 
@@ -129,7 +129,7 @@ Windows では Git Bash で実行してください。
 - 置き換わるのは、配布元にある CKMS のスキルだけです
 - 残るもの: `decisions/`・`patterns/`・`improvements/` の記録、`references/*_TEMPLATE.md`、プロジェクト固有のスキル、ほかの配布元のスキル。記録ディレクトリがシンボリックリンクなら、リンクのまま残ります
 - 置き換える前に、`skills/` を隣の `skills.backup-YYYYmmdd-HHMMSS/` へ退避します（`--no-backup` / `-NoBackup` で省略）
-- `SKILL.md` は配布元の内容になります。カスタマイズしていた場合（`team-standards` など）は、警告に出る退避先から戻してください
+- `SKILL.md` は配布元の内容になります。カスタマイズしていた場合は、警告に出る退避先から戻してください。`team-standards` の規約は `references/STANDARDS_TEMPLATE.md` に書けば残ります（`paths` は `SKILL.md` にあるため戻ります）
 - 失敗したときは、利用者データの退避先と戻し方を表示します。`validate.sh` は、失敗で残った一時ディレクトリを警告します
 
 ## v5 以前からの移行

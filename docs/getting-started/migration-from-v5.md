@@ -102,7 +102,7 @@ bash .agents/skills/project-setup/scripts/validate.sh
 
 ### 手順 5: team-standards をカスタマイズし直す
 
-`team-standards/SKILL.md` をプロジェクト向けに編集していた場合、手順 2 で配布元の内容に置き換わっています。`skills.backup-YYYYmmdd-HHMMSS/` または手順 1 のバックアップから内容を戻したうえで、v6 で追加された frontmatter の `paths` を確認してください。
+`team-standards/SKILL.md` をプロジェクト向けに編集していた場合、手順 2 で配布元の内容に置き換わっています。v6.2.4 から、規約は `team-standards/references/STANDARDS_TEMPLATE.md` に書きます（再実行でも残ります）。`skills.backup-YYYYmmdd-HHMMSS/` または手順 1 のバックアップにある `SKILL.md` から規約部分を `STANDARDS_TEMPLATE.md` へ移し、v6 で追加された frontmatter の `paths` を確認してください。
 
 ```yaml
 paths:

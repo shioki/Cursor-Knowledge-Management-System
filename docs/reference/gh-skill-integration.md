@@ -18,6 +18,13 @@ v5 までは `templates/.agents/skills/` に置いていましたが、`gh skill
 
 ## 個別スキルのインストール
 
+記録用のスクリプト（`knowledge-management` の `add-entry.sh`、`debug-workflow` の `create-session.sh` など）は、`project-setup` スキルにある `_skill-base.sh`（スキル配置の検出とエスケープ処理）を使います。スクリプトも使う場合は、`project-setup` も同じ `--agent` / `--scope` で入れてください。入っていないと、スクリプトはその旨を表示して止まります。
+
+```bash
+gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor
+gh skill install shioki/Cursor-Knowledge-Management-System project-setup --agent cursor
+```
+
 ### Cursor 向け
 
 ```bash

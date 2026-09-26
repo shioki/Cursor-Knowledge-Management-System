@@ -117,9 +117,9 @@ Windows では Git Bash で実行してください。エラー 0 件・警告 0
 ### 推奨（20 分）
 
 3. `/add-pattern` で初期パターンを登録
-4. `.agents/skills/team-standards/SKILL.md` をプロジェクトの規約に更新
+4. `.agents/skills/team-standards/references/STANDARDS_TEMPLATE.md` をプロジェクトの規約に更新（再実行しても残ります）
 
-`team-standards` の frontmatter にある `paths` は、このスキルをソースコード作業中だけ読み込ませるためのスコープ指定です。プロジェクトで使う言語に合わせて増減させてください。
+`team-standards` の `SKILL.md` の frontmatter にある `paths` は、このスキルをソースコード作業中だけ読み込ませるためのスコープ指定です。プロジェクトで使う言語に合わせて増減させてください。`paths` は再実行で初期値に戻るので、変えた場合は更新のたびに入れ直します。
 
 ### フル活用（30 分）
 

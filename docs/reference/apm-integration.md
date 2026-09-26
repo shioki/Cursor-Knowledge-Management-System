@@ -68,7 +68,10 @@ dependencies:
   apm:
     - shioki/Cursor-Knowledge-Management-System/skills/knowledge-management#v6.2.3
     - shioki/Cursor-Knowledge-Management-System/skills/debug-workflow#v6.2.3
+    - shioki/Cursor-Knowledge-Management-System/skills/project-setup#v6.2.3
 ```
+
+記録用のスクリプト（`add-entry.sh` など）は、`project-setup` スキルにある `_skill-base.sh` を使います。スクリプトも使う場合は、上の例のように `skills/project-setup` も指定してください。入っていないと、スクリプトはその旨を表示して止まります。
 
 `/record-decision` などのアクションスキルも同じ書き方で個別に取り込めます（`skills/record-decision` など）。記録先ディレクトリを共有するため、対応するドメインスキルと合わせて指定してください。
 

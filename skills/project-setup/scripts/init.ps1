@@ -58,6 +58,7 @@ $CkmsPreservedFiles = @(
     "improvement-tracking/references/IMPROVEMENTS_TEMPLATE.md"
     "project-context/references/CONTEXT_TEMPLATE.md"
     "debug-workflow/references/DEBUG_TEMPLATE.md"
+    "team-standards/references/STANDARDS_TEMPLATE.md"
 )
 
 $ErrorActionPreference = "Stop"
@@ -259,6 +260,22 @@ function Copy-CkmsPreserved([string]$SkillName, [string]$FromRoot, [string]$ToRo
     }
 }
 
+# v6.2.3 までは規約を team-standards/SKILL.md に直接書いていた。v6.2.4 から
+# references/STANDARDS_TEMPLATE.md に移し、再実行で残すようにした。まだ移して
+# いない導入先では、SKILL.md が置き換わる前に移し方を案内する。
+function Show-CkmsStandardsMove([string]$Name, [string]$Dest, [string]$SrcSkill, [string]$DestSkill) {
+    if ($Name -ne 'team-standards') { return }
+    if (Test-Path -LiteralPath (Join-Path $Dest 'references\STANDARDS_TEMPLATE.md')) { return }
+    if (-not (Test-Path -LiteralPath $DestSkill) -or -not (Test-Path -LiteralPath $SrcSkill)) { return }
+    if ((Get-FileHash -LiteralPath $SrcSkill).Hash -eq (Get-FileHash -LiteralPath $DestSkill).Hash) { return }
+    Write-Host "  案内: team-standards の規約は、この版から references/STANDARDS_TEMPLATE.md に書きます（再実行で残ります）。"
+    if ($script:SkillsBackup) {
+        Write-Host "        SKILL.md の規約を書き換えていた場合は、$(Join-Path (Join-Path $script:SkillsBackup $Name) 'SKILL.md') の規約部分を $(Join-Path $Dest 'references\STANDARDS_TEMPLATE.md') へ移してください。"
+    } else {
+        Write-Host "        SKILL.md の規約を書き換えていた場合、-NoBackup のため退避していません。Git の履歴から $(Join-Path $Dest 'references\STANDARDS_TEMPLATE.md') へ移してください。"
+    }
+}
+
 function Update-CkmsSkill([System.IO.DirectoryInfo]$SrcDir) {
     $name = $SrcDir.Name
     $dest = Join-Path $SkillsDest $name
@@ -281,6 +298,7 @@ function Update-CkmsSkill([System.IO.DirectoryInfo]$SrcDir) {
             }
         }
     }
+    Show-CkmsStandardsMove $name $dest $srcSkill $destSkill
     $stage = Join-Path ([System.IO.Path]::GetTempPath()) ("ckms-" + [guid]::NewGuid().ToString("N"))
     $incoming = $null
     $replacedOld = $null
@@ -681,7 +699,7 @@ if ($SkillsState -eq 'new') {
     Write-Host "次のステップ:"
     Write-Host "  1. /update-context でプロジェクト基本情報を記入"
     Write-Host "  2. /record-decision で最初の技術判断を記録"
-    Write-Host "  3. team-standards スキルをプロジェクトの規約に更新"
+    Write-Host "  3. team-standards の references/STANDARDS_TEMPLATE.md をプロジェクトの規約に更新"
     Write-Host ""
 } elseif ($SkillsState -eq 'updated') {
     Write-Host "CKMS のスキルを更新しました。記録とプロジェクト固有のスキルは残しています。"

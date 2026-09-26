@@ -26,7 +26,7 @@ metadata:
 
 `improvement-tracking/references/improvements/README.md` を読み、同じ対象の改善が進行中でないか確認してください。
 
-スキルの配置先は `.agents/skills/` を優先し、`.claude/skills/` / `.cursor/skills/` も検出対象です。
+コマンド例は `.agents/skills/` に導入した場合のパスです。`.claude/skills/` や `.cursor/skills/` に導入した場合（`--legacy-claude`、`--cursor-only`、`gh skill install --agent` など）は、先頭をそのパスに読み替えてください。記録先はスクリプトが自動で検出します。
 
 ### 3. ファイルの作成
 
