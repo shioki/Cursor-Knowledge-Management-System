@@ -310,6 +310,14 @@ jobs:
           $claudeMd = (Get-Content -Raw -LiteralPath (Join-Path $target 'CLAUDE.md')).Trim()
           if ($claudeMd -ne '@AGENTS.md') { throw "unexpected CLAUDE.md: $claudeMd" }
 
+      - name: Restore the skill when init.ps1 is interrupted (PowerShell 7)
+        shell: pwsh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\smoke-init-ps-interrupt.ps1 -TargetPath C:\ckms-interrupt-7
+
+      - name: Restore the skill when init.ps1 is interrupted (Windows PowerShell 5.1)
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\smoke-init-ps-interrupt.ps1 -TargetPath C:\ckms-interrupt-51
+
       - name: Reject self-targeted init.ps1
         shell: pwsh
         working-directory: C:\ckms-target

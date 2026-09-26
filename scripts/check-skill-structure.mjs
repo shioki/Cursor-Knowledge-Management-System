@@ -174,24 +174,29 @@ async function checkSkill(skillName, problems, warnings) {
     // scripts/ が無いのは正常
   }
 
-  // Windows PowerShell 5.1 は BOM の無い .ps1 を ANSI コードページで読む。
-  // 日本語を含む init.ps1 が文字化けし、構文エラーにもなる。
-  try {
-    const scriptEntries = await readdir(scriptsDir, { withFileTypes: true });
-    for (const se of scriptEntries) {
-      if (!se.isFile() || !se.name.endsWith('.ps1')) continue;
-      const bytes = await readFile(path.join(scriptsDir, se.name));
-      const hasBom = bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf;
-      const nonAscii = bytes.some((b) => b > 0x7f);
-      if (nonAscii && !hasBom) {
-        problems.push(`${skillName}/scripts/${se.name}: non-ASCII .ps1 must be saved as UTF-8 with BOM`);
-      }
-    }
-  } catch {
-    // scripts/ が無いのは正常
-  }
+  await checkPs1Bom(scriptsDir, `${skillName}/scripts`, problems);
 
   return { name: fm.name, explicitOnly: explicitOnly === true };
+}
+
+// Windows PowerShell 5.1 は BOM の無い .ps1 を ANSI コードページで読む。
+// 日本語を含む init.ps1 が文字化けし、構文エラーにもなる。
+async function checkPs1Bom(dir, label, problems) {
+  let entries;
+  try {
+    entries = await readdir(dir, { withFileTypes: true });
+  } catch {
+    return; // ディレクトリが無いのは正常
+  }
+  for (const e of entries) {
+    if (!e.isFile() || !e.name.endsWith('.ps1')) continue;
+    const bytes = await readFile(path.join(dir, e.name));
+    const hasBom = bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf;
+    const nonAscii = bytes.some((b) => b > 0x7f);
+    if (nonAscii && !hasBom) {
+      problems.push(`${label}/${e.name}: non-ASCII .ps1 must be saved as UTF-8 with BOM`);
+    }
+  }
 }
 
 // templates/ に SKILL.md が再び現れていないか（v5 の二重管理 drift の再発防止）
@@ -255,6 +260,8 @@ async function main() {
   }
 
   await checkNoDuplicateTree(problems);
+  // CI 用の scripts/*.ps1 も 5.1 で実行する
+  await checkPs1Bom(path.join(ROOT, 'scripts'), 'scripts', problems);
 
   for (const w of warnings) console.warn(`[skills-check] WARN: ${w}`);
 
