@@ -50,7 +50,7 @@ name: your-project
 version: 1.0.0
 dependencies:
   apm:
-    - shioki/Cursor-Knowledge-Management-System#v6.2.0
+    - shioki/Cursor-Knowledge-Management-System#v6.2.1
 ```
 
 ```bash
@@ -66,8 +66,8 @@ apm install
 ```yaml
 dependencies:
   apm:
-    - shioki/Cursor-Knowledge-Management-System/skills/knowledge-management#v6.2.0
-    - shioki/Cursor-Knowledge-Management-System/skills/debug-workflow#v6.2.0
+    - shioki/Cursor-Knowledge-Management-System/skills/knowledge-management#v6.2.1
+    - shioki/Cursor-Knowledge-Management-System/skills/debug-workflow#v6.2.1
 ```
 
 `/record-decision` などのアクションスキルも同じ書き方で個別に取り込めます（`skills/record-decision` など）。記録先ディレクトリを共有するため、対応するドメインスキルと合わせて指定してください。
@@ -80,7 +80,7 @@ dependencies:
 dependencies:
   apm:
     # タグ指定
-    - shioki/Cursor-Knowledge-Management-System#v6.2.0
+    - shioki/Cursor-Knowledge-Management-System#v6.2.1
     # SHA 指定（最も厳密）
     - shioki/Cursor-Knowledge-Management-System#abc123def
 ```
@@ -103,7 +103,7 @@ hooks を同梱している以上、導入側は実行されるスクリプト�
 2. [`.cursor-plugin/plugin.json`](../../.cursor-plugin/plugin.json) の `version` を揃える
 3. `CHANGELOG.md` にエントリを追加
 4. `npm run docs:check` で構造とリンクを検証
-5. `npm run release -- v6.2.0` でタグと GitHub Release を作成（immutable release 推奨）
+5. `npm run release -- v6.2.1` でタグと GitHub Release を作成（immutable release 推奨）
 
 両マニフェストのバージョン不一致は `npm run plugin:check` と `scripts/release.sh` の双方が検出するため、片方だけ上げた状態でリリースすることはできません。
 
