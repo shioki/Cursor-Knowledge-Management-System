@@ -57,6 +57,63 @@ jobs:
           mkdir -p /tmp/ckms-target
           bash skills/project-setup/scripts/init.sh /tmp/ckms-target --yes
 
+      - name: Re-run init.sh without deleting user records
+        run: |
+          bash scripts/smoke-init-rerun.sh /tmp/ckms-target .agents -- \
+            bash skills/project-setup/scripts/init.sh /tmp/ckms-target --yes
+          mkdir -p /tmp/ckms-legacy /tmp/ckms-cursor
+          bash skills/project-setup/scripts/init.sh /tmp/ckms-legacy --yes --legacy-claude --no-hooks --no-agents
+          bash scripts/smoke-init-rerun.sh /tmp/ckms-legacy .claude -- \
+            bash skills/project-setup/scripts/init.sh /tmp/ckms-legacy --yes --legacy-claude --no-hooks --no-agents
+          bash skills/project-setup/scripts/init.sh /tmp/ckms-cursor --yes --cursor-only --no-hooks --no-agents
+          bash scripts/smoke-init-rerun.sh /tmp/ckms-cursor .cursor -- \
+            bash skills/project-setup/scripts/init.sh /tmp/ckms-cursor --yes --cursor-only --no-hooks --no-agents
+          # 導入先の init.sh をその導入先へ向けて実行すると、配布元と導入先が同じになる
+          (
+            cd /tmp/ckms-target
+            if bash .agents/skills/project-setup/scripts/init.sh . --yes; then
+              echo "::error::self-targeted init.sh should fail"
+              exit 1
+            fi
+            test -d .agents/skills/add-pattern
+            if bash .claude/skills/project-setup/scripts/init.sh . --yes; then
+              echo "::error::self-targeted init.sh via .claude/skills should fail"
+              exit 1
+            fi
+            test -d .agents/skills/add-pattern
+          )
+          # 配布元だけにある新規ファイルが残り、利用者のファイルが優先される
+          upstream="skills/knowledge-management/references/decisions/UPSTREAM_ONLY.md"
+          cleanup_upstream() { rm -f "$upstream"; }
+          trap cleanup_upstream EXIT
+          echo from-upstream > "$upstream"
+          decisions=/tmp/ckms-target/.agents/skills/knowledge-management/references/decisions
+          echo marker-user >> "$decisions/README.md"
+          echo kept-user > "$decisions/user-only.md"
+          bash skills/project-setup/scripts/init.sh /tmp/ckms-target --yes
+          grep -q marker-user "$decisions/README.md"
+          grep -q kept-user "$decisions/user-only.md"
+          grep -q from-upstream "$decisions/UPSTREAM_ONLY.md"
+          rm -f "$upstream"
+          trap - EXIT
+          # 退避中のコピーが失敗したら、導入先を消す前に退避先を表示する
+          fail=$(mktemp -d)
+          bash skills/project-setup/scripts/init.sh "$fail" --yes --no-backup --no-hooks --no-agents
+          secret="$fail/.agents/skills/knowledge-management/references/decisions/secret.md"
+          echo secret > "$secret"
+          chmod 000 "$secret"
+          set +e
+          out=$(bash skills/project-setup/scripts/init.sh "$fail" --yes --no-backup --no-hooks --no-agents 2>&1)
+          code=$?
+          set -e
+          chmod 644 "$secret" 2>/dev/null || true
+          if [ "$code" -eq 0 ] || ! printf '%s\n' "$out" | grep -q '退避先'; then
+            echo "::error::failed replace did not report the preserved-data directory"
+            printf '%s\n' "$out"
+            exit 1
+          fi
+          test -f "$secret"
+
       - name: Validate the generated structure
         working-directory: /tmp/ckms-target
         run: bash .agents/skills/project-setup/scripts/validate.sh
@@ -179,6 +236,40 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path C:\ckms-target | Out-Null
           .\skills\project-setup\scripts\init.ps1 -TargetPath C:\ckms-target -Yes
+
+      - name: Re-run init.ps1 without deleting user records
+        shell: bash
+        run: |
+          bash scripts/smoke-init-rerun.sh "C:/ckms-target" .agents -- \
+            pwsh -NoProfile -File "$GITHUB_WORKSPACE/skills/project-setup/scripts/init.ps1" -TargetPath 'C:\ckms-target' -Yes
+
+      - name: Reject self-targeted init.ps1
+        shell: pwsh
+        working-directory: C:\ckms-target
+        run: |
+          function Assert-SelfInitFails([string]$ScriptPath) {
+            $failed = $false
+            try {
+              & $ScriptPath -TargetPath 'C:\ckms-target' -Yes
+              if ($LASTEXITCODE -ne 0) { $failed = $true }
+            } catch {
+              $failed = $true
+            }
+            if (-not $failed) { throw "self-targeted init.ps1 should fail: $ScriptPath" }
+            if (-not (Test-Path 'C:\ckms-target\.agents\skills\add-pattern')) {
+              throw "skills were removed by $ScriptPath"
+            }
+          }
+          Assert-SelfInitFails (Resolve-Path '.\.agents\skills\project-setup\scripts\init.ps1')
+          $bridge = Get-Item '.\.claude\skills' -Force -ErrorAction SilentlyContinue
+          if ($bridge -and ($bridge.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            Assert-SelfInitFails (Resolve-Path '.\.claude\skills\project-setup\scripts\init.ps1')
+            # init.ps1 が作る橋渡しは絶対パスなので、相対リンクを作り直して確認する。
+            # コピーで代用されたディレクトリには rmdir しない。
+            cmd /c rmdir "C:\ckms-target\.claude\skills"
+            New-Item -ItemType SymbolicLink -Path 'C:\ckms-target\.claude\skills' -Target '..\.agents\skills' | Out-Null
+            Assert-SelfInitFails (Resolve-Path 'C:\ckms-target\.claude\skills\project-setup\scripts\init.ps1')
+          }
 
       - name: Validate the generated structure (Git Bash)
         # working-directory は Windows パス。Git Bash の /c/... は CreateProcess に渡せない

@@ -4,11 +4,10 @@
 
 英語の短い導入は [README.en.md](README.en.md) を参照してください。
 
-> **v6.1.1**: **Claude Code 対応を実質化**しました。`.agents/skills/` は Claude Code が標準では探索しないため、`.claude/skills` へのシンボリックリンク橋渡しと `CLAUDE.md`（`@AGENTS.md` import）を自動生成し、hooks も Cursor 版・Claude Code 版の両方を提供します。あわせて Windows 互換性（symlink checkout 破損、並行実行のレースコンディション、CI の Windows 実行系未検証など）を横断的に見直しました。
-> - 詳細: [リリースノート v6.1.1](RELEASE_NOTES_v6.1.1.md)
-> - 更新: [hooks ガイド](docs/advanced/hooks-guide.md) — Claude Code 版 hooks の節を追加
-> - 更新: [Cursor + Claude Code 並行利用ガイド](docs/getting-started/parallel-use-cursor-claude.md)
-> - v6.0.0 の内容（Agent Skills への統一）は [リリースノート v6.0.0](RELEASE_NOTES_v6.0.0.md) を参照
+> **v6.2.0**: 導入済みプロジェクトで `init.sh` / `init.ps1` を再実行しても、判断記録・パターン・改善記録とプロジェクト固有のスキルは残るようにしました。置き換わるのは CKMS の配布スキルだけです。再実行前の `skills/` は `skills.backup-*` に退避します。
+> - 手順: [導入済みプロジェクトの更新](docs/getting-started/updating.md)
+> - 詳細: [リリースノート v6.2.0](RELEASE_NOTES_v6.2.0.md)
+> - v6.1.1 の内容は [リリースノート v6.1.1](RELEASE_NOTES_v6.1.1.md) を参照
 
 ## なぜ Agent Skills なのか
 
@@ -52,7 +51,7 @@ cd Cursor-Knowledge-Management-System
 # .claude/skills へのシンボリックリンク（自動作成）経由で読み込む
 bash skills/project-setup/scripts/init.sh /path/to/your-project
 
-# 確認プロンプトを出さずに実行（CI・自動化向け）
+# 確認プロンプトを出さずに実行（CI・自動化向け）。導入済みでも記録は残ります。
 bash skills/project-setup/scripts/init.sh /path/to/your-project --yes
 
 # AGENTS.md テンプレートも配置（CLAUDE.md も同時に作成）
@@ -258,6 +257,7 @@ v5 まで `.cursor/commands/` にあった `/migrate-from-rules` は廃止しま
 ### Getting Started
 
 - **[クイックスタート](docs/getting-started/quick-start.md)** — 導入方法の選び方とセットアップ手順
+- **[導入済みプロジェクトの更新](docs/getting-started/updating.md)** — `init.sh` / `init.ps1` の再実行
 - **[スキルの全体像](docs/getting-started/skills-and-commands.md)** — ドメインスキルとアクションスキルの違い
 - **[AGENTS.md 運用ガイド](docs/getting-started/agents-md-guide.md)** — ルート / ネスト AGENTS.md の使い分け
 - **[Cursor + Claude Code 並行利用ガイド](docs/getting-started/parallel-use-cursor-claude.md)** — 複数エージェントでの共有
@@ -345,6 +345,6 @@ MIT License — 詳細は [LICENSE](LICENSE) ファイルを参照
 
 ---
 
-**最終更新**: 2026-09-14
-**バージョン**: 6.1.1（[リリースノート](RELEASE_NOTES_v6.1.1.md)）
+**最終更新**: 2026-09-26
+**バージョン**: 6.2.0（[リリースノート](RELEASE_NOTES_v6.2.0.md)）
 **変更履歴**: [CHANGELOG.md](CHANGELOG.md) を参照

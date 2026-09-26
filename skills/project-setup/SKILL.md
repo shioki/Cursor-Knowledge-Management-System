@@ -51,6 +51,7 @@ bash path/to/cursor-knowledge-management-system/skills/project-setup/scripts/ini
 | `--no-hooks` | hooks を配置しない |
 | `--no-agents` | subagent を配置しない |
 | `--no-claude-bridge` | `.claude/skills` への橋渡しを作らない |
+| `--no-backup` | 再実行時に `skills/` の退避を作らない |
 
 配置されるもの:
 

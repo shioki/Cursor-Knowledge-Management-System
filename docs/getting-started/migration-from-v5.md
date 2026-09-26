@@ -65,27 +65,22 @@ git -C /path/to/Cursor-Knowledge-Management-System pull
 bash /path/to/Cursor-Knowledge-Management-System/skills/project-setup/scripts/init.sh /path/to/your-project
 ```
 
-`.agents/skills` が既に存在するため上書き確認が出ます。`y` を選んでください。
+`.agents/skills` が既に存在するため、更新の確認が出ます。`y` を選んでください。
 
-**注意**: `skills/*/references/` 配下の記録も上書きされます。手順 1 のバックアップから、次のファイルを書き戻してください。
+v6.2.0 以降の `init.sh` / `init.ps1` は、次を退避してから書き戻します。手動でコピーし直す必要はありません。
 
+- `knowledge-management/references/decisions/`
+- `pattern-library/references/patterns/`
+- `improvement-tracking/references/improvements/`
 - `knowledge-management/references/KNOWLEDGE_TEMPLATE.md`
 - `pattern-library/references/PATTERNS_TEMPLATE.md`
 - `improvement-tracking/references/IMPROVEMENTS_TEMPLATE.md`
 - `project-context/references/CONTEXT_TEMPLATE.md`
 - `debug-workflow/references/DEBUG_TEMPLATE.md`
 
-```bash
-for f in knowledge-management/references/KNOWLEDGE_TEMPLATE.md \
-         pattern-library/references/PATTERNS_TEMPLATE.md \
-         improvement-tracking/references/IMPROVEMENTS_TEMPLATE.md \
-         project-context/references/CONTEXT_TEMPLATE.md \
-         debug-workflow/references/DEBUG_TEMPLATE.md; do
-  cp ".agents.v5-backup/skills/$f" ".agents/skills/$f"
-done
-```
+v6.1.1 以前の init はこれらを削除していました。その版で再実行して失った場合は、手順 1 のバックアップか Git の履歴から戻してください。詳しくは [導入済みプロジェクトの更新](updating.md) を参照してください。
 
-`.agents/debug-sessions/` は上書きされないので、そのまま残ります。
+`.agents/debug-sessions/` は上書きされないので、そのまま残ります。再実行の直前の `skills/` 全体は `skills.backup-YYYYmmdd-HHMMSS/` にも残ります。
 
 ### 手順 3: 旧コマンドを削除する
 
@@ -107,7 +102,7 @@ bash .agents/skills/project-setup/scripts/validate.sh
 
 ### 手順 5: team-standards をカスタマイズし直す
 
-`team-standards/SKILL.md` をプロジェクト向けに編集していた場合、手順 2 で上書きされています。バックアップから内容を戻したうえで、v6 で追加された frontmatter の `paths` を確認してください。
+`team-standards/SKILL.md` をプロジェクト向けに編集していた場合、手順 2 で配布元の内容に置き換わっています。`skills.backup-YYYYmmdd-HHMMSS/` または手順 1 のバックアップから内容を戻したうえで、v6 で追加された frontmatter の `paths` を確認してください。
 
 ```yaml
 paths:

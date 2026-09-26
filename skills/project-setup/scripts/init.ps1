@@ -1,4 +1,4 @@
-# project-setup: プロジェクトに知識管理システムを初期セットアップするスクリプト（Windows PowerShell, v6.1.1）
+# project-setup: プロジェクトに知識管理システムを初期セットアップするスクリプト（Windows PowerShell, v6.2.0）
 #
 # Usage:
 #   .\init.ps1 -TargetPath "C:\path\to\target-project"
@@ -16,6 +16,7 @@
 #   NoHooks       - hooks を配置しない
 #   NoAgents      - subagent を配置しない
 #   NoClaudeBridge - .claude/skills への橋渡し（Claude Code 用）を作らない
+#   NoBackup      - 再実行時に skills/ の退避を作らない
 #
 # デフォルト: .agents/skills に配置。Cursor はこれをそのまま読み、Claude Code は
 # .agents/skills を標準では探索しないため、.claude/skills にシンボリックリンク
@@ -39,7 +40,24 @@ param(
     [Parameter(Mandatory = $false)]
     [switch]$NoAgents,
     [Parameter(Mandatory = $false)]
-    [switch]$NoClaudeBridge
+    [switch]$NoClaudeBridge,
+    [Parameter(Mandatory = $false)]
+    [switch]$NoBackup
+)
+
+# 再実行時に置き換えない利用者データ（skills/ からの相対パス）。
+# _skill-base.sh の ckms_preserved_dirs / ckms_preserved_files と同じ内容に保つ。
+$CkmsPreservedDirs = @(
+    "knowledge-management/references/decisions"
+    "pattern-library/references/patterns"
+    "improvement-tracking/references/improvements"
+)
+$CkmsPreservedFiles = @(
+    "knowledge-management/references/KNOWLEDGE_TEMPLATE.md"
+    "pattern-library/references/PATTERNS_TEMPLATE.md"
+    "improvement-tracking/references/IMPROVEMENTS_TEMPLATE.md"
+    "project-context/references/CONTEXT_TEMPLATE.md"
+    "debug-workflow/references/DEBUG_TEMPLATE.md"
 )
 
 $ErrorActionPreference = "Stop"
@@ -91,7 +109,7 @@ $SkillsDest = Join-Path $TargetPath "$BaseDir\skills"
 $SessionsDest = Join-Path $TargetPath "$BaseDir\debug-sessions"
 $ValidatePath = "$BaseDir\skills\project-setup\scripts\validate.sh"
 
-Write-Host "=== Cursor Knowledge Management System セットアップ (v6.1.1) ==="
+Write-Host "=== Cursor Knowledge Management System セットアップ (v6.2.0) ==="
 Write-Host "ターゲット: $TargetPath"
 Write-Host "モード:     $ModeLabel"
 Write-Host ("hooks:      " + $(if ($NoHooks) { "配置しない" } else { "配置する" }))
@@ -126,18 +144,220 @@ if (-not $CursorOnly -and -not $LegacyClaude) {
     }
 }
 
-# skills/
-$CopySkills = $true
-if (Test-Path $SkillsDest) {
-    Write-Host "警告: $SkillsDest は既に存在します"
-    if (Confirm-Overwrite "上書きしますか?") {
-        Remove-Item -Path $SkillsDest -Recurse -Force
-    } else {
-        Write-Host "  skills/ のコピーをスキップしました"
-        $CopySkills = $false
+function Join-CkmsRel([string]$Base, [string]$Rel) {
+    $path = $Base
+    foreach ($part in ($Rel -split '/')) {
+        if ($part) { $path = Join-Path $path $part }
+    }
+    return $path
+}
+
+function Copy-CkmsOverlay([string]$From, [string]$To) {
+    if (-not (Test-Path -LiteralPath $To)) {
+        New-Item -ItemType Directory -Path $To -Force | Out-Null
+    }
+    Get-ChildItem -LiteralPath $From -Force | ForEach-Object {
+        $target = Join-Path $To $_.Name
+        if ($_.PSIsContainer) {
+            Copy-CkmsOverlay $_.FullName $target
+        } else {
+            Copy-Item -LiteralPath $_.FullName -Destination $target -Force
+        }
     }
 }
-if ($CopySkills) {
+
+function Copy-CkmsPreserved([string]$SkillName, [string]$FromRoot, [string]$ToRoot, [switch]$Overlay) {
+    foreach ($rel in ($CkmsPreservedDirs + $CkmsPreservedFiles)) {
+        $prefix = "$SkillName/"
+        if (-not $rel.StartsWith($prefix)) { continue }
+        $inner = $rel.Substring($prefix.Length)
+        $from = Join-CkmsRel $FromRoot $inner
+        if (-not (Test-Path -LiteralPath $from)) { continue }
+        $to = Join-CkmsRel $ToRoot $inner
+        $fromItem = Get-Item -LiteralPath $from -Force
+        if ($Overlay -and $fromItem.PSIsContainer) {
+            Copy-CkmsOverlay $from $to
+            continue
+        }
+        $parent = Split-Path -Parent $to
+        if ($parent -and -not (Test-Path -LiteralPath $parent)) {
+            New-Item -ItemType Directory -Path $parent -Force | Out-Null
+        }
+        if (Test-Path -LiteralPath $to) {
+            Remove-Item -LiteralPath $to -Recurse -Force
+        }
+        Copy-Item -LiteralPath $from -Destination $to -Recurse -Force
+    }
+}
+
+function Update-CkmsSkill([System.IO.DirectoryInfo]$SrcDir) {
+    $name = $SrcDir.Name
+    $dest = Join-Path $SkillsDest $name
+    if (-not (Test-Path -LiteralPath $dest)) {
+        Copy-Item -LiteralPath $SrcDir.FullName -Destination $dest -Recurse -Force
+        Write-Host "  追加: $name"
+        return
+    }
+    $srcSkill = Join-Path $SrcDir.FullName "SKILL.md"
+    $destSkill = Join-Path $dest "SKILL.md"
+    if ((Test-Path -LiteralPath $destSkill) -and (Test-Path -LiteralPath $srcSkill)) {
+        $srcHash = (Get-FileHash -LiteralPath $srcSkill -Algorithm SHA256).Hash
+        $destHash = (Get-FileHash -LiteralPath $destSkill -Algorithm SHA256).Hash
+        if ($srcHash -ne $destHash) {
+            if ($script:SkillsBackup) {
+                $previousSkill = Join-Path (Join-Path $script:SkillsBackup $name) "SKILL.md"
+                Write-Host "  警告: $name/SKILL.md は配布元と異なります（版の更新でも、カスタマイズでも起きます）。新しい内容で置き換えます。カスタマイズしていた場合は $previousSkill から戻してください"
+            } else {
+                Write-Host "  警告: $name/SKILL.md は配布元と異なります。新しい内容で置き換えます（-NoBackup のため退避していません）"
+            }
+        }
+    }
+    $stage = Join-Path ([System.IO.Path]::GetTempPath()) ("ckms-" + [guid]::NewGuid().ToString("N"))
+    $incoming = $null
+    $replacedOld = $null
+    New-Item -ItemType Directory -Path $stage -Force | Out-Null
+    try {
+        Copy-CkmsPreserved $name $dest $stage
+        # 導入先と同じ親に置き、別ボリュームの Move-Item を避ける。
+        $incoming = Join-Path (Split-Path -Parent $SkillsDest) (".ckms-incoming-" + [guid]::NewGuid().ToString("N"))
+        New-Item -ItemType Directory -Path $incoming -Force | Out-Null
+        $assembled = Join-Path $incoming $name
+        Copy-Item -LiteralPath $SrcDir.FullName -Destination $assembled -Recurse -Force
+        Copy-CkmsPreserved $name $stage $assembled -Overlay
+        $replacedOld = "$dest.replacing." + [guid]::NewGuid().ToString("N")
+        Move-Item -LiteralPath $dest -Destination $replacedOld
+        try {
+            Move-Item -LiteralPath $assembled -Destination $dest
+        } catch {
+            $placeFailed = $_
+            if (-not (Test-Path -LiteralPath $dest) -and (Test-Path -LiteralPath $replacedOld)) {
+                try {
+                    Move-Item -LiteralPath $replacedOld -Destination $dest
+                    $replacedOld = $null
+                } catch {
+                    Write-Host "エラー: 入れ替え前のスキルを戻せません: $replacedOld"
+                }
+            }
+            throw $placeFailed
+        }
+        Remove-Item -LiteralPath $replacedOld -Recurse -Force
+        Remove-Item -LiteralPath $stage -Recurse -Force
+        Remove-Item -LiteralPath $incoming -Recurse -Force
+        Write-Host "  更新: $name"
+    } catch {
+        Write-Host "エラー: $name の置き換えに失敗しました。利用者データの退避先: $stage"
+        if ($incoming -and (Test-Path -LiteralPath $incoming)) {
+            Write-Host "      組み立て済みのコピー: $incoming"
+        }
+        if ($replacedOld -and (Test-Path -LiteralPath $replacedOld)) {
+            Write-Host "      入れ替え前のスキル: $replacedOld"
+            if (Test-Path -LiteralPath $dest) {
+                Write-Host "      配置先 $dest を削除してから、入れ替え前のスキルをそこへ移動してください。"
+            } else {
+                Write-Host "      入れ替え前のスキルを配置先 $dest へ移動してください。"
+            }
+        } else {
+            Write-Host "      導入先は変更していません。"
+            if (-not $incoming) {
+                Write-Host "      表示した退避先は途中までのコピーです。"
+            }
+        }
+        throw
+    }
+}
+
+# シンボリックリンクをたどった実パス。Resolve-Path はリンクを解決しない。
+function ConvertTo-CkmsPhysicalPath([string]$Path) {
+    $current = (Resolve-Path -LiteralPath $Path).Path
+    $root = [System.IO.Path]::GetPathRoot($current)
+    $remainder = $current.Substring($root.Length)
+    $built = $root
+    foreach ($part in ($remainder -split '[\\/]' | Where-Object { $_ })) {
+        $built = if ($built.EndsWith('\') -or $built.EndsWith('/')) { "$built$part" } else { Join-Path $built $part }
+        if (-not (Test-Path -LiteralPath $built)) { return $current }
+        $item = Get-Item -LiteralPath $built -Force
+        if (-not ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) { continue }
+        $target = $null
+        foreach ($prop in @('ResolvedTarget', 'LinkTarget', 'Target')) {
+            $member = $item.PSObject.Properties[$prop]
+            if ($null -eq $member) { continue }
+            $value = $member.Value
+            if ($value -is [array]) { $value = $value | Select-Object -Last 1 }
+            if ($value) { $target = [string]$value; break }
+        }
+        if (-not $target) { continue }
+        if (-not [System.IO.Path]::IsPathRooted($target)) {
+            $target = [System.IO.Path]::GetFullPath((Join-Path (Split-Path -Parent $item.FullName) $target))
+        }
+        $built = $target
+    }
+    return $built
+}
+
+# skills/
+# 初回は配布元をそのまま置く。再実行は配布元にあるスキルだけを置き換え、
+# 記録・テンプレート・配布元に無いスキルは残す。
+$script:SkillsBackup = $null
+$pluginManifest = Join-Path $SourceRoot ".cursor-plugin\plugin.json"
+if (-not (Test-Path -LiteralPath $pluginManifest)) {
+    Write-Host "警告: 配布元が CKMS リポジトリではありません: $SourceRoot"
+    Write-Host "      別プロジェクトの init.ps1 を使うと、その記録が導入先に入ります。"
+    Write-Host "      CKMS リポジトリの init.ps1 を使ってください。"
+}
+$skillsItem = Get-Item -LiteralPath $SkillsDest -Force -ErrorAction SilentlyContinue
+if ($skillsItem) {
+    if ($skillsItem.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+        Write-Host "情報: $SkillsDest はシンボリックリンクです（変更しません）"
+    } else {
+        $sourceReal = (ConvertTo-CkmsPhysicalPath ([string]$SourceSkills)).TrimEnd('\', '/')
+        $destReal = (ConvertTo-CkmsPhysicalPath $SkillsDest).TrimEnd('\', '/')
+        if ($sourceReal -eq $destReal) {
+            Write-Error "エラー: 配布元と導入先が同じディレクトリです: $destReal`nCKMS リポジトリの init.ps1 を、導入先のパスを引数にして実行してください。"
+            exit 1
+        }
+        $skillDirs = @(Get-ChildItem -LiteralPath $SourceSkills -Directory)
+        Write-Host "情報: $SkillsDest は既に存在します"
+        Write-Host ("  CKMS の {0} スキルを置き換えます。decisions/ patterns/ improvements/ と *_TEMPLATE.md、プロジェクト固有のスキルは残します。" -f $skillDirs.Count)
+        if (Confirm-Overwrite "続行しますか?") {
+            if (-not $NoBackup) {
+                $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
+                $script:SkillsBackup = "$SkillsDest.backup-$stamp"
+                $backupN = 0
+                while (Test-Path -LiteralPath $script:SkillsBackup) {
+                    $backupN++
+                    $script:SkillsBackup = "$SkillsDest.backup-$stamp-$backupN"
+                }
+                try {
+                    Copy-Item -LiteralPath $SkillsDest -Destination $script:SkillsBackup -Recurse -Force
+                } catch {
+                    Write-Host "エラー: バックアップの作成に失敗しました: $script:SkillsBackup"
+                    Write-Host "      作りかけのため削除します。"
+                    if (Test-Path -LiteralPath $script:SkillsBackup) {
+                        try {
+                            Remove-Item -LiteralPath $script:SkillsBackup -Recurse -Force
+                        } catch {
+                            Write-Host "      削除できませんでした: $script:SkillsBackup"
+                        }
+                    }
+                    throw
+                }
+                Write-Host "  バックアップ: $script:SkillsBackup"
+            }
+            foreach ($skillDir in $skillDirs) {
+                Update-CkmsSkill $skillDir
+            }
+            foreach ($existing in @(Get-ChildItem -LiteralPath $SkillsDest -Directory)) {
+                $sourceMatch = Join-Path $SourceSkills $existing.Name
+                if (-not (Test-Path -LiteralPath $sourceMatch)) {
+                    Write-Host "  情報: $($existing.Name) は配布元に無いので残しました"
+                }
+            }
+            Write-Host "skills/ を更新しました"
+        } else {
+            Write-Host "  skills/ の更新をスキップしました"
+        }
+    }
+} else {
     $SkillsDestParent = Split-Path -Parent $SkillsDest
     if (-not (Test-Path $SkillsDestParent)) {
         New-Item -ItemType Directory -Path $SkillsDestParent -Force | Out-Null
@@ -286,16 +506,17 @@ if (-not $NoHooks) {
 $CursorignoreSrc = Join-Path $SourceTemplates ".cursorignore"
 if (Test-Path $CursorignoreSrc) {
     $CursorignoreDest = Join-Path $TargetPath ".cursorignore"
-    $write = $true
     if (Test-Path $CursorignoreDest) {
-        Write-Host "警告: $CursorignoreDest は既に存在します"
-        $write = Confirm-Overwrite "上書きしますか?"
-    }
-    if ($write) {
+        $srcHash = (Get-FileHash -LiteralPath $CursorignoreSrc -Algorithm SHA256).Hash
+        $destHash = (Get-FileHash -LiteralPath $CursorignoreDest -Algorithm SHA256).Hash
+        if ($srcHash -eq $destHash) {
+            Write-Host "情報: $CursorignoreDest は既に存在します（上書きしません）"
+        } else {
+            Write-Host "情報: $CursorignoreDest は既に存在し、配布元と差分があります（上書きしません）"
+        }
+    } else {
         Copy-Item -Path $CursorignoreSrc -Destination $CursorignoreDest -Force
         Write-Host ".cursorignore をコピーしました"
-    } else {
-        Write-Host "  .cursorignore のコピーをスキップしました"
     }
 }
 

@@ -15,6 +15,11 @@
 # 個人メモ（後方互換）
 .cursor/personal-notes.md
 
+# init 再実行の退避
+.agents/skills.backup-*/
+.claude/skills.backup-*/
+.cursor/skills.backup-*/
+
 # 一時ファイル・ログ
 *.temp
 *.tmp

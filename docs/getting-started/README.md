@@ -7,6 +7,7 @@ Cursor Knowledge Management System の導入と基本的な使い方を解説す
 | ドキュメント | 内容 |
 |------------|------|
 | [クイックスタート](quick-start.md) | 導入方法の選び方と、5 分で始めるセットアップ手順 |
+| [導入済みプロジェクトの更新](updating.md) | 配布元を更新したあとに `init.sh` / `init.ps1` を再実行する手順 |
 | [スキルの全体像](skills-and-commands.md) | ドメインスキルとアクションスキルの違い、知識の保存場所 |
 | [AGENTS.md ガイド](agents-md-guide.md) | エージェント共通の指示ファイルの書き方 |
 | [Cursor + Claude Code 並行利用ガイド](parallel-use-cursor-claude.md) | 複数エージェントでスキルと記録を共有する方法 |

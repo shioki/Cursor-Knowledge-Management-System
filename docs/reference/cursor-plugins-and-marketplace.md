@@ -58,7 +58,7 @@ hooks はエージェントのライフサイクルに介入する仕組みで�
   "name": "cursor-knowledge-management-system",
   "displayName": "Cursor Knowledge Management System",
   "description": "...",
-  "version": "6.1.1",
+  "version": "6.2.0",
   "author": { "name": "shioki" },
   "license": "MIT",
   "homepage": "https://github.com/shioki/Cursor-Knowledge-Management-System",

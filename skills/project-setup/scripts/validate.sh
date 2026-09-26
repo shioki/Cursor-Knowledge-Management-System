@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# project-setup: 知識管理システムの構造を検証するスクリプト (v6.1.1)
+# project-setup: 知識管理システムの構造を検証するスクリプト (v6.2.0)
 #
 # Usage: bash .agents/skills/project-setup/scripts/validate.sh
 #        （.claude/skills / .cursor/skills も検出対象）
@@ -25,7 +25,13 @@ fi
 
 DATA_BASE="$(dirname "$SKILLS_BASE")"
 
-echo "=== Cursor Knowledge Management System 構造検証 (v6.1.1) ==="
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CKMS_LIST_ONLY=1
+# shellcheck source=_skill-base.sh
+source "$SCRIPT_DIR/_skill-base.sh"
+unset CKMS_LIST_ONLY
+
+echo "=== Cursor Knowledge Management System 構造検証 (v6.2.0) ==="
 echo "スキル配置: ${SKILLS_BASE}"
 echo ""
 
@@ -121,23 +127,28 @@ if [ -d ".cursor/commands" ]; then
   echo ""
 fi
 
-# 知識ディレクトリ
+# 知識ディレクトリ（保持対象は _skill-base.sh の一覧と揃える）
 echo "--- 知識ディレクトリ検証 ---"
-for entry in \
-  "${SKILLS_BASE}/knowledge-management/references/decisions:技術判断" \
-  "${SKILLS_BASE}/pattern-library/references/patterns:実装パターン" \
-  "${SKILLS_BASE}/improvement-tracking/references/improvements:改善記録" \
-  "${DATA_BASE}/debug-sessions:デバッグセッション"
-do
-  dir="${entry%%:*}"
-  label="${entry##*:}"
+ckms_check_knowledge_dir() {
+  local dir="$1" label="$2"
   if [ -d "$dir" ]; then
     count=$(find "$dir" -maxdepth 1 -name '*.md' ! -name 'README.md' 2>/dev/null | wc -l | tr -d ' ')
     echo "  [OK] ${label}: ${dir}（${count} 件）"
   else
     echo "  [INFO] ${label}のディレクトリは未作成です: ${dir}（最初の記録時に作成されます）"
   fi
-done
+}
+while IFS= read -r rel; do
+  [ -n "$rel" ] || continue
+  case "$rel" in
+    *decisions*) label="技術判断" ;;
+    *patterns*) label="実装パターン" ;;
+    *improvements*) label="改善記録" ;;
+    *) label="$rel" ;;
+  esac
+  ckms_check_knowledge_dir "${SKILLS_BASE}/${rel}" "$label"
+done < <(ckms_preserved_dirs)
+ckms_check_knowledge_dir "${DATA_BASE}/debug-sessions" "デバッグセッション"
 
 echo ""
 

@@ -32,7 +32,7 @@ bash skills/project-setup/scripts/init.sh /path/to/your-project
 .\skills\project-setup\scripts\init.ps1 -TargetPath "C:\path\to\your-project"
 ```
 
-確認プロンプトを出さずに実行するには `--yes`（PowerShell では `-Yes`）を付けます。CI や自動化から呼ぶ場合はこちらを使ってください。
+確認プロンプトを出さずに実行するには `--yes`（PowerShell では `-Yes`）を付けます。CI や自動化から呼ぶ場合はこちらを使ってください。既に導入済みのプロジェクトで配布元を更新するときの挙動は [導入済みプロジェクトの更新](updating.md) を参照してください。再実行しても判断記録やプロジェクト固有のスキルは残ります。
 
 ### 配置されるもの
 

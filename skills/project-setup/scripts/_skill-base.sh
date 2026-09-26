@@ -4,6 +4,30 @@
 #
 # 優先順: .agents/skills → .claude/skills → .cursor/skills
 # SKILL_ROOT 環境変数を設定すると検出をバイパスできる。
+#
+# 再実行時に置き換えない利用者データ（skills/ からの相対パス）。
+# init.ps1 の $CkmsPreservedDirs / $CkmsPreservedFiles も同じ内容に保つ。
+
+ckms_preserved_dirs() {
+  printf '%s\n' \
+    "knowledge-management/references/decisions" \
+    "pattern-library/references/patterns" \
+    "improvement-tracking/references/improvements"
+}
+
+ckms_preserved_files() {
+  printf '%s\n' \
+    "knowledge-management/references/KNOWLEDGE_TEMPLATE.md" \
+    "pattern-library/references/PATTERNS_TEMPLATE.md" \
+    "improvement-tracking/references/IMPROVEMENTS_TEMPLATE.md" \
+    "project-context/references/CONTEXT_TEMPLATE.md" \
+    "debug-workflow/references/DEBUG_TEMPLATE.md"
+}
+
+# init.sh / validate.sh は、配置先の検出より前に上の関数だけ欲しいことがある。
+if [ "${CKMS_LIST_ONLY:-}" = 1 ]; then
+  return 0 2>/dev/null || exit 0
+fi
 
 if [ -n "${SKILL_ROOT:-}" ]; then
   SKILL_BASE="$SKILL_ROOT"

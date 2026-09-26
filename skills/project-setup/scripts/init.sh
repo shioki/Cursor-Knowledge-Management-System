@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# project-setup: プロジェクトに知識管理システムを初期セットアップするスクリプト (v6.1.1)
+# project-setup: プロジェクトに知識管理システムを初期セットアップするスクリプト (v6.2.0)
 #
 # Usage: bash init.sh /path/to/target-project [オプション]
 #
@@ -15,6 +15,7 @@
 #   --no-hooks            - hooks を配置しない
 #   --no-agents           - subagent を配置しない
 #   --no-claude-bridge    - .claude/skills への橋渡し（Claude Code 用）を作らない
+#   --no-backup           - 再実行時に skills/ の退避を作らない
 #
 # デフォルト: .agents/skills に配置。Cursor はこれをそのまま読み、Claude Code は
 # .agents/skills を標準では探索しないため、.claude/skills にシンボリックリンクで
@@ -29,6 +30,7 @@ WITH_AGENTS_MD=false
 WITH_HOOKS=true
 WITH_AGENTS=true
 WITH_CLAUDE_BRIDGE=true
+NO_BACKUP=false
 LEGACY_CLAUDE=false
 CURSOR_ONLY=false
 
@@ -41,6 +43,7 @@ for arg in "$@"; do
     --no-hooks)           WITH_HOOKS=false ;;
     --no-agents)          WITH_AGENTS=false ;;
     --no-claude-bridge)   WITH_CLAUDE_BRIDGE=false ;;
+    --no-backup)          NO_BACKUP=true ;;
     -*)
       echo "エラー: 不明なオプション: $arg" >&2
       exit 1
@@ -56,7 +59,7 @@ fi
 
 if [ -z "$TARGET" ]; then
   echo "エラー: ターゲットプロジェクトのパスを指定してください" >&2
-  echo "Usage: bash init.sh /path/to/target-project [--yes] [--legacy-claude|--cursor-only] [--with-agents-md] [--no-hooks] [--no-agents]" >&2
+  echo "Usage: bash init.sh /path/to/target-project [--yes] [--legacy-claude|--cursor-only] [--with-agents-md] [--no-hooks] [--no-agents] [--no-backup]" >&2
   exit 1
 fi
 
@@ -78,6 +81,11 @@ SOURCE_HOOKS="${SOURCE_ROOT}/hooks"
 SOURCE_AGENTS="${SOURCE_ROOT}/agents"
 SOURCE_TEMPLATES="${SOURCE_ROOT}/templates"
 
+CKMS_LIST_ONLY=1
+# shellcheck source=_skill-base.sh
+source "$SCRIPT_DIR/_skill-base.sh"
+unset CKMS_LIST_ONLY
+
 # 確認プロンプト。--yes 指定時、または非対話環境では待たない。
 confirm() {
   local prompt="$1"
@@ -93,7 +101,7 @@ confirm() {
   [[ "$reply" =~ ^[Yy]$ ]]
 }
 
-echo "=== Cursor Knowledge Management System セットアップ (v6.1.1) ==="
+echo "=== Cursor Knowledge Management System セットアップ (v6.2.0) ==="
 echo "ターゲット: $TARGET"
 echo "モード:     $LABEL"
 echo "hooks:      $([ "$WITH_HOOKS" = true ] && echo '配置する' || echo '配置しない')"
@@ -124,17 +132,170 @@ fi
 
 SKILLS_DEST="$TARGET/$BASE_DIR/skills"
 SESSIONS_DEST="$TARGET/$BASE_DIR/debug-sessions"
+SKILLS_BACKUP=""
+
+# スキル内の利用者データをコピーする。rel は skills/ からの相対パス。
+# 第4引数が overlay のとき、ディレクトリは消さずに利用者のファイルを重ねる。
+# 同じパスは利用者側が優先され、配布元だけにあるファイルは残る。
+ckms_copy_preserved() {
+  local skill_name="$1"
+  local from="$2"
+  local to="$3"
+  local mode="${4:-replace}"
+  local rel inner parent
+  while IFS= read -r rel; do
+    [ -n "$rel" ] || continue
+    case "$rel" in
+      "$skill_name"/*) ;;
+      *) continue ;;
+    esac
+    inner=${rel#"$skill_name"/}
+    if [ -d "$from/$inner" ]; then
+      if [ "$mode" = overlay ]; then
+        mkdir -p "$to/$inner" || return 1
+        cp -a "$from/$inner/." "$to/$inner/" || return 1
+      else
+        parent=$(dirname "$inner")
+        mkdir -p "$to/$parent" || return 1
+        rm -rf "$to/$inner" || return 1
+        cp -a "$from/$inner" "$to/$inner" || return 1
+      fi
+    elif [ -e "$from/$inner" ] || [ -L "$from/$inner" ]; then
+      parent=$(dirname "$inner")
+      mkdir -p "$to/$parent" || return 1
+      rm -f "$to/$inner" || return 1
+      cp -a "$from/$inner" "$to/$inner" || return 1
+    fi
+  done < <(ckms_preserved_dirs; ckms_preserved_files)
+}
+
+ckms_replace_skill() {
+  local name="$1"
+  local src="$SOURCE_SKILLS/$name"
+  local dest="$SKILLS_DEST/$name"
+  local stage
+  if [ ! -d "$dest" ]; then
+    cp -a "$src" "$dest"
+    echo "  追加: $name"
+    return
+  fi
+  if [ -f "$dest/SKILL.md" ] && [ -f "$src/SKILL.md" ] && ! cmp -s "$dest/SKILL.md" "$src/SKILL.md"; then
+    if [ -n "$SKILLS_BACKUP" ]; then
+      echo "  警告: $name/SKILL.md は配布元と異なります（版の更新でも、カスタマイズでも起きます）。新しい内容で置き換えます。カスタマイズしていた場合は ${SKILLS_BACKUP}/$name/SKILL.md から戻してください"
+    else
+      echo "  警告: $name/SKILL.md は配布元と異なります。新しい内容で置き換えます（--no-backup のため退避していません）"
+    fi
+  fi
+  stage=$(mktemp -d)
+  incoming=""
+  replaced_old=""
+  # 失敗表示は呼び出し側で行う。trap ERR は set -E が無いと内側の関数まで
+  # 届かず、届いても呼び出し元の変数が見えない。
+  ckms_copy_preserved "$name" "$dest" "$stage" \
+    || ckms_preserve_fail "$name" "$stage" "" "" "$dest" partial
+  incoming=$(mktemp -d "$(dirname "$SKILLS_DEST")/.ckms-incoming.XXXXXX")
+  cp -a "$src" "$incoming/$name" \
+    || ckms_preserve_fail "$name" "$stage" "$incoming" "" "$dest"
+  ckms_copy_preserved "$name" "$stage" "$incoming/$name" overlay \
+    || ckms_preserve_fail "$name" "$stage" "$incoming" "" "$dest"
+  # 同じディレクトリ内の rename にして、別ボリュームの mv 失敗を避ける。
+  # 先に導入先をどかし、新しい方を置いてから古い方を消す。
+  replaced_old="${dest}.replacing.$$"
+  mv "$dest" "$replaced_old" \
+    || ckms_preserve_fail "$name" "$stage" "$incoming" "" "$dest"
+  if ! mv "$incoming/$name" "$dest"; then
+    if [ -e "$dest" ]; then
+      echo "エラー: 新しいスキルを置けませんでした。元のスキルは ${replaced_old} に残しています" >&2
+    else
+      mv "$replaced_old" "$dest" \
+        || echo "エラー: 入れ替え前のスキルを戻せません: $replaced_old" >&2
+    fi
+    ckms_preserve_fail "$name" "$stage" "$incoming" "$replaced_old" "$dest"
+  fi
+  rm -rf "$replaced_old" "$stage" "$incoming"
+  echo "  更新: $name"
+}
+
+ckms_preserve_fail() {
+  # $6 が partial のときだけ、退避先が途中までである旨を出す。
+  # 付けるのは、利用者データの最初のコピーが失敗した呼び出しだけ。
+  echo "エラー: $1 の置き換えに失敗しました。利用者データの退避先: $2" >&2
+  if [ -n "${3:-}" ] && [ -d "$3" ]; then
+    echo "      組み立て済みのコピー: $3" >&2
+  fi
+  if [ -n "${4:-}" ] && [ -e "$4" ]; then
+    echo "      入れ替え前のスキル: $4" >&2
+    if [ -n "${5:-}" ] && [ -e "$5" ]; then
+      echo "      配置先 $5 を削除してから、入れ替え前のスキルをそこへ移動してください。" >&2
+    elif [ -n "${5:-}" ]; then
+      echo "      入れ替え前のスキルを配置先 $5 へ移動してください。" >&2
+    fi
+  else
+    echo "      導入先は変更していません。" >&2
+    if [ "${6:-}" = partial ]; then
+      echo "      表示した退避先は途中までのコピーです。" >&2
+    fi
+  fi
+  exit 1
+}
 
 # skills/
+# 初回は配布元をそのまま置く。再実行は配布元にあるスキルだけを置き換え、
+# 記録・テンプレート・配布元に無いスキルは残す。
+if [ ! -f "$SOURCE_ROOT/.cursor-plugin/plugin.json" ]; then
+  echo "警告: 配布元が CKMS リポジトリではありません: $SOURCE_ROOT" >&2
+  echo "      別プロジェクトの init.sh を使うと、その記録が導入先に入ります。" >&2
+  echo "      CKMS リポジトリの init.sh を使ってください。" >&2
+fi
 if [ -d "$SKILLS_DEST" ]; then
-  echo "警告: $SKILLS_DEST は既に存在します"
-  if confirm "上書きしますか?"; then
-    rm -rf "$SKILLS_DEST"
-    mkdir -p "$(dirname "$SKILLS_DEST")"
-    cp -r "$SOURCE_SKILLS" "$SKILLS_DEST"
-    echo "  skills/ をコピーしました"
+  if [ -L "$SKILLS_DEST" ]; then
+    echo "情報: $SKILLS_DEST はシンボリックリンクです（変更しません）"
   else
-    echo "  skills/ のコピーをスキップしました"
+    source_real=$(cd -P "$SOURCE_SKILLS" && pwd)
+    dest_real=$(cd -P "$SKILLS_DEST" && pwd)
+    if [ "$source_real" = "$dest_real" ]; then
+      echo "エラー: 配布元と導入先が同じディレクトリです: $dest_real" >&2
+      echo "      CKMS リポジトリの init.sh を、導入先のパスを引数にして実行してください。" >&2
+      exit 1
+    fi
+    skill_count=0
+    for skill_dir in "$SOURCE_SKILLS"/*/; do
+      [ -d "$skill_dir" ] || continue
+      skill_count=$((skill_count + 1))
+    done
+    echo "情報: $SKILLS_DEST は既に存在します"
+    echo "  CKMS の ${skill_count} スキルを置き換えます。decisions/ patterns/ improvements/ と *_TEMPLATE.md、プロジェクト固有のスキルは残します。"
+    if confirm "続行しますか?"; then
+      if [ "$NO_BACKUP" != true ]; then
+        SKILLS_BACKUP="${SKILLS_DEST}.backup-$(date +%Y%m%d-%H%M%S)"
+        backup_n=0
+        while [ -e "$SKILLS_BACKUP" ]; do
+          backup_n=$((backup_n + 1))
+          SKILLS_BACKUP="${SKILLS_DEST}.backup-$(date +%Y%m%d-%H%M%S)-${backup_n}"
+        done
+        cp -a "$SKILLS_DEST" "$SKILLS_BACKUP" || {
+          echo "エラー: バックアップの作成に失敗しました: $SKILLS_BACKUP" >&2
+          echo "      作りかけのため削除します。" >&2
+          rm -rf "$SKILLS_BACKUP"
+          exit 1
+        }
+        echo "  バックアップ: $SKILLS_BACKUP"
+      fi
+      for skill_dir in "$SOURCE_SKILLS"/*/; do
+        [ -d "$skill_dir" ] || continue
+        ckms_replace_skill "$(basename "$skill_dir")"
+      done
+      for skill_dir in "$SKILLS_DEST"/*/; do
+        [ -d "$skill_dir" ] || continue
+        skill_name=$(basename "$skill_dir")
+        if [ ! -d "$SOURCE_SKILLS/$skill_name" ]; then
+          echo "  情報: $skill_name は配布元に無いので残しました"
+        fi
+      done
+      echo "skills/ を更新しました"
+    else
+      echo "  skills/ の更新をスキップしました"
+    fi
   fi
 else
   mkdir -p "$(dirname "$SKILLS_DEST")"
@@ -264,12 +425,10 @@ fi
 CURSORIGNORE_SRC="${SOURCE_TEMPLATES}/.cursorignore"
 if [ -f "$CURSORIGNORE_SRC" ]; then
   if [ -f "$TARGET/.cursorignore" ]; then
-    echo "警告: $TARGET/.cursorignore は既に存在します"
-    if confirm "上書きしますか?"; then
-      cp "$CURSORIGNORE_SRC" "$TARGET/.cursorignore"
-      echo "  .cursorignore をコピーしました"
+    if cmp -s "$CURSORIGNORE_SRC" "$TARGET/.cursorignore"; then
+      echo "情報: $TARGET/.cursorignore は既に存在します（上書きしません）"
     else
-      echo "  .cursorignore のコピーをスキップしました"
+      echo "情報: $TARGET/.cursorignore は既に存在し、配布元と差分があります（上書きしません）"
     fi
   else
     cp "$CURSORIGNORE_SRC" "$TARGET/.cursorignore"
