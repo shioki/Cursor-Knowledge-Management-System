@@ -1,4 +1,4 @@
-﻿# project-setup: プロジェクトに知識管理システムを初期セットアップするスクリプト（Windows PowerShell, v6.2.2）
+﻿# project-setup: プロジェクトに知識管理システムを初期セットアップするスクリプト（Windows PowerShell, v6.2.3）
 #
 # Usage:
 #   .\init.ps1 -TargetPath "C:\path\to\target-project"
@@ -109,7 +109,7 @@ $SkillsDest = Join-Path $TargetPath "$BaseDir\skills"
 $SessionsDest = Join-Path $TargetPath "$BaseDir\debug-sessions"
 $ValidatePath = "$BaseDir\skills\project-setup\scripts\validate.sh"
 
-Write-Host "=== Cursor Knowledge Management System セットアップ (v6.2.2) ==="
+Write-Host "=== Cursor Knowledge Management System セットアップ (v6.2.3) ==="
 Write-Host "ターゲット: $TargetPath"
 Write-Host "モード:     $ModeLabel"
 Write-Host ("hooks:      " + $(if ($NoHooks) { "配置しない" } else { "配置する" }))

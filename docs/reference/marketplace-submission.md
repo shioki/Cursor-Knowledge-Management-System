@@ -59,7 +59,7 @@ bash skills/project-setup/scripts/init.sh /tmp/ckms-check --yes
 ### 2. タグとリリースを作成
 
 ```bash
-npm run release -- v6.2.2
+npm run release -- v6.2.3
 ```
 
 ### 3. Marketplace へ提出
