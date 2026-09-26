@@ -4,11 +4,10 @@
 
 英語の短い導入は [README.en.md](README.en.md) を参照してください。
 
-> **v6.2.1**: v6.2.0 の再実行の修正を補強しました。記録ディレクトリのシンボリックリンク（Windows ではジャンクションも）を保ち、入れ替え中に中断しても元のスキルを戻します。`init.ps1` は Windows 標準の PowerShell 5.1 でも動くようにしました。
-> - v6.2.0 から、`init.sh` / `init.ps1` を再実行しても判断記録・パターン・改善記録とプロジェクト固有のスキルは残ります。再実行前の `skills/` は `skills.backup-*` に退避します
+> **v6.2.2**: 再実行のたびに、登録済みの hooks まで「手動で追記してください」と表示していた問題を直しました。案内どおりにすると hooks が二重に登録されていました。失敗で残った一時ディレクトリは `validate.sh` が警告します。
+> - v6.2.0 から、`init.sh` / `init.ps1` を再実行しても判断記録・パターン・改善記録とプロジェクト固有のスキルは残ります。再実行前の `skills/` は `skills.backup-*` に退避します。v6.2.1 で、記録ディレクトリのシンボリックリンクの保持、中断時の復元、Windows PowerShell 5.1 への対応を加えました
 > - 手順: [導入済みプロジェクトの更新](docs/getting-started/updating.md)
-> - 詳細: [リリースノート v6.2.1](RELEASE_NOTES_v6.2.1.md)、[v6.2.0](RELEASE_NOTES_v6.2.0.md)
-> - v6.1.1 の内容は [リリースノート v6.1.1](RELEASE_NOTES_v6.1.1.md) を参照
+> - 詳細: [リリースノート v6.2.2](RELEASE_NOTES_v6.2.2.md)、[v6.2.1](RELEASE_NOTES_v6.2.1.md)、[v6.2.0](RELEASE_NOTES_v6.2.0.md)
 
 ## なぜ Agent Skills なのか
 
@@ -85,7 +84,7 @@ Marketplace からプラグインとしてインストールできます。提�
 gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor
 
 # タグ固定版（サプライチェーン保全）
-gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.2.1
+gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.2.2
 ```
 
 v6 でスキルを非隠しディレクトリ `skills/` に移したため、`--allow-hidden-dirs` は不要になりました。詳細は [gh skill 連携](docs/reference/gh-skill-integration.md) を参照してください。
@@ -95,7 +94,7 @@ v6 でスキルを非隠しディレクトリ `skills/` に移したため、`--
 ```yaml
 dependencies:
   apm:
-    - shioki/Cursor-Knowledge-Management-System#v6.2.1
+    - shioki/Cursor-Knowledge-Management-System#v6.2.2
 ```
 
 ```bash
@@ -329,7 +328,7 @@ bash .agents/skills/project-setup/scripts/validate.sh
 `gh` の認証が必要です。未設定の場合は [GitHub リリース手順](docs/reference/github-release.md) を参照してください。
 
 ```bash
-npm run release -- v6.2.1
+npm run release -- v6.2.2
 ```
 
 **Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、Git Bash または WSL で実行してください。
@@ -347,5 +346,5 @@ MIT License — 詳細は [LICENSE](LICENSE) ファイルを参照
 ---
 
 **最終更新**: 2026-09-26
-**バージョン**: 6.2.1（[リリースノート](RELEASE_NOTES_v6.2.1.md)）
+**バージョン**: 6.2.2（[リリースノート](RELEASE_NOTES_v6.2.2.md)）
 **変更履歴**: [CHANGELOG.md](CHANGELOG.md) を参照

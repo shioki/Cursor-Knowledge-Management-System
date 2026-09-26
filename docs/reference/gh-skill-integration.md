@@ -25,10 +25,10 @@ v5 までは `templates/.agents/skills/` に置いていましたが、`gh skill
 gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor
 
 # タグ指定
-gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management@v6.2.1 --agent cursor
+gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management@v6.2.2 --agent cursor
 
 # タグ固定（以降 gh skill update でも更新されない）
-gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.2.1
+gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.2.2
 ```
 
 インストール先は `--agent cursor` の場合、自動的に `.cursor/skills/` または `~/.cursor/skills/` になります。`--scope user` を付けるとユーザーグローバルにインストールされます。
