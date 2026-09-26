@@ -2,7 +2,7 @@
 
 A knowledge-management template for AI-assisted development. It accumulates technical decisions, implementation patterns, debug sessions, and improvements inside your project so the agent can reuse them later. The skill set lives in `.agents/skills/`, which **Cursor** and **Codex** read directly; **Claude Code** only looks under `.claude/skills/`, so `init.sh` bridges it there with a symlink (no duplication).
 
-> **v6.2.3** fixes the hooks' activity log: paths containing `"` were cut short and Windows paths (`C:\...`) did not become project-relative. `search-sessions.sh` now matches keywords literally. Since v6.2.0, re-running `init.sh` / `init.ps1` keeps decision records, patterns, improvements, and project-specific skills; only the skills CKMS ships are replaced, and the previous `skills/` tree is copied to `skills.backup-*` first. v6.2.1 added symlink preservation, interrupt recovery, and Windows PowerShell 5.1 support; v6.2.2 stopped asking you to add hooks that are already registered. See [Updating an existing install (JA)](docs/getting-started/updating.md) and the release notes for [v6.2.3](RELEASE_NOTES_v6.2.3.md), [v6.2.2](RELEASE_NOTES_v6.2.2.md), [v6.2.1](RELEASE_NOTES_v6.2.1.md), and [v6.2.0](RELEASE_NOTES_v6.2.0.md).
+> **v6.2.4** moves the `team-standards` rules into `references/STANDARDS_TEMPLATE.md`, which survives re-running `init.sh` / `init.ps1`; the rules used to live in `SKILL.md` and were reset on every update. The docs now say to install `project-setup` alongside individually installed skills. Since v6.2.0, re-running keeps decision records, patterns, improvements, and project-specific skills, and copies the previous `skills/` tree to `skills.backup-*` first; v6.2.1–v6.2.3 added symlink preservation, interrupt recovery, Windows PowerShell 5.1 support, and fixes to hook hints and the activity log. See [Updating an existing install (JA)](docs/getting-started/updating.md) and the release notes for [v6.2.4](RELEASE_NOTES_v6.2.4.md), [v6.2.3](RELEASE_NOTES_v6.2.3.md), [v6.2.2](RELEASE_NOTES_v6.2.2.md), [v6.2.1](RELEASE_NOTES_v6.2.1.md), and [v6.2.0](RELEASE_NOTES_v6.2.0.md).
 >
 > For the full narrative and the complete doc index, see the Japanese **[README.md](README.md)**.
 
@@ -52,7 +52,7 @@ Install from the Cursor Marketplace. See [plugin development](docs/advanced/plug
 gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor
 
 # Pin a tag for supply-chain stability
-gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.2.3
+gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.2.4
 ```
 
 The recording scripts (`add-entry.sh` and friends) use shared helpers from the `project-setup` skill, so install `project-setup` with the same `--agent` if you use them.
@@ -64,7 +64,7 @@ Skills now live in the non-hidden `skills/` directory, so `--allow-hidden-dirs` 
 ```yaml
 dependencies:
   apm:
-    - shioki/Cursor-Knowledge-Management-System#v6.2.3
+    - shioki/Cursor-Knowledge-Management-System#v6.2.4
 ```
 
 Then `apm install`. Details: [APM integration](docs/reference/apm-integration.md).
@@ -126,4 +126,4 @@ Runs skill structure validation against the Agent Skills spec, hooks/subagent co
 ---
 
 **Last updated**: 2026-09-26  
-**Version**: 6.2.3 ([CHANGELOG](CHANGELOG.md) · [release notes v6.2.3](RELEASE_NOTES_v6.2.3.md))
+**Version**: 6.2.4 ([CHANGELOG](CHANGELOG.md) · [release notes v6.2.4](RELEASE_NOTES_v6.2.4.md))

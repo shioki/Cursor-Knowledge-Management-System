@@ -66,7 +66,7 @@ gh auth status
    揃っていない場合、`scripts/release.sh` は release を作成せずに終了します。README や `init.sh` などの表示文字列も併せて更新してください（一覧は [AGENTS.md](../../AGENTS.md) の「ドキュメントの版数」）。
 
 3. **リリースノートの準備**  
-   ルートに `RELEASE_NOTES_vX.Y.Z.md` を用意する（例: `RELEASE_NOTES_v6.2.3.md`）。  
+   ルートに `RELEASE_NOTES_vX.Y.Z.md` を用意する（例: `RELEASE_NOTES_v6.2.4.md`）。  
    既に同じ名前のファイルがある場合はそのまま利用してよい。ファイルが無い場合、スクリプトはその時点で停止します。  
    冒頭のリリース日の次の行に `**Codename**: <英単語 1 語>` を入れてください（例: `**Codename**: Bridge`）。リリースのタイトルは `vX.Y.Z - <Codename>` になります。この行が無い場合もスクリプトは停止します。
 
@@ -80,23 +80,23 @@ gh auth status
 
    **オプション 1: npm スクリプト（推奨）**
    ```bash
-   npm run release -- v6.2.3
+   npm run release -- v6.2.4
    ```
    未認証の場合は日本語でエラー案内を表示して終了します。
 
    本番実行前に、副作用なしで一連の検証だけを走らせることもできます。
 
    ```bash
-   npm run release -- v6.2.3 --dry-run
+   npm run release -- v6.2.4 --dry-run
    ```
 
-   **Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、**Git Bash** または **WSL** で `npm run release -- v6.2.3` を実行してください。
+   **Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、**Git Bash** または **WSL** で `npm run release -- v6.2.4` を実行してください。
 
    **オプション 2: gh を直接使う**
    ```bash
-   gh release create v6.2.3 \
-     --title "v6.2.3 - タイトル" \
-     --notes-file RELEASE_NOTES_v6.2.3.md
+   gh release create v6.2.4 \
+     --title "v6.2.4 - タイトル" \
+     --notes-file RELEASE_NOTES_v6.2.4.md
    ```
 
    この場合は後述の事前検証が走りません。検証を省略したくない場合はオプション 1 を使ってください。
