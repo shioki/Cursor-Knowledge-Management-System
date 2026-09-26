@@ -52,7 +52,7 @@ Install from the Cursor Marketplace. See [plugin development](docs/advanced/plug
 gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor
 
 # Pin a tag for supply-chain stability
-gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.1.1
+gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.2.0
 ```
 
 Skills now live in the non-hidden `skills/` directory, so `--allow-hidden-dirs` is no longer needed. Details: [gh skill integration](docs/reference/gh-skill-integration.md).
@@ -62,7 +62,7 @@ Skills now live in the non-hidden `skills/` directory, so `--allow-hidden-dirs` 
 ```yaml
 dependencies:
   apm:
-    - shioki/Cursor-Knowledge-Management-System#v6.1.1
+    - shioki/Cursor-Knowledge-Management-System#v6.2.0
 ```
 
 Then `apm install`. Details: [APM integration](docs/reference/apm-integration.md).

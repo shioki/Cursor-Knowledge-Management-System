@@ -84,7 +84,7 @@ Marketplace からプラグインとしてインストールできます。提�
 gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor
 
 # タグ固定版（サプライチェーン保全）
-gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.1.1
+gh skill install shioki/Cursor-Knowledge-Management-System knowledge-management --agent cursor --pin v6.2.0
 ```
 
 v6 でスキルを非隠しディレクトリ `skills/` に移したため、`--allow-hidden-dirs` は不要になりました。詳細は [gh skill 連携](docs/reference/gh-skill-integration.md) を参照してください。
@@ -94,7 +94,7 @@ v6 でスキルを非隠しディレクトリ `skills/` に移したため、`--
 ```yaml
 dependencies:
   apm:
-    - shioki/Cursor-Knowledge-Management-System#v6.1.1
+    - shioki/Cursor-Knowledge-Management-System#v6.2.0
 ```
 
 ```bash
@@ -328,7 +328,7 @@ bash .agents/skills/project-setup/scripts/validate.sh
 `gh` の認証が必要です。未設定の場合は [GitHub リリース手順](docs/reference/github-release.md) を参照してください。
 
 ```bash
-npm run release -- v6.1.1
+npm run release -- v6.2.0
 ```
 
 **Windows でリリースする場合**: `scripts/release.sh` は Bash 前提のため、Git Bash または WSL で実行してください。
