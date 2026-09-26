@@ -144,13 +144,16 @@ if [[ ! -f "$NOTES_FILE" ]]; then
 fi
 
 # タイトルの副題はリリースノートの Codename から取る。ハードコードすると
-# 版が上がるたびに前版の副題が残る。
+# 版が上がるたびに前版の副題が残る。v6.2.0 は Codename 行が無いまま公開し、
+# 副題なしのタイトルになったため、無い場合は止める。
 CODENAME=$(sed -n 's/^\*\*Codename\*\*:[[:space:]]*//p' "$NOTES_FILE" | head -1)
-if [[ -n "$CODENAME" ]]; then
-  TITLE="${VERSION} - ${CODENAME}"
-else
-  TITLE="$VERSION"
+if [[ -z "$CODENAME" ]]; then
+  echo "エラー: $NOTES_FILE に Codename 行がありません。"
+  echo "  リリース日の次の行に **Codename**: <英単語 1 語> を追加してください（例: **Codename**: Bridge）。"
+  echo "  リリースのタイトルは「${VERSION} - <Codename>」になります。"
+  exit 1
 fi
+TITLE="${VERSION} - ${CODENAME}"
 echo ""
 echo "リリースを作成します: $VERSION"
 echo "  タイトル: $TITLE"

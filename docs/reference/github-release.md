@@ -67,7 +67,8 @@ gh auth status
 
 3. **リリースノートの準備**  
    ルートに `RELEASE_NOTES_vX.Y.Z.md` を用意する（例: `RELEASE_NOTES_v6.2.0.md`）。  
-   既に同じ名前のファイルがある場合はそのまま利用してよい。ファイルが無い場合、スクリプトはその時点で停止します。
+   既に同じ名前のファイルがある場合はそのまま利用してよい。ファイルが無い場合、スクリプトはその時点で停止します。  
+   冒頭のリリース日の次の行に `**Codename**: <英単語 1 語>` を入れてください（例: `**Codename**: Bridge`）。リリースのタイトルは `vX.Y.Z - <Codename>` になります。この行が無い場合もスクリプトは停止します。
 
 4. **push（まだの場合）**
    ```bash
@@ -108,7 +109,7 @@ gh auth status
 2. `.cursor-plugin/plugin.json` / `apm.yml` の `version` がリリースタグと一致すること
 3. `npm run docs:check`（`skills:check` / `components:check` / `plugin:check` / `links:check`）
 4. `gh skill publish --dry-run`（`gh skill` が使える場合のみ）
-5. `RELEASE_NOTES_<タグ>.md` の存在
+5. `RELEASE_NOTES_<タグ>.md` の存在と、その中の `**Codename**:` 行
 
 3 について、v5 までは `npm` が見つからない環境では検証をスキップしてリリースを続行していました。検証を飛ばせてしまうと検証を組み込んだ意味がないため、v6 からは `npm` が無い場合にエラーで停止します。Node.js を用意してから再実行してください。
 
@@ -126,6 +127,7 @@ Marketplace / `gh skill` 経由でも配布したい場合は、`gh skill publis
 | `npm が見つかりません` で停止する | 事前検証に Node.js が必要です。インストールして再実行する。 |
 | `version ... が一致しません` で停止する | `plugin.json` と `apm.yml` の `version` をタグに合わせる。 |
 | `リリースノートが見つかりません` で停止する | ルートに `RELEASE_NOTES_<タグ>.md` を作成する。 |
+| `Codename 行がありません` で停止する | リリースノートのリリース日の次の行に `**Codename**: <英単語 1 語>` を追加する。 |
 
 ## 関連リンク
 
