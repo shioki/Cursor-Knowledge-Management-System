@@ -287,6 +287,29 @@ jobs:
           $backup = @(Get-ChildItem -LiteralPath (Join-Path $target '.agents') -Directory -Filter 'skills.backup-*')
           if ($backup.Count -lt 1) { throw "backup was not created" }
 
+      - name: Run init.ps1 on Windows PowerShell 5.1
+        # Windows 標準の PowerShell。BOM の無い .ps1 は ANSI として読まれ、
+        # Set-Content -Encoding UTF8 は BOM を付ける。どちらも pwsh では起きない。
+        shell: powershell
+        run: |
+          $target = 'C:\ckms-ps51'
+          New-Item -ItemType Directory -Force -Path $target | Out-Null
+          .\skills\project-setup\scripts\init.ps1 -TargetPath $target -Yes -WithAgentsMd
+          $marker = Join-Path $target '.agents\skills\knowledge-management\references\decisions\user-only.md'
+          Set-Content -LiteralPath $marker -Value 'kept-user'
+          .\skills\project-setup\scripts\init.ps1 -TargetPath $target -Yes
+          if (-not (Test-Path -LiteralPath $marker)) { throw "re-run on 5.1 deleted user records" }
+          foreach ($rel in @('.cursor\hooks.json', 'CLAUDE.md')) {
+            $path = Join-Path $target $rel
+            $bytes = [System.IO.File]::ReadAllBytes($path)
+            if ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) {
+              throw "$rel was written with a UTF-8 BOM"
+            }
+          }
+          Get-Content -Raw -LiteralPath (Join-Path $target '.cursor\hooks.json') | ConvertFrom-Json | Out-Null
+          $claudeMd = (Get-Content -Raw -LiteralPath (Join-Path $target 'CLAUDE.md')).Trim()
+          if ($claudeMd -ne '@AGENTS.md') { throw "unexpected CLAUDE.md: $claudeMd" }
+
       - name: Reject self-targeted init.ps1
         shell: pwsh
         working-directory: C:\ckms-target

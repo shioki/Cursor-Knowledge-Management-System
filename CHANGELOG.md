@@ -9,6 +9,8 @@
 - **既存の `.cursorignore` に退避先の除外が無い**: v6.1.1 以前に導入した `.cursorignore` は上書きしないため、再実行で作る `skills.backup-*/` が Cursor の索引に入っていた。除外の行が無いときは、追加する行を表示する
 - **記録ディレクトリのシンボリックリンクが実ディレクトリに変わる**: `decisions/` などをリンクにしていると、再実行でリンク先の中身をコピーした実ディレクトリに置き換わっていた。リンクのまま残す。`init.ps1` はシンボリックリンクとジャンクションの両方を扱い、削除時にリンク先をたどらない（Windows PowerShell 5.1 の `Remove-Item -Recurse` はリンク先まで消すことがある）
 - **入れ替え中の中断でスキルが消えたままになる**: 導入先をどかしてから新しいスキルを置くまでに中断すると、配置先が空のまま残っていた。`init.sh` は INT / TERM、`init.ps1` は Ctrl+C でも入れ替え前のスキルを戻す
+- **Windows PowerShell 5.1 で `init.ps1` が文字化けする**: BOM の無い UTF-8 で保存していたため、5.1 は日本語を含むスクリプトを ANSI コードページとして読み、文字化けや構文エラーになっていた。UTF-8（BOM 付き）で保存し、`skills:check` で BOM の無い非 ASCII の `.ps1` を検出する。`.editorconfig` にも `*.ps1` の `charset = utf-8-bom` を追加
+- **Windows PowerShell 5.1 で作る `hooks.json` / `CLAUDE.md` に BOM が付く**: 5.1 の `Set-Content -Encoding UTF8` は BOM を付けるため、JSON の読み込みや `@AGENTS.md` の import を妨げるおそれがあった。BOM 無しの UTF-8 で書く
 - **`init.sh` の入れ替え前ディレクトリの名前衝突**: `名前.replacing.<PID>` が過去の残骸とぶつかると、その中へ移動して一緒に削除していた。`mktemp -d` で作った一意のディレクトリへ移す。`skills/` の中にも置かなくなった
 
 ## [6.2.0] - 2026-09-26

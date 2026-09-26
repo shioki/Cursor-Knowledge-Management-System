@@ -40,7 +40,7 @@ bash skills/project-setup/scripts/init.sh /path/to/your-project --legacy-claude
 bash skills/project-setup/scripts/init.sh /path/to/your-project --cursor-only
 ```
 
-Windows: use `skills/project-setup/scripts/init.ps1` with the same options.
+Windows: use `skills/project-setup/scripts/init.ps1` with the same options. It runs on both the built-in Windows PowerShell 5.1 and PowerShell 7.
 
 ### 2. Cursor Marketplace (plugin)
 

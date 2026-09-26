@@ -67,7 +67,7 @@ bash skills/project-setup/scripts/init.sh /path/to/your-project --legacy-claude
 bash skills/project-setup/scripts/init.sh /path/to/your-project --cursor-only
 ```
 
-Windows では同じディレクトリの `init.ps1` を利用できます。
+Windows では同じディレクトリの `init.ps1` を利用できます。Windows 標準の PowerShell 5.1 と PowerShell 7 のどちらでも動きます。
 
 ```powershell
 .\skills\project-setup\scripts\init.ps1 -TargetPath "C:\path\to\your-project" -WithAgentsMd

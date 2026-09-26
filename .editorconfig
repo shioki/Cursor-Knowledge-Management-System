@@ -8,3 +8,7 @@ trim_trailing_whitespace = true
 
 [*.md]
 trim_trailing_whitespace = false
+
+# Windows PowerShell 5.1 は BOM の無い .ps1 を ANSI として読む
+[*.ps1]
+charset = utf-8-bom

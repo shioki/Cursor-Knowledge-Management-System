@@ -174,6 +174,23 @@ async function checkSkill(skillName, problems, warnings) {
     // scripts/ が無いのは正常
   }
 
+  // Windows PowerShell 5.1 は BOM の無い .ps1 を ANSI コードページで読む。
+  // 日本語を含む init.ps1 が文字化けし、構文エラーにもなる。
+  try {
+    const scriptEntries = await readdir(scriptsDir, { withFileTypes: true });
+    for (const se of scriptEntries) {
+      if (!se.isFile() || !se.name.endsWith('.ps1')) continue;
+      const bytes = await readFile(path.join(scriptsDir, se.name));
+      const hasBom = bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf;
+      const nonAscii = bytes.some((b) => b > 0x7f);
+      if (nonAscii && !hasBom) {
+        problems.push(`${skillName}/scripts/${se.name}: non-ASCII .ps1 must be saved as UTF-8 with BOM`);
+      }
+    }
+  } catch {
+    // scripts/ が無いのは正常
+  }
+
   return { name: fm.name, explicitOnly: explicitOnly === true };
 }
 

@@ -1,4 +1,4 @@
-# project-setup: プロジェクトに知識管理システムを初期セットアップするスクリプト（Windows PowerShell, v6.2.0）
+﻿# project-setup: プロジェクトに知識管理システムを初期セットアップするスクリプト（Windows PowerShell, v6.2.0）
 #
 # Usage:
 #   .\init.ps1 -TargetPath "C:\path\to\target-project"
@@ -142,6 +142,13 @@ if (-not $CursorOnly -and -not $LegacyClaude) {
         }
         Write-Host ""
     }
+}
+
+# BOM 無しの UTF-8 で書く。Windows PowerShell 5.1 の Set-Content -Encoding UTF8 は
+# BOM を付け、hooks.json の JSON 読み込みや CLAUDE.md の @import を壊す。
+function Write-CkmsUtf8([string]$Path, [string]$Text) {
+    $encoding = New-Object System.Text.UTF8Encoding $false
+    [System.IO.File]::WriteAllText($Path, $Text, $encoding)
 }
 
 function Join-CkmsRel([string]$Base, [string]$Rel) {
@@ -535,7 +542,7 @@ if (-not $NoHooks) {
   }
 }
 '@
-            Set-Content -Path $HooksJson -Value $HooksConfig -Encoding UTF8
+            Write-CkmsUtf8 $HooksJson ($HooksConfig + "`n")
             Write-Host "hooks.json を作成しました: $HooksJson"
         }
         Write-Host "注意: hooks スクリプトの実行には Git Bash または WSL が必要です"
@@ -611,7 +618,7 @@ if ($WithAgentsMd) {
         Write-Host "情報: $ClaudeMdDest は既に存在します（上書きしません）"
         Write-Host "      AGENTS.md を読ませるには '@AGENTS.md' の行を追加してください"
     } else {
-        Set-Content -Path $ClaudeMdDest -Value "@AGENTS.md" -Encoding UTF8
+        Write-CkmsUtf8 $ClaudeMdDest "@AGENTS.md`n"
         Write-Host "CLAUDE.md を作成しました（@AGENTS.md を import）"
     }
 }
