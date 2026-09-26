@@ -8,8 +8,11 @@ build/
 *.pyc
 __pycache__/
 
-# dogfooding 用のローカル導入（init.sh で再生成できるためコミットしない）
+# dogfooding 用のローカル導入。スキルは init.sh で作り直せるが、中の開発記録
+# （decisions/ patterns/ improvements/）は作り直せない。削除しないこと。
 .agents/
+# dogfooding の init.sh . がリポジトリ直下に置く .cursorignore
+/.cursorignore
 
 # hooks が生成する活動ログ・ローカル設定
 knowledge-activity.log

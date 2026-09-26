@@ -21,20 +21,14 @@ INPUT="$(cat 2>/dev/null || true)"
 BASE="$(ckms_detect_base)"
 [ -n "$BASE" ] || ckms_noop_exit
 
-FILE_PATH="$(printf '%s' "$INPUT" \
-  | sed -n 's/.*"tool_input"[[:space:]]*:[[:space:]]*{[^}]*"file_path"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
-  | head -n 1)"
+FILE_PATH="$(printf '%s' "$INPUT" | ckms_json_string_field file_path tool_input)"
 if [ -z "$FILE_PATH" ]; then
-  FILE_PATH="$(printf '%s' "$INPUT" \
-    | sed -n 's/.*"file_path"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
-    | head -n 1)"
+  FILE_PATH="$(printf '%s' "$INPUT" | ckms_json_string_field file_path)"
 fi
 [ -n "$FILE_PATH" ] || ckms_noop_exit
 
-# バックスラッシュ区切りのパス（Windows ネイティブな渡され方をした場合）を
-# 正規化する。通常は Git Bash / WSL の POSIX パスが渡ってくるはずだが、
-# 念のための防御。
-FILE_PATH="${FILE_PATH//\\//}"
+# Windows ネイティブのパス（C:\Users\...）を、$PWD と同じ形へそろえる
+FILE_PATH="$(ckms_normalize_path "$FILE_PATH")"
 
 # 知識ベース自身の編集は記録しない（記録行為でログが埋まるのを避ける）
 case "$FILE_PATH" in

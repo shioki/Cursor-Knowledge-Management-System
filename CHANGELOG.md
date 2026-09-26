@@ -2,6 +2,14 @@
 
 このプロジェクトの重要な変更履歴を記録します。
 
+## [Unreleased]
+
+### Fixed
+
+- **作業ログのパスが崩れる**: `afterFileEdit` / `PostToolUse` の hooks は `sed` でパスを取り出していたため、`"` を含むパスは途中で切れ、Windows ネイティブのパス（`C:\Users\...`）は `C://Users//...` になって相対パスにも直らなかった。`_hook-lib.sh` に JSON の文字列を 1 文字ずつ読む `ckms_json_string_field` と、`C:\...` を Git Bash / WSL / Cygwin の形へそろえる `ckms_normalize_path` を追加。`\n` などは戻さず、ログは 1 行 1 件に保つ
+- **`search-sessions.sh` がキーワードを正規表現として扱う**: `[` を含むと「見つからない」になり、`\|` や `.*` では無関係なセッションまで当たっていた。文字列そのものとして探す（`grep -F`）
+- **開発者向け文書の dogfooding 手順が開発記録を消す**: `docs/advanced/plugin-development.md` は `rm -rf .agents` してから作り直す手順だった。`.agents/` は `.gitignore` 対象のため、中の開発記録は戻せない。再実行だけで反映する手順に改めた。`.gitignore` の説明も直し、dogfooding でリポジトリ直下にできる `.cursorignore` を除外
+
 ## [6.2.2] - 2026-09-26
 
 ### Fixed

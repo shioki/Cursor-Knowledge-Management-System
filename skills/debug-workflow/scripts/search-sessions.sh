@@ -28,10 +28,13 @@ echo ""
 FOUND=0
 for file in "$SESSIONS_DIR"/*.md; do
   [ -f "$file" ] || continue
-  if grep -qli -- "$KEYWORD" "$file" 2>/dev/null; then
+  # キーワードは文字列そのものとして探す。正規表現として扱うと、[ で
+  # エラーになり（捨てているので「見つからない」になる）、\| や .* で無関係な
+  # セッションまで当たる。
+  if grep -qliF -- "$KEYWORD" "$file" 2>/dev/null; then
     FOUND=$((FOUND + 1))
     echo "--- $(basename "$file") ---"
-    grep -n -i -- "$KEYWORD" "$file" | head -5
+    grep -n -i -F -- "$KEYWORD" "$file" | head -5
     echo ""
   fi
 done

@@ -25,6 +25,66 @@ ckms_json_escape() {
     | awk 'BEGIN { ORS = "" } { if (NR > 1) printf "\\n"; print }'
 }
 
+# stdin の JSON から、文字列フィールドの値を取り出す（最初に現れたもの）。
+# sed の "\([^"]*\)" では、値に \" があると途中で切れ、\\ も戻らない。
+# ここでは 1 文字ずつ読み、\" \\ \/ だけを戻す。\n \t \uXXXX はそのまま残す
+# （作業ログを 1 行 1 件に保つため）。
+# Usage: printf '%s' "$INPUT" | ckms_json_string_field <key> [<先に探すキー>]
+#   第2引数を渡すと、そのキーより後ろから探す（例: tool_input の中の file_path）。
+ckms_json_string_field() {
+  CKMS_JSON_KEY="$1" CKMS_JSON_AFTER="${2:-}" awk '
+    { buf = buf (NR > 1 ? "\n" : "") $0 }
+    END {
+      s = buf
+      if (ENVIRON["CKMS_JSON_AFTER"] != "") {
+        p = index(s, "\"" ENVIRON["CKMS_JSON_AFTER"] "\"")
+        if (p == 0) exit
+        s = substr(s, p)
+      }
+      pat = "\"" ENVIRON["CKMS_JSON_KEY"] "\""
+      p = index(s, pat)
+      if (p == 0) exit
+      s = substr(s, p + length(pat))
+      if (!sub(/^[ \t\r\n]*:[ \t\r\n]*"/, "", s)) exit
+      out = ""
+      n = length(s)
+      for (i = 1; i <= n; i++) {
+        c = substr(s, i, 1)
+        if (c == "\\") {
+          e = substr(s, i + 1, 1)
+          if (e == "\"" || e == "\\" || e == "/") out = out e
+          else out = out c e
+          i++
+        } else if (c == "\"") {
+          printf "%s", out
+          exit
+        } else {
+          out = out c
+        }
+      }
+    }'
+}
+
+# エディタから渡ったパスを、$PWD と比べられる形にそろえる。
+# Windows ネイティブのパス（C:\Users\... / c:/Users/...）は、Git Bash の /c/...、
+# WSL の /mnt/c/...、Cygwin の /cygdrive/c/... のうち $PWD と同じ形へ直す。
+ckms_normalize_path() {
+  local p="$1" drive rest prefix
+  p="${p//\\//}"
+  case "$p" in
+    [A-Za-z]:/*)
+      drive="$(printf '%s' "${p%%:*}" | tr '[:upper:]' '[:lower:]')"
+      rest="${p#?:}"
+      for prefix in "/$drive" "/mnt/$drive" "/cygdrive/$drive"; do
+        case "$PWD/" in
+          "$prefix"/*) p="${prefix}${rest}"; break ;;
+        esac
+      done
+      ;;
+  esac
+  printf '%s' "$p"
+}
+
 # Markdown のタイトルを取り出す。frontmatter の title を優先し、無ければ最初の H1。
 # デバッグセッションのように frontmatter を持たない形式にも対応する。
 ckms_read_title() {

@@ -92,11 +92,13 @@ bash skills/project-setup/scripts/init.sh . --yes --no-hooks --no-agents
 
 これで `.agents/skills/` にスキルの複製ができ、`/record-decision` などが `.agents/skills/knowledge-management/references/decisions/` に書き込むようになります。hooks の索引注入もこのディレクトリを読みます。
 
-複製は使い捨てです。`skills/` を変更したら作り直してください。
+`skills/` を変更したら、同じコマンドを再実行して反映します。再実行で置き換わるのは CKMS のスキルだけで、`.agents/` に書いた判断記録・パターン・改善記録は残ります。
 
 ```bash
-rm -rf .agents && bash skills/project-setup/scripts/init.sh . --yes --no-hooks --no-agents
+bash skills/project-setup/scripts/init.sh . --yes --no-hooks --no-agents
 ```
+
+`.agents/` を削除して作り直さないでください。`.agents/` は `.gitignore` の対象なので、中の開発記録は Git からも戻せません。再実行のたびにできる `.agents/skills.backup-*/` は、確認してから削除してかまいません（`--no-backup` で作らないこともできます）。
 
 ### 知識ベースを作らない場合
 
