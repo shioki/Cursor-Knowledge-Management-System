@@ -5,8 +5,8 @@
   "devDependencies": {
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
-    "markdown-link-check": "^3.12.2",
-    "yaml": "^2.9.0"
+    "markdown-link-check": "^3.15.0",
+    "yaml": "^2.9.1"
   },
   "scripts": {
     "skills:check": "node scripts/check-skill-structure.mjs",
