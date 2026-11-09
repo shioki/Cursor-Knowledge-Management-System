@@ -7,6 +7,32 @@ import { pathToFileURL } from 'node:url';
 const require = createRequire(import.meta.url);
 const markdownLinkCheck = require('markdown-link-check');
 
+// retryOn429 は 429 しか再試行しないため、タイムアウトや 5xx による一時的な dead をここで再確認する
+const EXTERNAL_RETRY_COUNT = 2;
+const EXTERNAL_RETRY_DELAY_MS = 5000;
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function check(markdown, options) {
+  return new Promise((resolve, reject) => {
+    markdownLinkCheck(markdown, options, (err, results) => (err ? reject(err) : resolve(results)));
+  });
+}
+
+// ignored は .mlc.config.json の ignorePatterns で意図して外したもの
+const isDead = (r) => r.status !== 'alive' && r.status !== 'ignored';
+
+async function recheckExternal(result, options) {
+  let latest = result;
+  for (let i = 0; i < EXTERNAL_RETRY_COUNT; i++) {
+    await sleep(EXTERNAL_RETRY_DELAY_MS);
+    const [r] = await check(`<${result.link}>`, options);
+    if (r) latest = r;
+    if (!isDead(latest)) break;
+  }
+  return latest;
+}
+
 async function runOne(filePath, configPath) {
   const markdown = await readFile(filePath, 'utf8');
   const configRaw = await readFile(configPath, 'utf8');
@@ -19,23 +45,31 @@ async function runOne(filePath, configPath) {
   //   "file:///" + "/path" => "file:////path"  (Unix absolute paths already start with '/')
   // Use Node's URL utilities instead; this is correct on both Unix and Windows.
   const baseUrl = pathToFileURL(path.resolve(path.dirname(filePath)) + path.sep).href;
+  const options = { ...config, baseUrl };
 
-  await new Promise((resolve, reject) => {
-    markdownLinkCheck(markdown, { ...config, baseUrl }, (err, results) => {
-      if (err) {
-        const e = new Error(`error while checking ${fileName}: ${err.message ?? String(err)}`);
-        e.cause = err;
-        return reject(e);
-      }
+  let results;
+  try {
+    results = await check(markdown, options);
+  } catch (err) {
+    const e = new Error(`error while checking ${fileName}: ${err.message ?? String(err)}`);
+    e.cause = err;
+    throw e;
+  }
 
-      // ignored は .mlc.config.json の ignorePatterns で意図して外したもの
-      const dead = results.filter((r) => r.status !== 'alive' && r.status !== 'ignored');
-      if (dead.length === 0) return resolve();
+  const dead = [];
+  for (const r of results.filter(isDead)) {
+    const final = /^https?:\/\//i.test(r.link) ? await recheckExternal(r, options) : r;
+    if (isDead(final)) dead.push(final);
+  }
+  if (dead.length === 0) return;
 
-      const lines = dead.map((r) => `  [✖] ${r.link} → Status: ${r.status}`);
-      return reject(new Error(`dead links found in ${fileName}\n${lines.join('\n')}`));
-    });
+  const lines = dead.map((r) => {
+    const detail = [r.statusCode ? `HTTP ${r.statusCode}` : null, r.err ? String(r.err.message ?? r.err) : null]
+      .filter(Boolean)
+      .join(', ');
+    return `  [✖] ${r.link} → Status: ${r.status}${detail ? ` (${detail})` : ''}`;
   });
+  throw new Error(`dead links found in ${fileName}\n${lines.join('\n')}`);
 }
 
 async function main() {
